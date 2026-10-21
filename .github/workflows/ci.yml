@@ -1,0 +1,87 @@
+name: Integración continua
+
+on:
+  push:
+    branches: [main, develop, "feature/**"]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  calidad-y-pruebas:
+    runs-on: ubuntu-24.04
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: podocenter
+          POSTGRES_USER: podo
+          POSTGRES_PASSWORD: podo
+        options: >-
+          --health-cmd "pg_isready -U podo"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+      POSTGRES_HOST: localhost
+      DJANGO_SECRET_KEY: clave-solo-para-la-integracion-continua
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: pip install -r requirements-dev.txt
+
+      - name: Estilo y errores (ruff)
+        run: ruff check . --output-format=github
+
+      - name: Seguridad del código (bandit)
+        run: bandit -c pyproject.toml -r backend/apps -f screen
+
+      - name: Dependencias vulnerables (pip-audit)
+        run: pip-audit -r requirements.txt
+
+      - name: Migraciones sin generar
+        run: python backend/manage.py makemigrations --check --dry-run
+
+      - name: Pruebas con cobertura
+        run: pytest --cov --cov-report=term-missing --cov-report=xml --cov-fail-under=80
+
+      - name: Revisión de despliegue de Django
+        run: python backend/manage.py check --deploy --fail-level WARNING
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.prod
+          DJANGO_ALLOWED_HOSTS: podocenter.pe
+          DJANGO_CSRF_ORIGINS: https://podocenter.pe
+
+      - name: Publicar el informe de cobertura
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura
+          path: coverage.xml
+
+  frontend:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
