@@ -1,0 +1,75 @@
+"""Agenda de citas (RF06, RF08).
+
+La regla que da forma a este módulo es que dos citas de la misma podóloga
+no pueden solaparse. La Práctica N.° 6 decidió sostenerla en la base con
+una restricción EXCLUDE sobre un rango de tiempo, y no solo en el
+servidor, porque dos peticiones simultáneas pueden pasar la validación de
+aplicación y chocar al escribir.
+"""
+from django.contrib.postgres.constraints import ExclusionConstraint
+from django.contrib.postgres.fields import DateTimeRangeField, RangeOperators
+from django.db import models
+from django.utils import timezone
+
+from apps.core.modelos_base import ModeloDeCentro
+
+
+class Cita(ModeloDeCentro):
+    class Estado(models.TextChoices):
+        PROGRAMADA = "PROGRAMADA", "Programada"
+        ATENDIDA = "ATENDIDA", "Atendida"
+        CANCELADA = "CANCELADA", "Cancelada"
+        NO_ASISTIO = "NO_ASISTIO", "No asistió"
+
+    sede = models.ForeignKey("sedes.Sede", on_delete=models.PROTECT, related_name="citas")
+    paciente = models.ForeignKey("pacientes.Paciente", on_delete=models.PROTECT,
+                                 related_name="citas")
+    profesional = models.ForeignKey("usuarios.Usuario", on_delete=models.PROTECT,
+                                    related_name="citas")
+    servicio = models.ForeignKey("catalogo.Servicio", on_delete=models.PROTECT,
+                                 related_name="citas")
+    inicio = models.DateTimeField()
+    fin = models.DateTimeField()
+    periodo = DateTimeRangeField(
+        help_text="Rango [inicio, fin) que sostiene la restricción de solapamiento",
+    )
+    estado = models.CharField(max_length=12, choices=Estado.choices, default=Estado.PROGRAMADA)
+    observaciones = models.CharField(max_length=300, blank=True)
+    motivo_cancelacion = models.CharField(max_length=200, blank=True)
+    cancelada_en = models.DateTimeField(null=True, blank=True)
+    creada_por = models.ForeignKey("usuarios.Usuario", on_delete=models.PROTECT,
+                                   related_name="citas_creadas")
+
+    class Meta:
+        db_table = "cita"
+        verbose_name_plural = "citas"
+        ordering = ["inicio"]
+        indexes = [
+            models.Index(fields=["sede", "inicio"], name="idx_cita_sede_inicio"),
+            models.Index(fields=["paciente", "-inicio"], name="idx_cita_paciente"),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(fin__gt=models.F("inicio")), name="ck_cita_fin_posterior"
+            ),
+            ExclusionConstraint(
+                name="ex_cita_sin_solape_por_profesional",
+                expressions=[
+                    ("periodo", RangeOperators.OVERLAPS),
+                    ("profesional", RangeOperators.EQUAL),
+                ],
+                condition=models.Q(estado="PROGRAMADA"),
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.paciente} · {self.inicio:%d/%m %H:%M}"
+
+    def save(self, *args, **kwargs):
+        """Mantiene `periodo` sincronizado con inicio y fin."""
+        self.periodo = (self.inicio, self.fin)
+        super().save(*args, **kwargs)
+
+    @property
+    def esta_vigente(self) -> bool:
+        return self.estado == self.Estado.PROGRAMADA and self.fin > timezone.now()
