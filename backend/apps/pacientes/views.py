@@ -1,8 +1,8 @@
 """API del módulo Pacientes (RF04, RF05)."""
 from django.db.models import Q
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import viewsets
 
 from apps.core.permisos import TieneRol
 from apps.core.vistas import ContextoDeCentro
