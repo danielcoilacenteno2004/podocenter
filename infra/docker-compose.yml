@@ -1,0 +1,35 @@
+# Entorno de desarrollo. La configuración de producción (EC2 + RDS) vive en
+# infra/despliegue/ y no monta la base de datos como contenedor.
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: podocenter
+      POSTGRES_USER: podo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-podo}
+    volumes:
+      - datos_postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U podo -d podocenter"]
+      interval: 10s
+      retries: 5
+
+  api:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+      POSTGRES_HOST: db
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../backend:/app/backend
+
+volumes:
+  datos_postgres:
