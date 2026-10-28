@@ -7,7 +7,7 @@ cada función, porque lo necesitan capas que no reciben el `request`
 from contextvars import ContextVar
 from dataclasses import dataclass
 
-__all__ = ["ContextoPeticion", "fijar_contexto", "contexto_actual", "limpiar_contexto"]
+__all__ = ["ContextoPeticion", "contexto_actual", "fijar_contexto", "limpiar_contexto"]
 
 
 @dataclass(frozen=True)
@@ -17,9 +17,8 @@ class ContextoPeticion:
     usuario_id: int | None = None
 
 
-_contexto: ContextVar[ContextoPeticion] = ContextVar(
-    "contexto_peticion", default=ContextoPeticion()
-)
+_SIN_CONTEXTO = ContextoPeticion()
+_contexto: ContextVar[ContextoPeticion | None] = ContextVar("contexto_peticion", default=None)
 
 
 def fijar_contexto(centro_id=None, sede_id=None, usuario_id=None) -> None:
@@ -27,8 +26,8 @@ def fijar_contexto(centro_id=None, sede_id=None, usuario_id=None) -> None:
 
 
 def contexto_actual() -> ContextoPeticion:
-    return _contexto.get()
+    return _contexto.get() or _SIN_CONTEXTO
 
 
 def limpiar_contexto() -> None:
-    _contexto.set(ContextoPeticion())
+    _contexto.set(None)

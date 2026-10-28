@@ -3,8 +3,8 @@ import pytest
 from django.db import InternalError, ProgrammingError, transaction
 
 from apps.core.models import Centro
-from apps.sedes.models import Sede
 from apps.core.soporte_pruebas import activar_centro
+from apps.sedes.models import Sede
 
 
 @pytest.mark.django_db

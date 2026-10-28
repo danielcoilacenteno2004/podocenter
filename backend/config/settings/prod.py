@@ -5,7 +5,7 @@ contiene ninguna credencial.
 """
 import os
 
-from .base import *  # noqa: F403
+from .base import *
 
 DEBUG = False
 ALLOWED_HOSTS = os.environ["DJANGO_ALLOWED_HOSTS"].split(",")
@@ -22,5 +22,5 @@ CSRF_COOKIE_SECURE = True
 CSRF_TRUSTED_ORIGINS = os.environ["DJANGO_CSRF_ORIGINS"].split(",")
 X_FRAME_OPTIONS = "DENY"
 
-DATABASES["default"]["OPTIONS"] = {"sslmode": "require"}  # noqa: F405
-DATABASES["default"]["CONN_MAX_AGE"] = 60  # noqa: F405
+DATABASES["default"]["OPTIONS"] = {"sslmode": "require"}
+DATABASES["default"]["CONN_MAX_AGE"] = 60

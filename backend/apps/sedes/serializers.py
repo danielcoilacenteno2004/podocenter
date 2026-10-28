@@ -10,7 +10,9 @@ class HorarioSedeSerializer(serializers.ModelSerializer):
 
     def validate(self, datos):
         if datos["hora_cierre"] <= datos["hora_apertura"]:
-            raise serializers.ValidationError("La hora de cierre debe ser posterior a la de apertura.")
+            raise serializers.ValidationError(
+                "La hora de cierre debe ser posterior a la de apertura."
+            )
         return datos
 
 

@@ -14,7 +14,13 @@ exclude = ["*/migrations/*", "frontend"]
 # E/W pycodestyle · F pyflakes · I orden de importaciones · N nombres
 # B bugbear · S bandit · DJ reglas de Django · C4 comprensiones · UP sintaxis moderna
 select = ["E", "W", "F", "I", "N", "B", "S", "DJ", "C4", "UP", "RUF"]
-ignore = ["RUF012"]
+ignore = [
+    "RUF012",
+    # N818 exige el sufijo Error en las excepciones. La convención del
+    # equipo nombra el dominio en español y "ReglaDeNegocioError" mezcla
+    # los dos idiomas en un mismo identificador; se descarta con criterio.
+    "N818",
+]
 
 [tool.ruff.lint.per-file-ignores]
 "*/tests/*" = ["S101"]          # assert es el modo normal de escribir pruebas
@@ -35,4 +41,4 @@ source = ["backend/apps"]
 omit = ["*/migrations/*", "*/tests/*", "*/apps.py"]
 
 [tool.bandit]
-exclude_dirs = ["backend/apps/*/tests", "frontend"]
+exclude_dirs = ["tests", "migrations", "frontend"]

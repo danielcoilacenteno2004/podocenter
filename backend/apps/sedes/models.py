@@ -58,7 +58,7 @@ class HorarioSede(models.Model):
         ]
 
     def __str__(self) -> str:
-        return f"{self.sede} día {self.dia_semana}: {self.hora_apertura}–{self.hora_cierre}"
+        return f"{self.sede} día {self.dia_semana}: {self.hora_apertura}-{self.hora_cierre}"
 
     def cubre(self, inicio, fin) -> bool:
         return self.esta_abierta and self.hora_apertura <= inicio and fin <= self.hora_cierre

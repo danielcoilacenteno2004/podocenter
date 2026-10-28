@@ -55,7 +55,7 @@ def test_rechaza_un_segundo_paciente_con_el_mismo_documento(centro, podologa):
 
 
 @pytest.mark.django_db
-def test_los_antecedentes_se_guardan_cifrados_en_la_columna(centro, podologa, django_assert_num_queries):
+def test_los_antecedentes_se_guardan_cifrados_en_la_columna(centro, podologa):
     from django.db import connection
 
     paciente = registrar_paciente(

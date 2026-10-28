@@ -67,4 +67,6 @@ def desactivar_usuario(usuario: Usuario) -> Usuario:
 
 def sedes_disponibles(usuario: Usuario):
     """Sedes entre las que el usuario puede elegir al iniciar sesión (P03)."""
-    return usuario.asignaciones.filter(esta_activa=True, sede__esta_activa=True).select_related("sede")
+    return usuario.asignaciones.filter(
+        esta_activa=True, sede__esta_activa=True
+    ).select_related("sede")

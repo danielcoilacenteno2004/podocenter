@@ -10,6 +10,9 @@ from apps.sedes.models import HorarioSede, Sede
 from apps.usuarios.models import AsignacionSede, Usuario
 from apps.usuarios.roles import Rol
 
+# Credencial ficticia; solo existe dentro de la base de datos de pruebas.
+CLAVE_DE_PRUEBA = "ClaveSegura2026"  # nosec B105
+
 
 @pytest.fixture
 def centro(db) -> Centro:
@@ -40,7 +43,7 @@ def sede(centro) -> Sede:
 @pytest.fixture
 def podologa(centro, sede) -> Usuario:
     usuario = Usuario.objects.create_user(
-        correo="podologa@centro.pe", password="ClaveSegura2026",
+        correo="podologa@centro.pe", password=CLAVE_DE_PRUEBA,
         nombres="Rosa", apellidos="Quispe", rol=Rol.PODOLOGA, centro=centro,
     )
     AsignacionSede.objects.create(usuario=usuario, sede=sede, es_predeterminada=True)
@@ -51,7 +54,7 @@ def podologa(centro, sede) -> Usuario:
 @pytest.fixture
 def administradora(centro, sede) -> Usuario:
     usuario = Usuario.objects.create_user(
-        correo="admin@centro.pe", password="ClaveSegura2026",
+        correo="admin@centro.pe", password=CLAVE_DE_PRUEBA,
         nombres="Lucía", apellidos="Ramos", rol=Rol.ADMIN_CENTRO, centro=centro,
     )
     AsignacionSede.objects.create(usuario=usuario, sede=sede, es_predeterminada=True)

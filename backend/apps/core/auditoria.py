@@ -27,5 +27,5 @@ def registrar(accion: str, entidad: str, entidad_id="", datos=None, ip=None) -> 
             datos=datos or {},
             direccion_ip=ip,
         )
-    except Exception:  # noqa: BLE001 - la auditoría nunca tumba la petición
+    except Exception:
         logger.exception("No se pudo escribir la auditoría de %s %s", accion, entidad)
