@@ -42,6 +42,8 @@ class RegistroAuditoria(models.Model):
         ALTA = "ALTA", "Alta"
         EDICION = "EDICION", "Edición"
         BAJA = "BAJA", "Baja"
+        ACCESO = "ACCESO", "Inicio de sesión"
+        SALIDA = "SALIDA", "Cierre de sesión"
         ACCESO_DENEGADO = "ACCESO_DENEGADO", "Acceso denegado"
 
     centro = models.ForeignKey(Centro, on_delete=models.PROTECT, related_name="auditoria")
