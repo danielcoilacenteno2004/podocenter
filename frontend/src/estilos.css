@@ -1,0 +1,161 @@
+/* Hoja única de la aplicación. Los colores se declaran como variables para
+   que una marca distinta (otro centro cliente) se cambie en un solo lugar. */
+:root {
+  --tinta: #16222e;
+  --tinta-suave: #5a6b7a;
+  --marca: #0f6f6a;
+  --marca-oscura: #0a514d;
+  --marca-tenue: #e6f2f1;
+  --fondo: #f5f7f8;
+  --superficie: #ffffff;
+  --borde: #dde4e8;
+  --alerta: #a3281f;
+  --alerta-tenue: #fdecea;
+  --aviso: #8a5a00;
+  --aviso-tenue: #fdf3e2;
+  --ok: #1d6b3e;
+  --ok-tenue: #e7f4ec;
+  --radio: 10px;
+  --sombra: 0 1px 2px rgba(22, 34, 46, .06), 0 4px 16px rgba(22, 34, 46, .06);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--tinta);
+  font: 16px/1.55 "Segoe UI", Roboto, "Helvetica Neue", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 { font-size: 1.5rem; margin: 0 0 .25rem; letter-spacing: -.01em; }
+h2 { font-size: 1.1rem; margin: 0 0 .75rem; }
+a { color: var(--marca-oscura); }
+
+/* --- estructura ------------------------------------------------------- */
+.app { min-height: 100vh; display: flex; flex-direction: column; }
+
+.barra {
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borde);
+  padding: .65rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.marca { display: flex; align-items: center; gap: .55rem; font-weight: 700; letter-spacing: -.02em; }
+.marca svg { display: block; }
+.barra nav { display: flex; gap: .25rem; margin-left: .5rem; flex-wrap: wrap; }
+.barra nav a {
+  padding: .4rem .75rem; border-radius: 999px; text-decoration: none;
+  color: var(--tinta-suave); font-weight: 600; font-size: .92rem;
+}
+.barra nav a:hover { background: var(--fondo); color: var(--tinta); }
+.barra nav a.router-link-active { background: var(--marca-tenue); color: var(--marca-oscura); }
+.barra .derecha { margin-left: auto; display: flex; align-items: center; gap: .85rem; }
+
+.identidad { text-align: right; line-height: 1.25; }
+.identidad strong { display: block; font-size: .92rem; }
+.identidad span { font-size: .78rem; color: var(--tinta-suave); }
+
+main { flex: 1; width: 100%; max-width: 1080px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+.encabezado { margin-bottom: 1.25rem; }
+.encabezado p { margin: 0; color: var(--tinta-suave); }
+
+.tarjeta {
+  background: var(--superficie); border: 1px solid var(--borde);
+  border-radius: var(--radio); box-shadow: var(--sombra); padding: 1.25rem;
+}
+
+/* --- formularios ------------------------------------------------------ */
+label { display: block; font-weight: 600; font-size: .88rem; margin-bottom: .3rem; }
+input, select {
+  width: 100%; padding: .55rem .7rem; font: inherit; color: inherit;
+  background: var(--superficie); border: 1px solid var(--borde);
+  border-radius: 8px;
+}
+input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--marca); outline-offset: 2px;
+}
+.campo { margin-bottom: .9rem; }
+
+button {
+  font: inherit; font-weight: 600; cursor: pointer;
+  padding: .55rem 1.1rem; border-radius: 8px;
+  border: 1px solid var(--marca); background: var(--marca); color: #fff;
+}
+button:hover:not(:disabled) { background: var(--marca-oscura); border-color: var(--marca-oscura); }
+button:disabled { opacity: .55; cursor: progress; }
+button.secundario { background: transparent; color: var(--marca-oscura); }
+button.secundario:hover:not(:disabled) { background: var(--marca-tenue); }
+button.enlace {
+  background: none; border: none; color: var(--tinta-suave); padding: .3rem .5rem;
+  text-decoration: underline;
+}
+button.enlace:hover { color: var(--tinta); background: none; }
+
+/* --- tablas ----------------------------------------------------------- */
+table { width: 100%; border-collapse: collapse; font-size: .94rem; }
+caption { text-align: left; color: var(--tinta-suave); font-size: .85rem; padding-bottom: .5rem; }
+th, td { text-align: left; padding: .6rem .5rem; border-bottom: 1px solid var(--borde); }
+thead th {
+  font-size: .76rem; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--tinta-suave); border-bottom-width: 2px;
+}
+tbody tr:hover { background: var(--fondo); }
+td.numero { font-variant-numeric: tabular-nums; }
+
+/* --- avisos y etiquetas ----------------------------------------------- */
+[role="alert"] {
+  background: var(--alerta-tenue); border: 1px solid #f3c9c4; color: var(--alerta);
+  padding: .65rem .85rem; border-radius: 8px; margin: 0 0 1rem;
+}
+[role="status"] { color: var(--tinta-suave); }
+.vacio { color: var(--tinta-suave); text-align: center; padding: 2rem 1rem; }
+
+.etiqueta {
+  display: inline-block; padding: .15rem .55rem; border-radius: 999px;
+  font-size: .76rem; font-weight: 700; letter-spacing: .02em;
+}
+.etiqueta.PROGRAMADA { background: var(--marca-tenue); color: var(--marca-oscura); }
+.etiqueta.ATENDIDA   { background: var(--ok-tenue); color: var(--ok); }
+.etiqueta.CANCELADA  { background: var(--alerta-tenue); color: var(--alerta); }
+.etiqueta.NO_ASISTIO { background: var(--aviso-tenue); color: var(--aviso); }
+
+/* --- indicadores del panel -------------------------------------------- */
+.indicadores { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.indicador { background: var(--superficie); border: 1px solid var(--borde);
+  border-radius: var(--radio); padding: 1rem 1.15rem; box-shadow: var(--sombra); }
+.indicador dt { font-size: .8rem; color: var(--tinta-suave); font-weight: 600; }
+.indicador dd { margin: .2rem 0 0; font-size: 2rem; font-weight: 700;
+  font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+
+/* --- acceso (P01) ------------------------------------------------------ */
+.acceso { min-height: 100vh; display: grid; place-items: center; padding: 1.25rem; }
+.acceso .tarjeta { width: 100%; max-width: 400px; }
+.acceso .marca { justify-content: center; margin-bottom: 1.25rem; font-size: 1.15rem; }
+.credenciales { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px dashed var(--borde);
+  font-size: .82rem; color: var(--tinta-suave); }
+.credenciales code { background: var(--fondo); padding: .1rem .35rem; border-radius: 4px; }
+
+/* --- lista de sedes (P03) --------------------------------------------- */
+.sedes { list-style: none; padding: 0; margin: 0; display: grid; gap: .75rem; }
+.sedes button {
+  width: 100%; text-align: left; background: var(--superficie); color: var(--tinta);
+  border: 1px solid var(--borde); padding: .9rem 1rem;
+}
+.sedes button:hover { border-color: var(--marca); background: var(--marca-tenue); }
+.sedes strong { display: block; }
+.sedes span { font-size: .85rem; color: var(--tinta-suave); }
+
+.filtros { display: flex; gap: .75rem; align-items: flex-end; flex-wrap: wrap; margin-bottom: 1rem; }
+.filtros .campo { margin: 0; min-width: 200px; }
+
+@media (max-width: 640px) {
+  main { padding: 1rem .9rem 2.5rem; }
+  .barra { padding: .6rem .9rem; }
+  .barra .derecha { width: 100%; justify-content: space-between; margin-left: 0; }
+  table { font-size: .88rem; }
+}
