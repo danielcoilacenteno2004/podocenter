@@ -76,14 +76,23 @@ def cancelar_cita(*, cita: Cita, motivo: str) -> Cita:
     return cita
 
 
-def agenda_del_dia(*, centro_id: int, sede_id: int, fecha):
-    """Citas de una sede en un día, para la pantalla P05."""
+def agenda_del_dia(*, centro_id: int, sede_id: int, fecha, estado=None,
+                   profesional_id=None, servicio_id=None):
+    """Citas de una sede en un día, para la pantalla P05.
+
+    Los filtros son opcionales y se aplican en la base, no en el navegador:
+    la observación de la Práctica N.° 7 pedía poder acotar la agenda por
+    estado, profesional y servicio sin recargar toda la jornada.
+    """
     inicio = timezone.make_aware(timezone.datetime.combine(fecha, timezone.datetime.min.time()))
-    return (
-        Cita.objects.filter(
-            centro_id=centro_id, sede_id=sede_id, inicio__gte=inicio,
-            inicio__lt=inicio + timedelta(days=1),
-        )
-        .select_related("paciente", "profesional", "servicio")
-        .order_by("inicio")
+    consulta = Cita.objects.filter(
+        centro_id=centro_id, sede_id=sede_id, inicio__gte=inicio,
+        inicio__lt=inicio + timedelta(days=1),
     )
+    if estado:
+        consulta = consulta.filter(estado=estado)
+    if profesional_id:
+        consulta = consulta.filter(profesional_id=profesional_id)
+    if servicio_id:
+        consulta = consulta.filter(servicio_id=servicio_id)
+    return consulta.select_related("paciente", "profesional", "servicio").order_by("inicio")

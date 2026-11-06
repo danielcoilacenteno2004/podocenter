@@ -5,6 +5,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from apps.core.errores import ReglaDeNegocio
 from apps.core.permisos import TieneRol
 from apps.core.vistas import ContextoDeCentro
 from apps.usuarios.roles import Rol
@@ -12,6 +13,14 @@ from apps.usuarios.roles import Rol
 from .models import Cita
 from .serializers import CancelacionSerializer, CitaSerializer
 from .servicios import agenda_del_dia, cancelar_cita, programar_cita
+
+
+def _entero(valor):
+    """Convierte un parámetro de consulta a entero; ignora lo que no lo sea."""
+    try:
+        return int(valor) if valor else None
+    except (TypeError, ValueError):
+        return None
 
 
 class CitaViewSet(ContextoDeCentro, viewsets.ModelViewSet):
@@ -57,8 +66,37 @@ class CitaViewSet(ContextoDeCentro, viewsets.ModelViewSet):
 
     @action(detail=False, methods=["get"])
     def agenda(self, request):
-        fecha = request.query_params.get("fecha")
-        fecha = date.fromisoformat(fecha) if fecha else date.today()
-        sede_id = request.sede_id or request.query_params.get("sede")
-        citas = agenda_del_dia(centro_id=request.centro_id, sede_id=sede_id, fecha=fecha)
-        return Response({"fecha": fecha, "citas": self.get_serializer(citas, many=True).data})
+        """P05 — jornada de una sede, con los filtros opcionales de la P7."""
+        parametros = request.query_params
+        try:
+            fecha = date.fromisoformat(parametros["fecha"]) if parametros.get("fecha") \
+                else date.today()
+        except ValueError as error:
+            raise ReglaDeNegocio(
+                "fecha-invalida", "La fecha debe tener el formato AAAA-MM-DD."
+            ) from error
+
+        estado = parametros.get("estado") or None
+        if estado and estado not in Cita.Estado.values:
+            raise ReglaDeNegocio("estado-desconocido", "Ese estado de cita no existe.")
+
+        sede_id = request.sede_id or parametros.get("sede")
+        citas = agenda_del_dia(
+            centro_id=request.centro_id,
+            sede_id=sede_id,
+            fecha=fecha,
+            estado=estado,
+            profesional_id=_entero(parametros.get("profesional")),
+            servicio_id=_entero(parametros.get("servicio")),
+        )
+        datos = self.get_serializer(citas, many=True).data
+        return Response({
+            "fecha": fecha,
+            "total": len(datos),
+            "filtros_aplicados": {
+                clave: parametros[clave]
+                for clave in ("estado", "profesional", "servicio")
+                if parametros.get(clave)
+            },
+            "citas": datos,
+        })
