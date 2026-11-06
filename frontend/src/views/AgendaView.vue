@@ -1,53 +1,172 @@
 <script setup>
-// P05 Agenda de citas. Solo pinta lo que devuelve la API: la regla de
-// solapamiento la decide el servidor, nunca el navegador.
-import { onMounted, ref } from 'vue'
+// P05 Agenda de citas (CU08), con los filtros que pidió la observación de la
+// Práctica N.° 7. Los filtros se resuelven en el servidor: el navegador no
+// esconde filas, pide solo las que corresponden. Las opciones de cada filtro
+// salen de la propia jornada, de modo que nunca se ofrece un valor que no
+// tenga ninguna cita detrás.
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { api } from '../services/api'
+import { useSesion } from '../stores/sesion'
+
+const sesion = useSesion()
+const ruta = useRoute()
+
+// La agenda se puede abrir ya filtrada desde el panel del día: el enlace trae
+// la fecha y, si viene del desglose por servicio, también el servicio.
+const fecha = ref(ruta.query.fecha ?? new Date().toISOString().slice(0, 10))
+const filtros = ref({
+  estado: ruta.query.estado ?? '',
+  profesional: ruta.query.profesional ? Number(ruta.query.profesional) : '',
+  servicio: ruta.query.servicio ? Number(ruta.query.servicio) : ''
+})
 
 const citas = ref([])
-const fecha = ref(new Date().toISOString().slice(0, 10))
-const error = ref(null)
+const jornada = ref([])      // el día completo, para construir las opciones
 const cargando = ref(false)
+const error = ref(null)
 
-async function cargarAgenda () {
+const ESTADOS = [
+  ['PROGRAMADA', 'Programada'],
+  ['ATENDIDA', 'Atendida'],
+  ['CANCELADA', 'Cancelada'],
+  ['NO_ASISTIO', 'No asistió']
+]
+
+function opciones (campoId, campoNombre) {
+  const vistos = new Map()
+  for (const cita of jornada.value) {
+    if (cita[campoId] != null) vistos.set(cita[campoId], cita[campoNombre])
+  }
+  return [...vistos].map(([id, nombre]) => ({ id, nombre }))
+}
+const profesionales = computed(() => opciones('profesional', 'profesional_nombre'))
+const servicios = computed(() => opciones('servicio', 'servicio_nombre'))
+
+const hayFiltros = computed(() => Object.values(filtros.value).some(Boolean))
+const estadosPresentes = computed(() => {
+  const cuenta = {}
+  for (const cita of jornada.value) cuenta[cita.estado] = (cuenta[cita.estado] ?? 0) + 1
+  return cuenta
+})
+
+function hora (valor) {
+  return new Date(valor).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })
+}
+
+async function pedir (params) {
+  const { data } = await api.get('/citas/agenda/', { params: { fecha: fecha.value, ...params } })
+  return data.citas
+}
+
+async function cargar () {
   cargando.value = true
   error.value = null
   try {
-    const { data } = await api.get('/citas/agenda/', { params: { fecha: fecha.value } })
-    citas.value = data.citas
+    jornada.value = await pedir({})
+    citas.value = hayFiltros.value
+      ? await pedir({
+          estado: filtros.value.estado || undefined,
+          profesional: filtros.value.profesional || undefined,
+          servicio: filtros.value.servicio || undefined
+        })
+      : jornada.value
   } catch (problema) {
     error.value = problema.mensaje
+    citas.value = []
   } finally {
     cargando.value = false
   }
 }
 
-onMounted(cargarAgenda)
+function limpiar () {
+  filtros.value = { estado: '', profesional: '', servicio: '' }
+}
+
+watch(fecha, () => { limpiar(); cargar() })
+watch(filtros, cargar, { deep: true })
+onMounted(cargar)
 </script>
 
 <template>
-  <section aria-labelledby="titulo-agenda">
-    <h1 id="titulo-agenda">Agenda de citas</h1>
-    <label for="fecha">Fecha</label>
-    <input id="fecha" v-model="fecha" type="date" @change="cargarAgenda">
+  <main>
+    <div class="encabezado">
+      <h1>Agenda de citas</h1>
+      <p v-if="sesion.sedeActiva">{{ sesion.sedeActiva.nombre }} — {{ sesion.sedeActiva.direccion }}</p>
+    </div>
 
-    <p v-if="cargando" role="status">Cargando la agenda…</p>
-    <p v-else-if="error" role="alert">{{ error }}</p>
+    <form class="filtros" aria-label="Filtros de la agenda" @submit.prevent="cargar">
+      <div class="campo">
+        <label for="fecha">Fecha</label>
+        <input id="fecha" v-model="fecha" type="date">
+      </div>
 
-    <table v-else>
-      <caption>Citas del día</caption>
-      <thead>
-        <tr><th scope="col">Hora</th><th scope="col">Paciente</th><th scope="col">Servicio</th><th scope="col">Estado</th></tr>
-      </thead>
-      <tbody>
-        <tr v-for="cita in citas" :key="cita.id">
-          <td>{{ new Date(cita.inicio).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }) }}</td>
-          <td>{{ cita.paciente_nombre }}</td>
-          <td>{{ cita.servicio_nombre }}</td>
-          <td>{{ cita.estado }}</td>
-        </tr>
-        <tr v-if="citas.length === 0"><td colspan="4">No hay citas programadas para esta fecha.</td></tr>
-      </tbody>
-    </table>
-  </section>
+      <div class="campo">
+        <label for="estado">Estado</label>
+        <select id="estado" v-model="filtros.estado">
+          <option value="">Todos</option>
+          <option v-for="[valor, etiqueta] in ESTADOS" :key="valor" :value="valor">
+            {{ etiqueta }}<template v-if="estadosPresentes[valor]"> ({{ estadosPresentes[valor] }})</template>
+          </option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label for="profesional">Profesional</label>
+        <select id="profesional" v-model="filtros.profesional">
+          <option value="">Todas</option>
+          <option v-for="p in profesionales" :key="p.id" :value="p.id">{{ p.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label for="servicio">Servicio</label>
+        <select id="servicio" v-model="filtros.servicio">
+          <option value="">Todos</option>
+          <option v-for="s in servicios" :key="s.id" :value="s.id">{{ s.nombre }}</option>
+        </select>
+      </div>
+
+      <button v-if="hayFiltros" class="secundario" type="button" @click="limpiar">
+        Quitar filtros
+      </button>
+    </form>
+
+    <p v-if="error" role="alert">{{ error }}</p>
+
+    <section class="tarjeta">
+      <p v-if="cargando" role="status">Cargando la agenda…</p>
+      <p v-else-if="!citas.length" class="vacio">
+        {{ hayFiltros
+          ? 'Ninguna cita del día coincide con los filtros elegidos.'
+          : 'No hay citas programadas para esta fecha.' }}
+      </p>
+      <table v-else>
+        <caption>
+          {{ citas.length }} de {{ jornada.length }} cita(s) del día
+          <template v-if="hayFiltros"> · filtro aplicado</template>
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Hora</th>
+            <th scope="col">Paciente</th>
+            <th scope="col">Servicio</th>
+            <th scope="col">Profesional</th>
+            <th scope="col">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="cita in citas" :key="cita.id">
+            <td class="numero">{{ hora(cita.inicio) }} – {{ hora(cita.fin) }}</td>
+            <td>{{ cita.paciente_nombre }}</td>
+            <td>{{ cita.servicio_nombre }}</td>
+            <td>{{ cita.profesional_nombre }}</td>
+            <td><span class="etiqueta" :class="cita.estado">
+              {{ (ESTADOS.find(([v]) => v === cita.estado) ?? [])[1] ?? cita.estado }}
+            </span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
 </template>
