@@ -1,0 +1,48 @@
+# Despliegue en la nube (EC2 + RDS). La base de datos NO es un contenedor:
+# es el servicio gestionado, por eso aquí solo viajan la aplicación y Nginx.
+#
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# Variables esperadas en un archivo .env junto a este compose:
+#   DJANGO_SECRET_KEY, DJANGO_ALLOWED_HOSTS, DJANGO_CSRF_ORIGINS,
+#   CLAVE_CIFRADO_CAMPOS, POSTGRES_HOST, POSTGRES_DB, POSTGRES_USER,
+#   POSTGRES_PASSWORD
+services:
+  api:
+    build:
+      context: ../..
+      dockerfile: infra/Dockerfile
+    env_file: .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+    volumes:
+      - estaticos:/app/backend/staticfiles
+    expose:
+      - "8000"
+    restart: unless-stopped        # cubre el RNF03 de disponibilidad
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 60"
+
+  # El planificador de recordatorios automáticos (RF13) se añadirá como un
+  # servicio más cuando el proveedor de mensajería apruebe la cuenta: el RF07
+  # quedó fuera de la primera entrega por ese trámite (sección 2.7.3).
+
+  web:
+    image: nginx:1.27-alpine
+    depends_on: [api]
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ../../frontend/dist:/var/www/spa:ro
+      - estaticos:/var/www/estaticos:ro
+      - ./certificados:/etc/nginx/certificados:ro
+      - certbot:/var/www/certbot
+    restart: unless-stopped
+
+volumes:
+  estaticos:
+  certbot:
