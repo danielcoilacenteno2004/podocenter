@@ -11,6 +11,8 @@ const rutas = [
   { path: '/citas/:citaId/atencion', name: 'registrar-atencion', component: () => import('./views/RegistrarAtencionView.vue'), props: true },
   { path: '/pacientes', name: 'pacientes', component: () => import('./views/PacientesView.vue') },
   { path: '/pacientes/:pacienteId', name: 'ficha-paciente', component: () => import('./views/FichaPacienteView.vue'), props: true },
+  // Administración del centro: solo la administradora (Práctica N.° 7, Tabla 1).
+  { path: '/usuarios', name: 'usuarios', component: () => import('./views/UsuariosView.vue'), meta: { roles: ['ADMIN_CENTRO'] } },
   { path: '/:rutaNoEncontrada(.*)*', name: 'error', component: () => import('./views/ErrorView.vue'), meta: { publica: true } }
 ]
 
@@ -23,6 +25,11 @@ router.beforeEach((destino) => {
   if (destino.name === 'login' && sesion.autenticado) return { name: 'panel' }
   if (sesion.autenticado && sesion.necesitaElegirSede && destino.name !== 'elegir-sede') {
     return { name: 'elegir-sede' }
+  }
+  // El menú ya no muestra lo que el rol no permite; esto cubre a quien
+  // escribe la dirección a mano. El servidor responde 403 de todos modos.
+  if (destino.meta.roles && !destino.meta.roles.includes(sesion.usuario?.rol)) {
+    return { name: 'panel' }
   }
   return true
 })

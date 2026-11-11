@@ -193,6 +193,11 @@ label.casilla .ayuda { display: block; }
 .sugerencias button:hover { background: var(--marca-tenue); }
 .sugerencias span { color: var(--tinta-suave); font-weight: 400; font-size: .88rem; }
 
+/* --- administración (P15, P17, P18) ----------------------------------- */
+.secundario-celda { display: block; color: var(--tinta-suave); font-size: .85rem; }
+.confirmacion span { font-weight: 600; color: var(--alerta); font-size: .9rem; }
+table.administracion td.accion { width: 1%; }
+
 /* --- registrar atención (P11) ------------------------------------------ */
 a.boton {
   display: inline-block; padding: .4rem .85rem; border-radius: 8px;

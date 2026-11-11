@@ -38,6 +38,9 @@ function cambiarSede () {
         <router-link :to="{ name: 'panel' }">Panel del día</router-link>
         <router-link :to="{ name: 'agenda' }">Agenda</router-link>
         <router-link :to="{ name: 'pacientes' }">Pacientes</router-link>
+        <template v-if="sesion.esAdministradoraDelCentro">
+          <router-link :to="{ name: 'usuarios' }">Usuarios</router-link>
+        </template>
       </nav>
 
       <div class="derecha">
