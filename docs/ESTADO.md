@@ -14,11 +14,11 @@ Contra eso, el estado real es:
 
 | Compromiso | Estado |
 |---|---|
-| Usuarios y roles | API terminada. Pantallas: ingreso (P01) y elección de sede (P03). **Sin P02 (dos pasos), P17/P27 (gestión de usuarios) ni P20/P23/P24 (perfil y contraseña)** |
-| Sedes | API terminada; **sin pantallas P18/P28** |
+| Usuarios y roles | Pantallas: ingreso (P01), elección de sede (P03) y gestión de usuarios (P17/P27). **Sin P02 (dos pasos) ni P20/P23/P24 (perfil y contraseña): un usuario nuevo no puede ingresar, porque no hay forma de darle contraseña.** La edición no cambia rol ni sedes (ver sección 6) |
+| Sedes | Pantallas P18/P28. **El horario de atención se ve pero no se edita: la API no tiene ruta para escribirlo**, así que una sede nueva nace cerrada |
 | Pacientes con consentimiento | API terminada. Pantallas: búsqueda (P08) y ficha con historial (P10). **Sin P09: el alta y la edición de pacientes no tienen pantalla** |
 | Citas sin recordatorios | Terminado: agenda con filtros (P05), nueva cita (P06), cancelación con reemplazo (P07) y panel del día (P04) |
-| Servicios | API terminada; **sin pantallas P15/P26** |
+| Servicios | Terminado: pantallas P15/P26 |
 | **Atenciones** | **Parcial.** Registro de la atención con su pantalla P11, que se abre desde la agenda. **Sin monto cobrado, sin insumos y sin registro diario** |
 | Desplegado en producción | **No**: la infraestructura está escrita, nada corre en la nube |
 | Validado con la usuaria | **No**: la prueba de usabilidad está diseñada, no aplicada |
@@ -66,7 +66,7 @@ medición válida para el RNF02 es la que se haga con la podóloga.
 
 ## 2. Lo que está sólido
 
-- **128 pruebas** en verde, **93.8 %** de cobertura de sentencias, sobre
+- **129 pruebas** en verde, **93.9 %** de cobertura de sentencias, sobre
   PostgreSQL real y no sobre una base en memoria. La cifra varía unas
   décimas entre ejecuciones.
 - **Cero vulnerabilidades** conocidas en las dependencias tras subir a Django
@@ -78,13 +78,13 @@ medición válida para el RNF02 es la que se haga con la podóloga.
   tres en la API de usuarios y tres en atenciones. Comprueban que un centro
   no ve, no abre, no modifica y no registra atenciones sobre datos de otro. Es
   lo que sostiene el modelo de arriendo ante el jurado.
-- **66 commits** con «un commit, un cambio», contando el que actualiza este
-  documento: 35 de Sergio Daniel Coila Centeno y 31 de Andre Nicolas Huaroc
+- **71 commits** con «un commit, un cambio», contando el que actualiza este
+  documento: 38 de Sergio Daniel Coila Centeno y 33 de Andre Nicolas Huaroc
   Condori. La identidad de git está fijada en la configuración del
   repositorio para que no vuelva a entrar un autor con otro nombre.
 - Entorno de demostración reproducible con un comando y probado con nueve
   pruebas, incluida una que verifica que las credenciales publicadas funcionan.
-- Frontend: **9 pantallas de las 29 diseñadas en la Práctica N.° 7 (P01, P03, P04, P05, P06, P07, P08, P10, P11); P21 solo cubre la página no encontrada**. El frontend no tiene pruebas automáticas; cada pantalla se comprobó con un recorrido en Playwright.
+- Frontend: **15 pantallas de las 29 diseñadas en la Práctica N.° 7 (P01, P03, P04, P05, P06, P07, P08, P10, P11, P15, P17, P18, P26, P27, P28); P21 solo cubre la página no encontrada**. El frontend no tiene pruebas automáticas; cada pantalla se comprobó con un recorrido en Playwright.
 
 ### Pipeline: corregido, pendiente de ver en verde
 
@@ -125,7 +125,25 @@ Registradas en la Práctica N.° 7 y pendientes de decisión de alcance:
 | CC-19 | *Añade* el panel segmentado por decisión; no revierte CC-12 |
 | RF07 | Recordatorios por mensajería, pendientes de aprobación del proveedor |
 
-## 5. Lo que hay que decidir
+## 5. Lo que la API permite y no debería (encontrado al construir las pantallas de administración, 11/11/2026)
+
+Las pantallas rodean estos huecos sin inventar reglas; cerrarlos es trabajo
+del servidor:
+
+- **`PATCH /usuarios/{id}/` no pasa por el servicio**: cambia el rol o
+  `esta_activo` de la única administradora (200) sin la regla del último
+  administrador, e ignora `sedes_ids`. Por eso P27 solo edita nombres,
+  apellidos y correo.
+- **Nadie puede dar contraseña a un usuario nuevo**: la API le pone una
+  aleatoria y P24 no existe.
+- **No hay ruta para escribir el horario de una sede.**
+- **Nombre repetido de sede o servicio → 500**, no un error de negocio.
+- **`DELETE` de sede o servicio con citas → 500.** Las pantallas no lo usan.
+- Reglas del diseño que el servidor no aplica: una sede o un servicio
+  inactivo siguen aceptando citas; la duración admite desde 5 minutos (la
+  Tabla 24 dice entre 10 y 240).
+
+## 6. Lo que hay que decidir
 
 - **La escritura directa en `/pacientes/`, antes de construir P09.** El
   `PATCH` cambia los antecedentes (dato clínico cifrado) sin pasar por
