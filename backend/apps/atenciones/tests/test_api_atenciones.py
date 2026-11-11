@@ -159,6 +159,49 @@ def test_la_api_no_permite_editar_ni_borrar_una_atencion(cliente, cita):
     assert Atencion.objects.count() == 1
 
 
+# --- Permisos por rol --------------------------------------------------------
+
+@pytest.mark.django_db
+def test_la_administradora_del_centro_tambien_registra_atenciones(administradora, sede, cita):
+    # Garantiza que el CU10 tiene los dos actores que declara el informe: la
+    # dueña también atiende y no puede quedar bloqueada por su rol.
+    cliente = APIClient()
+    cliente.force_authenticate(user=administradora)
+    cliente.credentials(HTTP_X_SEDE=str(sede.pk))
+
+    respuesta = cliente.post("/api/v1/atenciones/", {"cita": cita.pk}, format="json")
+
+    assert respuesta.status_code == 201
+    assert respuesta.data["registrada_por"] == administradora.pk
+
+
+@pytest.mark.django_db
+def test_el_administrador_de_plataforma_no_registra_ni_lee_atenciones(cita):
+    # Garantiza que quien opera la plataforma no toca datos clínicos de los
+    # centros clientes: administra cuentas, no consultas (RF17).
+    plataforma = Usuario.objects.create_superuser(
+        correo="soporte@podocenter.pe", password=CLAVE_DE_PRUEBA,
+        nombres="Soporte", apellidos="Plataforma",
+    )
+    cliente = APIClient()
+    cliente.force_authenticate(user=plataforma)
+
+    assert cliente.post("/api/v1/atenciones/", {"cita": cita.pk},
+                        format="json").status_code == 403
+    assert cliente.get("/api/v1/atenciones/").status_code == 403
+    assert Atencion.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_sin_sesion_no_se_registra_ninguna_atencion(cita):
+    # Garantiza que el dato clínico no se escribe sin una persona
+    # identificada detrás: sin sesión, la API responde antes de tocar la base.
+    respuesta = APIClient().post("/api/v1/atenciones/", {"cita": cita.pk}, format="json")
+
+    assert respuesta.status_code == 403
+    assert Atencion.objects.count() == 0
+
+
 # --- La agenda indica qué citas ya tienen atención ---------------------------
 
 @pytest.mark.django_db
