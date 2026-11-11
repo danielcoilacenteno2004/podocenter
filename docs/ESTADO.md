@@ -14,7 +14,7 @@ Contra eso, el estado real es:
 
 | Compromiso | Estado |
 |---|---|
-| Usuarios y roles | Pantallas: ingreso (P01), elección de sede (P03) y gestión de usuarios (P17/P27). **Sin P02 (dos pasos) ni P20/P23/P24 (perfil y contraseña): un usuario nuevo no puede ingresar, porque no hay forma de darle contraseña.** La edición no cambia rol ni sedes (ver sección 6) |
+| Usuarios y roles | Pantallas: ingreso (P01), elección de sede (P03), gestión de usuarios (P17/P27) y perfil con cambio de contraseña (P20). **Sin P02 (dos pasos) ni P23/P24 (recuperación de contraseña por correo): un usuario nuevo no puede ingresar, porque nadie conoce la contraseña que le asigna el alta, y P20 exige la actual.** La edición no cambia rol ni sedes (ver sección 5) |
 | Sedes | Pantallas P18/P28. **El horario de atención se ve pero no se edita: la API no tiene ruta para escribirlo**, así que una sede nueva nace cerrada |
 | Pacientes con consentimiento | Pantallas: búsqueda (P08), alta con consentimiento (P09), ficha con historial (P10) y detalle de atención (P25). **Sin edición: se quitaron PUT, PATCH y DELETE de `/pacientes/`** porque escribían sin auditoría; vuelve con un servicio que la audite |
 | Citas sin recordatorios | Terminado: agenda con filtros (P05), nueva cita (P06), cancelación con reemplazo (P07) y panel del día (P04) |
@@ -66,7 +66,7 @@ medición válida para el RNF02 es la que se haga con la podóloga.
 
 ## 2. Lo que está sólido
 
-- **132 pruebas** en verde, **94.0 %** de cobertura de sentencias, sobre
+- **145 pruebas** en verde, **93.7 %** de cobertura de sentencias, sobre
   PostgreSQL real y no sobre una base en memoria. La cifra varía unas
   décimas entre ejecuciones.
 - **Cero vulnerabilidades** conocidas en las dependencias tras subir a Django
@@ -78,13 +78,13 @@ medición válida para el RNF02 es la que se haga con la podóloga.
   tres en la API de usuarios y tres en atenciones. Comprueban que un centro
   no ve, no abre, no modifica y no registra atenciones sobre datos de otro. Es
   lo que sostiene el modelo de arriendo ante el jurado.
-- **77 commits** con «un commit, un cambio», contando el que actualiza este
-  documento: 40 de Sergio Daniel Coila Centeno y 37 de Andre Nicolas Huaroc
+- **81 commits** con «un commit, un cambio», contando el que actualiza este
+  documento: 42 de Sergio Daniel Coila Centeno y 39 de Andre Nicolas Huaroc
   Condori. La identidad de git está fijada en la configuración del
   repositorio para que no vuelva a entrar un autor con otro nombre.
 - Entorno de demostración reproducible con un comando y probado con nueve
   pruebas, incluida una que verifica que las credenciales publicadas funcionan.
-- Frontend: **18 pantallas de las 29 diseñadas en la Práctica N.° 7 (P01, P03, P04, P05, P06, P07, P08, P09, P10, P11, P15, P17, P18, P21, P25, P26, P27, P28)**. El frontend no tiene pruebas automáticas; cada pantalla se comprobó con un recorrido en Playwright.
+- Frontend: **19 pantallas de las 29 diseñadas en la Práctica N.° 7 (P01, P03, P04, P05, P06, P07, P08, P09, P10, P11, P15, P17, P18, P20, P21, P25, P26, P27, P28)**. El frontend no tiene pruebas automáticas; cada pantalla se comprobó con un recorrido en Playwright.
 
 ### Pipeline: corregido, pendiente de ver en verde
 
