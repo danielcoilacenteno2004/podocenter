@@ -75,7 +75,7 @@ Si en tu máquina hay otra versión, crea el entorno con 3.12 (por ejemplo,
 ruff check .                                   # estilo; debe salir limpio
 bandit -c pyproject.toml -r backend/apps       # seguridad del código
 pip-audit -r requirements.txt                  # dependencias vulnerables
-pytest --cov --cov-fail-under=80               # 120 pruebas, cobertura ≥ 80 %
+pytest --cov --cov-fail-under=80               # 124 pruebas, cobertura ≥ 80 %
 ```
 
 El pipeline rechaza un hallazgo sin corregir, una prueba en rojo, cobertura por
@@ -113,6 +113,6 @@ pantalla P11 (sin monto ni insumos).
 No construido: Inventario, Registro diario, Notificaciones
 (RF07, pendiente de aprobación del proveedor de mensajería).
 
-Frontend: 7 pantallas de las 29 diseñadas en la Práctica N.° 7.
+Frontend: 9 pantallas de las 29 diseñadas en la Práctica N.° 7 (P01, P03, P04, P05, P06, P07, P08, P10, P11); P21 solo cubre la página no encontrada.
 
 El detalle, con lo que falta y lo que está en riesgo, en `docs/ESTADO.md`.

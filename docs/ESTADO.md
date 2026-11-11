@@ -14,11 +14,11 @@ Contra eso, el estado real es:
 
 | Compromiso | Estado |
 |---|---|
-| Usuarios y roles | Terminado |
-| Sedes | Terminado |
-| Pacientes con consentimiento | Terminado |
-| Citas sin recordatorios | Terminado, con filtros y panel |
-| Servicios | API terminada; **sin pantalla de gestión** |
+| Usuarios y roles | API terminada. Pantallas: ingreso (P01) y elección de sede (P03). **Sin P02 (dos pasos), P17/P27 (gestión de usuarios) ni P20/P23/P24 (perfil y contraseña)** |
+| Sedes | API terminada; **sin pantallas P18/P28** |
+| Pacientes con consentimiento | API terminada. Pantallas: búsqueda (P08) y ficha con historial (P10). **Sin P09: el alta y la edición de pacientes no tienen pantalla** |
+| Citas sin recordatorios | Terminado: agenda con filtros (P05), nueva cita (P06), cancelación con reemplazo (P07) y panel del día (P04) |
+| Servicios | API terminada; **sin pantallas P15/P26** |
 | **Atenciones** | **Parcial.** Registro de la atención con su pantalla P11, que se abre desde la agenda. **Sin monto cobrado, sin insumos y sin registro diario** |
 | Desplegado en producción | **No**: la infraestructura está escrita, nada corre en la nube |
 | Validado con la usuaria | **No**: la prueba de usabilidad está diseñada, no aplicada |
@@ -66,9 +66,9 @@ medición válida para el RNF02 es la que se haga con la podóloga.
 
 ## 2. Lo que está sólido
 
-- **120 pruebas** en verde, **93.5 %** de cobertura de sentencias, sobre
+- **124 pruebas** en verde, **93.7 %** de cobertura de sentencias, sobre
   PostgreSQL real y no sobre una base en memoria. La cifra varía unas
-  décimas entre ejecuciones (93.15–93.53 %).
+  décimas entre ejecuciones.
 - **Cero vulnerabilidades** conocidas en las dependencias tras subir a Django
   5.2 LTS, DRF 3.18.2, django-filter 25.2 y cryptography 50.0.2.
 - `ruff`, `bandit` 1.9.4 y `npm run lint` limpios. `bandit` se comprobó
@@ -78,13 +78,13 @@ medición válida para el RNF02 es la que se haga con la podóloga.
   tres en la API de usuarios y tres en atenciones. Comprueban que un centro
   no ve, no abre, no modifica y no registra atenciones sobre datos de otro. Es
   lo que sostiene el modelo de arriendo ante el jurado.
-- **55 commits** con «un commit, un cambio», contando el que actualiza este
-  documento: 30 de Sergio Daniel Coila Centeno y 25 de Andre Nicolas Huaroc
+- **62 commits** con «un commit, un cambio», contando el que actualiza este
+  documento: 33 de Sergio Daniel Coila Centeno y 29 de Andre Nicolas Huaroc
   Condori. La identidad de git está fijada en la configuración del
   repositorio para que no vuelva a entrar un autor con otro nombre.
 - Entorno de demostración reproducible con un comando y probado con nueve
   pruebas, incluida una que verifica que las credenciales publicadas funcionan.
-- Frontend: **7 pantallas** de las 29 diseñadas.
+- Frontend: **9 pantallas de las 29 diseñadas en la Práctica N.° 7 (P01, P03, P04, P05, P06, P07, P08, P10, P11); P21 solo cubre la página no encontrada**. El frontend no tiene pruebas automáticas; cada pantalla se comprobó con un recorrido en Playwright.
 
 ### Pipeline: corregido, pendiente de ver en verde
 
