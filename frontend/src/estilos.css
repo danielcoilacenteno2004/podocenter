@@ -197,6 +197,10 @@ label.casilla .ayuda { display: block; }
 .secundario-celda { display: block; color: var(--tinta-suave); font-size: .85rem; }
 .confirmacion span { font-weight: 600; color: var(--alerta); font-size: .9rem; }
 table.administracion td.accion { width: 1%; }
+dl.horario { margin: .2rem 0 .4rem; display: grid; gap: .15rem; }
+dl.horario div { display: flex; justify-content: space-between; max-width: 18rem; font-size: .92rem; }
+dl.horario dt { color: var(--tinta-suave); }
+dl.horario dd { margin: 0; font-variant-numeric: tabular-nums; }
 
 /* --- registrar atención (P11) ------------------------------------------ */
 a.boton {

@@ -13,6 +13,7 @@ const rutas = [
   { path: '/pacientes/:pacienteId', name: 'ficha-paciente', component: () => import('./views/FichaPacienteView.vue'), props: true },
   // Administración del centro: solo la administradora (Práctica N.° 7, Tabla 1).
   { path: '/usuarios', name: 'usuarios', component: () => import('./views/UsuariosView.vue'), meta: { roles: ['ADMIN_CENTRO'] } },
+  { path: '/sedes', name: 'sedes', component: () => import('./views/SedesView.vue'), meta: { roles: ['ADMIN_CENTRO'] } },
   { path: '/:rutaNoEncontrada(.*)*', name: 'error', component: () => import('./views/ErrorView.vue'), meta: { publica: true } }
 ]
 
