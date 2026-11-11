@@ -35,9 +35,12 @@ function cambiarSede () {
       </span>
 
       <nav aria-label="Secciones">
-        <router-link :to="{ name: 'panel' }">Panel del día</router-link>
-        <router-link :to="{ name: 'agenda' }">Agenda</router-link>
-        <router-link :to="{ name: 'pacientes' }">Pacientes</router-link>
+        <router-link v-if="sesion.esAdministradoraDePlataforma" :to="{ name: 'centros' }">Centros clientes</router-link>
+        <template v-else>
+          <router-link :to="{ name: 'panel' }">Panel del día</router-link>
+          <router-link :to="{ name: 'agenda' }">Agenda</router-link>
+          <router-link :to="{ name: 'pacientes' }">Pacientes</router-link>
+        </template>
         <template v-if="sesion.esAdministradoraDelCentro">
           <router-link :to="{ name: 'usuarios' }">Usuarios</router-link>
           <router-link :to="{ name: 'sedes' }">Sedes</router-link>

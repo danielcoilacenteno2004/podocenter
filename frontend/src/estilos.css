@@ -197,6 +197,15 @@ label.casilla .ayuda { display: block; }
 .secundario-celda { display: block; color: var(--tinta-suave); font-size: .85rem; }
 .confirmacion span { font-weight: 600; color: var(--alerta); font-size: .9rem; }
 table.administracion td.accion { width: 1%; }
+/* --- centros clientes (P19) -------------------------------------------- */
+.aviso-ok p { margin: 0; }
+.credencial-temporal { margin-top: .6rem; padding-top: .6rem; border-top: 1px dashed #bfe0cb; }
+.credencial-temporal code {
+  background: var(--superficie); border: 1px solid #bfe0cb; border-radius: 4px;
+  padding: .1rem .4rem; font-size: .95rem; user-select: all;
+}
+input.campo-motivo { width: 14rem; padding: .35rem .55rem; font-size: .88rem; }
+
 /* --- mi perfil (P20) --------------------------------------------------- */
 a.identidad { color: var(--tinta); text-decoration: none; border-radius: 8px; padding: .2rem .4rem; }
 a.identidad:hover { background: var(--fondo); }
