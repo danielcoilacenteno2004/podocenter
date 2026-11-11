@@ -28,10 +28,17 @@ def sede_solicitada(request, usuario) -> int | None:
     return sede_id if usuario.puede_usar_sede(sede_id) else None
 
 
-def fijar_centro_en_la_sesion(centro_id: int) -> None:
-    """Deja el centro en la sesión de PostgreSQL para que actúe el RLS."""
+def fijar_centro_en_la_sesion(centro_id: int | None) -> None:
+    """Deja el centro en la sesión de PostgreSQL para que actúe el RLS.
+
+    Con None lo deja vacío, y la política no devuelve ninguna fila. El valor
+    vive en la conexión, no en la petición: en producción las conexiones se
+    reutilizan (CONN_MAX_AGE), así que no fijarlo equivale a heredar el
+    centro de la petición anterior.
+    """
+    valor = "" if centro_id is None else str(centro_id)
     with connection.cursor() as cursor:
-        cursor.execute("SELECT set_config('app.centro_id', %s, false)", [str(centro_id)])
+        cursor.execute("SELECT set_config('app.centro_id', %s, false)", [valor])
 
 
 def aplicar_contexto(request) -> None:
@@ -39,10 +46,13 @@ def aplicar_contexto(request) -> None:
     usuario = getattr(request, "user", None)
     autenticado = getattr(usuario, "is_authenticated", False)
     centro_id = getattr(usuario, "centro_id", None) if autenticado else None
+    # Primero el centro en la base, siempre, también sin centro: una petición
+    # anónima o del administrador de plataforma no debe ver los datos del
+    # centro que usó antes la conexión. Y antes de comprobar la sede, que
+    # consulta asignaciones protegidas por la misma política.
+    fijar_centro_en_la_sesion(centro_id)
     sede_id = sede_solicitada(request, usuario)
     fijar_contexto(centro_id=centro_id, sede_id=sede_id,
                    usuario_id=getattr(usuario, "pk", None) if autenticado else None)
-    if centro_id is not None:
-        fijar_centro_en_la_sesion(centro_id)
     request.centro_id = centro_id
     request.sede_id = sede_id

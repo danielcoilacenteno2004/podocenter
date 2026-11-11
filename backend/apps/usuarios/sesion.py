@@ -15,6 +15,7 @@ from rest_framework.views import APIView
 
 from apps.core.auditoria import registrar
 from apps.core.contexto import fijar_contexto
+from apps.core.contexto_http import fijar_centro_en_la_sesion
 from apps.core.errores import ReglaDeNegocio
 from apps.core.vistas import ContextoDeCentro
 
@@ -83,6 +84,9 @@ class IniciarSesion(APIView):
         login(request, usuario)
         usuario.ultimo_acceso_en = timezone.now()
         usuario.save(update_fields=["ultimo_acceso_en"])
+        # La petición llegó sin usuario: hay que fijar su centro también en la
+        # base, o el registro de auditoría choca con la política RLS.
+        fijar_centro_en_la_sesion(usuario.centro_id)
         fijar_contexto(centro_id=usuario.centro_id, usuario_id=usuario.pk)
         registrar("ACCESO", "sesion", usuario.pk, {"correo": usuario.correo})
         return Response({"autenticado": True, "usuario": _datos_de(usuario)})

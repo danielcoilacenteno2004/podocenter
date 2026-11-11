@@ -46,3 +46,25 @@ def test_la_base_rechaza_escribir_una_fila_con_el_centro_de_otro_inquilino(centr
 def test_la_tabla_de_centros_no_esta_sujeta_al_aislamiento(centro, otro_centro):
     """El administrador de plataforma necesita verlos todos (RF17)."""
     assert Centro.objects.count() == 2
+
+
+@pytest.mark.django_db
+def test_una_peticion_sin_centro_no_hereda_el_centro_de_la_anterior(centro, paciente):
+    # Garantiza el aislamiento con conexiones reutilizadas (CONN_MAX_AGE en
+    # producción): el centro vive en la conexión, y una petición anónima o del
+    # administrador de plataforma (por ejemplo, en /admin/) veía los pacientes
+    # del último centro que había usado esa conexión.
+    from django.db import connection
+    from rest_framework.test import APIClient
+
+    from apps.pacientes.models import Paciente
+
+    assert Paciente.objects.count() == 1  # la conexión trae fijado el centro
+
+    APIClient().get("/api/v1/estado/")  # una petición sin centro
+
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT current_setting('app.centro_id', true)")
+        assert cursor.fetchone()[0] == ""
+    assert Paciente.objects.count() == 0
+
