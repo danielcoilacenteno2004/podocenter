@@ -11,7 +11,7 @@ from apps.catalogo.models import Servicio
 from apps.citas.models import Cita
 from apps.citas.servicios import cancelar_cita, programar_cita
 from apps.core.models import RegistroAuditoria
-from apps.core.soporte_pruebas import activar_centro
+from apps.core.soporte_pruebas import activar_centro, hacer_que_la_cita_ya_empezo
 from apps.pacientes.models import Paciente
 from apps.sedes.models import Sede
 from apps.usuarios.models import Usuario
@@ -24,10 +24,11 @@ NOTAS = "Hiperqueratosis plantar; se deslamina"
 
 @pytest.fixture
 def cita(centro, podologa, sede, servicio, paciente, proximo_lunes_a_las_nueve):
-    return programar_cita(
+    """Una cita programada que ya empezó: la única que admite atención."""
+    return hacer_que_la_cita_ya_empezo(programar_cita(
         centro=centro, usuario=podologa, sede=sede, paciente=paciente,
         profesional=podologa, servicio=servicio, inicio=proximo_lunes_a_las_nueve,
-    )
+    ))
 
 
 @pytest.fixture

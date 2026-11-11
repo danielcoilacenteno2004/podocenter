@@ -59,10 +59,12 @@ async function citaCreada (cita) {
   else await cargar()
 }
 
-// Se ofrece registrar solo donde el servidor lo aceptaría: cita programada y
-// sin atención. Así el botón no aparece dos veces para la misma cita.
+// Se ofrece registrar solo donde el servidor lo aceptaría: cita programada,
+// sin atención y cuya hora ya llegó (cita-aun-no-llega). Así el botón no
+// aparece dos veces ni antes de tiempo.
 function atendible (cita) {
-  return cita.estado === 'PROGRAMADA' && !cita.tiene_atencion
+  return cita.estado === 'PROGRAMADA' && !cita.tiene_atencion &&
+    new Date(cita.inicio) <= new Date()
 }
 
 const citas = ref([])

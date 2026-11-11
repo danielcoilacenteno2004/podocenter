@@ -14,7 +14,7 @@ from apps.atenciones.servicios import registrar_atencion
 from apps.catalogo.models import Servicio
 from apps.citas.models import Cita
 from apps.core.models import Centro
-from apps.core.soporte_pruebas import activar_centro
+from apps.core.soporte_pruebas import activar_centro, hacer_que_la_cita_ya_empezo
 from apps.pacientes.models import Paciente
 from apps.sedes.models import Sede
 from apps.usuarios.models import Usuario
@@ -110,7 +110,9 @@ def test_rehace_la_demostracion_aunque_ya_tenga_atenciones_registradas(demo):
     # atenciones y después se recarga la demostración. La atención protege su
     # cita (PROTECT), así que si la limpieza no la borra primero, el comando
     # se cae y la sustentación se queda con los datos del ensayo.
-    cita = Cita.objects.filter(estado=Cita.Estado.PROGRAMADA).order_by("inicio").first()
+    cita = hacer_que_la_cita_ya_empezo(
+        Cita.objects.filter(estado=Cita.Estado.PROGRAMADA).order_by("inicio").first()
+    )
     registrar_atencion(centro=demo, usuario=cita.profesional, sede_id=cita.sede_id,
                        cita_id=cita.pk, observaciones_clinicas="Ensayo de la exposición")
 

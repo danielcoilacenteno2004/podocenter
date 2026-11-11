@@ -1,5 +1,6 @@
 """Reglas de aplicación de la atención (CU10)."""
 from django.db import transaction
+from django.utils import timezone
 
 from apps.citas.models import Cita
 from apps.core.auditoria import registrar
@@ -35,6 +36,12 @@ def _cita_atendible(*, centro, usuario, sede_id, cita_id) -> Cita:
             "cita-no-atendible",
             f"La cita está en estado {cita.get_estado_display()}; "
             "solo se registra la atención de una cita programada.",
+        )
+    if cita.inicio > timezone.now():
+        raise ReglaDeNegocio(
+            "cita-aun-no-llega",
+            f"La cita es el {timezone.localtime(cita.inicio):%d/%m a las %H:%M}; "
+            "la atención se registra cuando llega la hora.",
         )
     return cita
 

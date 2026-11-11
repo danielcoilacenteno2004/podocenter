@@ -26,8 +26,9 @@ const errorAlGuardar = ref(null)
 const campoNotas = ref(null)
 
 // La interfaz no ofrece la acción cuando sabe que el servidor la rechazará.
+const aunNoLlega = computed(() => cita.value && new Date(cita.value.inicio) > new Date())
 const atendible = computed(() =>
-  cita.value?.estado === 'PROGRAMADA' && !cita.value?.tiene_atencion)
+  cita.value?.estado === 'PROGRAMADA' && !cita.value?.tiene_atencion && !aunNoLlega.value)
 
 function hora (valor) {
   return new Date(valor).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })
@@ -130,7 +131,9 @@ onMounted(cargar)
       <p v-if="!atendible" role="alert">
         {{ cita.tiene_atencion
           ? 'Esta cita ya tiene su atención registrada.'
-          : 'Solo se registra la atención de una cita programada.' }}
+          : cita.estado !== 'PROGRAMADA'
+            ? 'Solo se registra la atención de una cita programada.'
+            : 'La cita todavía no llega: la atención se registra cuando llega la hora.' }}
       </p>
 
       <form v-else class="tarjeta" aria-label="Atención" @submit.prevent="confirmar">

@@ -9,7 +9,7 @@ from apps.citas.models import Cita
 from apps.citas.servicios import cancelar_cita, programar_cita
 from apps.core.errores import ReglaDeNegocio
 from apps.core.models import RegistroAuditoria
-from apps.core.soporte_pruebas import activar_centro
+from apps.core.soporte_pruebas import activar_centro, hacer_que_la_cita_ya_empezo
 from apps.sedes.models import Sede
 from apps.usuarios.models import Usuario
 from apps.usuarios.roles import Rol
@@ -21,10 +21,11 @@ NOTAS = "Onicocriptosis en hallux derecho; se retira la espícula"
 
 @pytest.fixture
 def cita(centro, podologa, sede, servicio, paciente, proximo_lunes_a_las_nueve):
-    return programar_cita(
+    """Una cita programada que ya empezó: la única que admite atención."""
+    return hacer_que_la_cita_ya_empezo(programar_cita(
         centro=centro, usuario=podologa, sede=sede, paciente=paciente,
         profesional=podologa, servicio=servicio, inicio=proximo_lunes_a_las_nueve,
-    )
+    ))
 
 
 def _registrar(centro, usuario, cita, sede_id=None, notas=""):
@@ -48,6 +49,28 @@ def test_rechaza_registrar_la_atencion_de_una_cita_cancelada(centro, podologa, c
         _registrar(centro, podologa, cita)
 
     assert error.value.codigo == "cita-no-atendible"
+    assert Atencion.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_rechaza_registrar_la_atencion_de_una_cita_que_todavia_no_llega(
+    centro, podologa, sede, servicio, paciente, proximo_lunes_a_las_nueve
+):
+    # Garantiza que no se deja constancia de un acto clínico antes de que
+    # ocurra: una atención registrada sobre una cita futura sería un ingreso
+    # y una ficha de algo que todavía no pasó, y la cita saldría de la agenda
+    # como atendida antes de tiempo.
+    futura = programar_cita(
+        centro=centro, usuario=podologa, sede=sede, paciente=paciente,
+        profesional=podologa, servicio=servicio, inicio=proximo_lunes_a_las_nueve,
+    )
+
+    with pytest.raises(ReglaDeNegocio) as error:
+        _registrar(centro, podologa, futura)
+
+    assert error.value.codigo == "cita-aun-no-llega"
+    futura.refresh_from_db()
+    assert futura.estado == Cita.Estado.PROGRAMADA
     assert Atencion.objects.count() == 0
 
 
