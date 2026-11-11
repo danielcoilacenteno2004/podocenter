@@ -52,10 +52,10 @@ function cambiarSede () {
         <span v-else-if="sesion.sedeActiva" class="identidad">
           <span>{{ sesion.sedeActiva.nombre }}</span>
         </span>
-        <span class="identidad">
+        <router-link class="identidad" :to="{ name: 'perfil' }" title="Mi perfil y seguridad">
           <strong>{{ sesion.usuario?.nombre_completo }}</strong>
           <span>{{ sesion.usuario?.rol_descripcion }}</span>
-        </span>
+        </router-link>
         <button class="secundario" type="button" @click="salir">Salir</button>
       </div>
     </header>

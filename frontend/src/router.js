@@ -17,6 +17,7 @@ const rutas = [
   { path: '/sedes', name: 'sedes', component: () => import('./views/SedesView.vue'), meta: { roles: ['ADMIN_CENTRO'] } },
   { path: '/servicios', name: 'servicios', component: () => import('./views/ServiciosView.vue'), meta: { roles: ['ADMIN_CENTRO'] } },
   // P21: la misma plantilla para la falta de permiso y para la ruta inexistente.
+  { path: '/perfil', name: 'perfil', component: () => import('./views/PerfilView.vue') },
   { path: '/sin-permiso', name: 'sin-permiso', component: () => import('./views/ErrorView.vue'), props: { codigo: 403 } },
   { path: '/:rutaNoEncontrada(.*)*', name: 'error', component: () => import('./views/ErrorView.vue'), props: { codigo: 404 }, meta: { publica: true } }
 ]

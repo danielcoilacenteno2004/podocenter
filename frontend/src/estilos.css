@@ -197,6 +197,15 @@ label.casilla .ayuda { display: block; }
 .secundario-celda { display: block; color: var(--tinta-suave); font-size: .85rem; }
 .confirmacion span { font-weight: 600; color: var(--alerta); font-size: .9rem; }
 table.administracion td.accion { width: 1%; }
+/* --- mi perfil (P20) --------------------------------------------------- */
+a.identidad { color: var(--tinta); text-decoration: none; border-radius: 8px; padding: .2rem .4rem; }
+a.identidad:hover { background: var(--fondo); }
+.perfil-datos, form.tarjeta + .perfil-segundo-factor, .perfil-datos + form.tarjeta { margin-bottom: 1rem; }
+.perfil-datos h2 { margin: 0 0 .2rem; }
+.perfil-datos p { margin: .15rem 0; color: var(--tinta-suave); }
+.perfil-segundo-factor p { margin: 0; color: var(--tinta-suave); }
+.perfil-segundo-factor .etiqueta { margin-right: .4rem; }
+
 /* --- sin permiso o error (P21) ----------------------------------------- */
 .error-tarjeta { max-width: 520px; text-align: center; padding: 2rem 1.5rem; }
 .error-tarjeta p { margin: .4rem 0; }
