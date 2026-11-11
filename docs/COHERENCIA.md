@@ -20,7 +20,7 @@ tras añadir Atenciones):
 
 | Apartado | Afirma | Estado | Cómo comprobarlo |
 |---|---|---|---|
-| 2.6.5 | 32 pruebas, 90 % de cobertura | **Fechada** | En el commit del corte (`2d4a9b8`, 28/10) hay 32 pruebas: `git grep -hE "^def test_\|^    def test_" 2d4a9b8 -- 'backend/**/test_*.py' \| wc -l`. Hoy: 146 pruebas y 93.6 %. |
+| 2.6.5 | 32 pruebas, 90 % de cobertura | **Fechada** | En el commit del corte (`2d4a9b8`, 28/10) hay 32 pruebas: `git grep -hE "^def test_\|^    def test_" 2d4a9b8 -- 'backend/**/test_*.py' \| wc -l`. Hoy: 161 pruebas y 94.4 %. |
 | 2.6.3 | 29 commits entre el 15 y el 28 de octubre, 15 y 14 por integrante | **No coincide** | `git log --since=2026-10-15 --until=2026-10-29 --format=%an \| sort \| uniq -c` da **26 commits, 13 y 13**. La diferencia es anterior a Atenciones. |
 | 2.6.3 | Nada entra a la rama de integración con el pipeline en rojo | **No coincide** | Desde el 28/10, `npm run lint` del trabajo `frontend` no podía pasar: no había `eslint.config.js` y ESLint 9 rechaza `--ext`. Se corrigió en `453ef9c`. Las ejecuciones en GitHub no se han revisado. |
 | 2.2 | Python 3.12, Django 5.2 LTS, Django REST Framework | **Cierta** | `grep -E '^(Django\|djangorestframework)' requirements.txt` → 5.2.19 y 3.18.2; `grep FROM infra/Dockerfile` → `python:3.12-slim` |
@@ -41,7 +41,7 @@ tras añadir Atenciones):
 
 | Apartado | Afirma | Estado | Cómo comprobarlo |
 |---|---|---|---|
-| Tabla 1 | 29 pantallas diseñadas | **Cierta** | El documento dice «Se construye», no «construida». Construidas **19**: P01, P03, P04, P05, P08, P09, P10, P11, P15, P17, P18, P20 y P21 en `frontend/src/views/` (los formularios P26, P27 y P28 van como ventana dentro de su listado), y P06, P07 y P25 como ventanas en `frontend/src/components/`. P09 solo cubre el alta; P20 cubre el perfil y el cambio de contraseña, sin el segundo factor; P21 cubre 403 y 404. |
+| Tabla 1 | 29 pantallas diseñadas | **Cierta** | El documento dice «Se construye», no «construida». Construidas **21**: P01, P03, P04, P05, P08, P09, P10, P11, P15, P17, P18, P19, P20 y P21 en `frontend/src/views/` (los formularios P26, P27, P28 y P29 van como ventana dentro de su listado), y P06, P07 y P25 como ventanas en `frontend/src/components/`. P09 solo cubre el alta; P20 cubre el perfil y el cambio de contraseña, sin el segundo factor; P21 cubre 403 y 404. |
 | Tabla 1 | P04 «Se construye (3 segmentos)» | **Cierta** | `backend/apps/citas/panel.py` devuelve citas, ingresos y ocupación |
 | Tabla 1 | P05 «Se construye (con filtros)» | **Cierta** | `grep -n "estado\|profesional\|servicio" backend/apps/citas/servicios.py` |
 | Tabla 1 | P11 «Se construye» | **Cierta** | `frontend/src/views/RegistrarAtencionView.vue`, ruta `/citas/:citaId/atencion` |
@@ -49,6 +49,8 @@ tras añadir Atenciones):
 | 4.5, Tabla 11 | El recorrido del RNF02 usa cuatro interacciones | **Parcial** | 3 medidas con el alcance construido; el recorrido diseñado prevé 4 al incorporar monto e insumos (ver la fila del informe). |
 | Tabla 42 | CC-18 verificado con **ocho** pruebas | **Cierta** | En `backend/apps/citas/tests/test_agenda_filtros.py` hay 18 pruebas: 8 de filtros (líneas 59–141) y 10 del panel |
 | Tabla 42 | CC-19 verificado con **diez** pruebas | **Cierta** | Las 10 del panel en el mismo archivo (líneas 152–252) |
+| Tabla 31 | Un centro suspendido no puede iniciar sesión | **Cierta** | `test_un_centro_suspendido_no_puede_iniciar_sesion` en `backend/apps/core/tests/test_api_centros.py`; la regla está en `IniciarSesion` (`backend/apps/usuarios/sesion.py`) |
+| Tabla 32 | El alta del centro crea su administrador inicial y le envía un enlace para definir la contraseña (P24) | **Parcial** | El administrador se crea en la misma transacción (`crear_centro` en `backend/apps/core/servicios.py`). Sin P24, recibe una contraseña temporal que solo se muestra en la respuesta del alta |
 | Tabla 13 | Tipos de movimiento: Entrada, Ajuste, Merma; las salidas las genera el sistema | **Pendiente** | Módulo de inventario no construido |
 
 La Práctica 7 registra la observación de la podóloga sobre los antecedentes

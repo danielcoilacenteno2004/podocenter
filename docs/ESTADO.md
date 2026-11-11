@@ -66,7 +66,7 @@ medición válida para el RNF02 es la que se haga con la podóloga.
 
 ## 2. Lo que está sólido
 
-- **146 pruebas** en verde, **93.6 %** de cobertura de sentencias, sobre
+- **161 pruebas** en verde, **94.4 %** de cobertura de sentencias, sobre
   PostgreSQL real y no sobre una base en memoria. La cifra varía unas
   décimas entre ejecuciones.
 - **Cero vulnerabilidades** conocidas en las dependencias tras subir a Django
@@ -78,13 +78,13 @@ medición válida para el RNF02 es la que se haga con la podóloga.
   tres en la API de usuarios y tres en atenciones. Comprueban que un centro
   no ve, no abre, no modifica y no registra atenciones sobre datos de otro. Es
   lo que sostiene el modelo de arriendo ante el jurado.
-- **84 commits** con «un commit, un cambio», contando el que actualiza este
-  documento: 44 de Sergio Daniel Coila Centeno y 40 de Andre Nicolas Huaroc
+- **89 commits** con «un commit, un cambio», contando el que actualiza este
+  documento: 46 de Sergio Daniel Coila Centeno y 43 de Andre Nicolas Huaroc
   Condori. La identidad de git está fijada en la configuración del
   repositorio para que no vuelva a entrar un autor con otro nombre.
 - Entorno de demostración reproducible con un comando y probado con nueve
   pruebas, incluida una que verifica que las credenciales publicadas funcionan.
-- Frontend: **19 pantallas de las 29 diseñadas en la Práctica N.° 7 (P01, P03, P04, P05, P06, P07, P08, P09, P10, P11, P15, P17, P18, P20, P21, P25, P26, P27, P28)**. El frontend no tiene pruebas automáticas; cada pantalla se comprobó con un recorrido en Playwright.
+- Frontend: **21 pantallas de las 29 diseñadas en la Práctica N.° 7 (P01, P03, P04, P05, P06, P07, P08, P09, P10, P11, P15, P17, P18, P19, P20, P21, P25, P26, P27, P28, P29)**. El frontend no tiene pruebas automáticas; cada pantalla se comprobó con un recorrido en Playwright.
 
 ### Pipeline: corregido, pendiente de ver en verde
 
