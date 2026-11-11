@@ -197,6 +197,17 @@ label.casilla .ayuda { display: block; }
 .secundario-celda { display: block; color: var(--tinta-suave); font-size: .85rem; }
 .confirmacion span { font-weight: 600; color: var(--alerta); font-size: .9rem; }
 table.administracion td.accion { width: 1%; }
+/* --- registrar paciente (P09) ------------------------------------------ */
+.fila-tres { grid-template-columns: 1fr 1fr 1fr; }
+.fila-documento { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); }
+a.boton-grande { padding: .55rem 1.1rem; font-size: 1rem; }
+a.boton-secundario {
+  display: inline-block; padding: .55rem 1.1rem; border-radius: 8px; font-weight: 600;
+  background: transparent; color: var(--marca-oscura); border: 1px solid var(--marca); text-decoration: none;
+}
+a.boton-secundario:hover { background: var(--marca-tenue); }
+.consentimiento-alta { background: var(--fondo); border-style: dashed; }
+.vacio a { display: block; margin-top: .5rem; }
 dl.horario { margin: .2rem 0 .4rem; display: grid; gap: .15rem; }
 dl.horario div { display: flex; justify-content: space-between; max-width: 18rem; font-size: .92rem; }
 dl.horario dt { color: var(--tinta-suave); }

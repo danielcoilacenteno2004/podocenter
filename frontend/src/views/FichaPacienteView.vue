@@ -12,6 +12,7 @@
 // evidencia» del consentimiento, el filtro por año, las columnas Monto e
 // Insumos (no existen en la atención) y «Ver detalle» (P25).
 import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { api } from '../services/api'
 
 const props = defineProps({ pacienteId: { type: String, required: true } })
@@ -23,6 +24,8 @@ const total = ref(0)
 const cargando = ref(true)
 const cargandoMas = ref(false)
 const error = ref(null)
+// Al venir de P09 se confirma el alta.
+const aviso = useRoute().query.aviso === 'paciente-registrado' ? 'Paciente registrado con su consentimiento.' : null
 
 function edad (fecha) {
   if (!fecha) return null
@@ -111,6 +114,9 @@ onMounted(cargar)
         </p>
       </div>
 
+      <p v-if="aviso" class="aviso-ok" role="status">
+        {{ aviso }}
+      </p>
       <div class="bloques-ficha">
         <section class="antecedentes" :class="{ vacios: !paciente.antecedentes }" aria-labelledby="titulo-antecedentes">
           <h2 id="titulo-antecedentes">

@@ -217,7 +217,7 @@ watch(() => props.abierto, async (abierto) => {
               Buscando…
             </template>
             <template v-else-if="buscado && !sugerencias.length">
-              Ningún paciente coincide. El registro de pacientes nuevos (P09) aún no está disponible.
+              Ningún paciente coincide. Regístrelo primero en Pacientes → «+ Nuevo paciente».
             </template>
           </p>
           <ul v-if="sugerencias.length" class="sugerencias" aria-label="Pacientes encontrados">

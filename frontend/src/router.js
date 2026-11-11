@@ -10,6 +10,7 @@ const rutas = [
   { path: '/agenda', name: 'agenda', component: () => import('./views/AgendaView.vue') },
   { path: '/citas/:citaId/atencion', name: 'registrar-atencion', component: () => import('./views/RegistrarAtencionView.vue'), props: true },
   { path: '/pacientes', name: 'pacientes', component: () => import('./views/PacientesView.vue') },
+  { path: '/pacientes/nuevo', name: 'nuevo-paciente', component: () => import('./views/NuevoPacienteView.vue') },
   { path: '/pacientes/:pacienteId', name: 'ficha-paciente', component: () => import('./views/FichaPacienteView.vue'), props: true },
   // Administración del centro: solo la administradora (Práctica N.° 7, Tabla 1).
   { path: '/usuarios', name: 'usuarios', component: () => import('./views/UsuariosView.vue'), meta: { roles: ['ADMIN_CENTRO'] } },

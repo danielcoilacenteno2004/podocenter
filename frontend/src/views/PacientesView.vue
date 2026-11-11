@@ -41,9 +41,14 @@ onMounted(cargar)
 
 <template>
   <main>
-    <div class="encabezado">
-      <h1>Pacientes</h1>
-      <p>Busque por nombre, apellido o número de documento.</p>
+    <div class="encabezado encabezado-con-accion">
+      <div>
+        <h1>Pacientes</h1>
+        <p>Busque por nombre, apellido o número de documento.</p>
+      </div>
+      <router-link class="boton boton-grande" :to="{ name: 'nuevo-paciente' }">
+        + Nuevo paciente
+      </router-link>
     </div>
 
     <form class="filtros" @submit.prevent="cargar">
@@ -62,6 +67,7 @@ onMounted(cargar)
       <p v-if="cargando" role="status">Buscando pacientes…</p>
       <p v-else-if="!pacientes.length" class="vacio">
         {{ buscar ? 'Ningún paciente coincide con esa búsqueda.' : 'Todavía no hay pacientes registrados.' }}
+        <router-link :to="{ name: 'nuevo-paciente' }">Registrar un paciente nuevo</router-link>
       </p>
       <table v-else>
         <caption>{{ pacientes.length }} paciente(s)</caption>
