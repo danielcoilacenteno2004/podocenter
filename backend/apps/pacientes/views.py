@@ -1,6 +1,6 @@
 """API del módulo Pacientes (RF04, RF05)."""
 from django.db.models import Q
-from rest_framework import viewsets
+from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -13,8 +13,16 @@ from .serializers import PacienteSerializer
 from .servicios import ficha_con_auditoria, registrar_paciente, revocar_consentimiento
 
 
-class PacienteViewSet(ContextoDeCentro, viewsets.ModelViewSet):
-    """CU06 y CU07 — búsqueda, alta y ficha del paciente."""
+class PacienteViewSet(ContextoDeCentro, mixins.CreateModelMixin, mixins.ListModelMixin,
+                      mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """CU06 y CU07 — búsqueda, alta y ficha del paciente.
+
+    No hay PUT, PATCH ni DELETE. Escribían en el modelo sin pasar por
+    `servicios.py`: cambiaban los antecedentes (dato clínico cifrado) sin
+    dejar rastro en la auditoría, y borrar un paciente con citas respondía
+    500. La edición vuelve cuando exista un servicio que la audite; la baja
+    de un paciente es lógica (`esta_activo`), no un borrado.
+    """
 
     serializer_class = PacienteSerializer
     permission_classes = [TieneRol]
