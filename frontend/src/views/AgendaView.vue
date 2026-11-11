@@ -103,23 +103,34 @@ async function pedir (params) {
   return data.citas
 }
 
+// Cambiar la fecha o un filtro dispara una carga nueva sin esperar a que
+// termine la anterior. Cada carga lleva su turno y solo pinta la última
+// pedida: si no, una respuesta lenta del día anterior podía llegar después y
+// dejar en la tabla las citas de otra fecha que la que muestra el selector.
+let turno = 0
+
 async function cargar () {
+  const mio = ++turno
   cargando.value = true
   error.value = null
   try {
-    jornada.value = await pedir({})
-    citas.value = hayFiltros.value
+    const delDia = await pedir({})
+    const filtradas = hayFiltros.value
       ? await pedir({
           estado: filtros.value.estado || undefined,
           profesional: filtros.value.profesional || undefined,
           servicio: filtros.value.servicio || undefined
         })
-      : jornada.value
+      : delDia
+    if (mio !== turno) return
+    jornada.value = delDia
+    citas.value = filtradas
   } catch (problema) {
+    if (mio !== turno) return
     error.value = problema.mensaje
     citas.value = []
   } finally {
-    cargando.value = false
+    if (mio === turno) cargando.value = false
   }
 }
 
