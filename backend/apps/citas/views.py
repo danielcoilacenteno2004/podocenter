@@ -1,7 +1,7 @@
 """API de la agenda (RF06, RF08)."""
 from datetime import date
 
-from rest_framework import viewsets
+from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -23,7 +23,16 @@ def _entero(valor):
         return None
 
 
-class CitaViewSet(ContextoDeCentro, viewsets.ModelViewSet):
+class CitaViewSet(ContextoDeCentro, mixins.CreateModelMixin, mixins.ListModelMixin,
+                  mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """Agenda: crear, consultar y cancelar.
+
+    No hay PUT, PATCH ni DELETE. Escribían en el modelo sin pasar por
+    `servicios.py`, de modo que por ahí se podía solapar una cita o sacarla
+    del horario de la sede. Una cita no se borra, se cancela con motivo
+    (`cancelar`); y reprogramarla quedó fuera por el recorte CC-12.
+    """
+
     serializer_class = CitaSerializer
     permission_classes = [TieneRol]
     roles_permitidos = {Rol.ADMIN_CENTRO, Rol.PODOLOGA}
