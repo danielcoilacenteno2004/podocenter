@@ -8,6 +8,7 @@ const rutas = [
   { path: '/elegir-sede', name: 'elegir-sede', component: () => import('./views/ElegirSedeView.vue') },
   { path: '/panel', name: 'panel', component: () => import('./views/PanelDelDiaView.vue') },
   { path: '/agenda', name: 'agenda', component: () => import('./views/AgendaView.vue') },
+  { path: '/citas/:citaId/atencion', name: 'registrar-atencion', component: () => import('./views/RegistrarAtencionView.vue'), props: true },
   { path: '/pacientes', name: 'pacientes', component: () => import('./views/PacientesView.vue') },
   { path: '/:rutaNoEncontrada(.*)*', name: 'error', component: () => import('./views/ErrorView.vue'), meta: { publica: true } }
 ]

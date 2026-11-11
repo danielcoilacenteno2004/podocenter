@@ -88,13 +88,12 @@ documento deja de ser cierto.
 
 Construido: Cuentas y centros, Usuarios y roles, Sedes con horario, Catálogo de
 servicios, Pacientes con consentimiento versionado y antecedentes cifrados,
-Citas con agenda filtrable y panel del día segmentado, Atenciones en el
-backend (modelo, API y RLS; sin monto ni insumos).
+Citas con agenda filtrable y panel del día segmentado, Atenciones con su
+pantalla P11 (sin monto ni insumos).
 
-No construido: **pantalla P11 de Atenciones** (caso de uso CU10 — comprometido
-para la primera entrega), Inventario, Registro diario, Notificaciones
+No construido: Inventario, Registro diario, Notificaciones
 (RF07, pendiente de aprobación del proveedor de mensajería).
 
-Frontend: 6 pantallas de las 29 diseñadas en la Práctica N.° 7.
+Frontend: 7 pantallas de las 29 diseñadas en la Práctica N.° 7.
 
 El detalle, con lo que falta y lo que está en riesgo, en `docs/ESTADO.md`.

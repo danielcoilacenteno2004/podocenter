@@ -21,6 +21,16 @@ const filtros = ref({
   servicio: ruta.query.servicio ? Number(ruta.query.servicio) : ''
 })
 
+// Al volver de P11 la agenda confirma el registro; la fila ya aparece atendida.
+const aviso = computed(() =>
+  ruta.query.aviso === 'atencion-registrada' ? 'Atención registrada.' : null)
+
+// Se ofrece registrar solo donde el servidor lo aceptaría: cita programada y
+// sin atención. Así el botón no aparece dos veces para la misma cita.
+function atendible (cita) {
+  return cita.estado === 'PROGRAMADA' && !cita.tiene_atencion
+}
+
 const citas = ref([])
 const jornada = ref([])      // el día completo, para construir las opciones
 const cargando = ref(false)
@@ -133,6 +143,7 @@ onMounted(cargar)
     </form>
 
     <p v-if="error" role="alert">{{ error }}</p>
+    <p v-if="aviso" class="aviso-ok" role="status">{{ aviso }}</p>
 
     <section class="tarjeta">
       <p v-if="cargando" role="status">Cargando la agenda…</p>
@@ -153,6 +164,7 @@ onMounted(cargar)
             <th scope="col">Servicio</th>
             <th scope="col">Profesional</th>
             <th scope="col">Estado</th>
+            <th scope="col"><span class="solo-lectores">Acción</span></th>
           </tr>
         </thead>
         <tbody>
@@ -164,6 +176,14 @@ onMounted(cargar)
             <td><span class="etiqueta" :class="cita.estado">
               {{ (ESTADOS.find(([v]) => v === cita.estado) ?? [])[1] ?? cita.estado }}
             </span></td>
+            <td class="accion">
+              <router-link
+                v-if="atendible(cita)"
+                class="boton"
+                :to="{ name: 'registrar-atencion', params: { citaId: cita.id } }"
+                :aria-label="`Registrar atención de ${cita.paciente_nombre}`"
+              >Registrar atención</router-link>
+            </td>
           </tr>
         </tbody>
       </table>

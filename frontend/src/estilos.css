@@ -150,6 +150,55 @@ td.numero { font-variant-numeric: tabular-nums; }
 .sedes strong { display: block; }
 .sedes span { font-size: .85rem; color: var(--tinta-suave); }
 
+/* --- registrar atención (P11) ------------------------------------------ */
+a.boton {
+  display: inline-block; padding: .4rem .85rem; border-radius: 8px;
+  background: var(--marca); color: #fff; font-weight: 600; font-size: .88rem;
+  text-decoration: none; white-space: nowrap;
+}
+a.boton:hover { background: var(--marca-oscura); }
+td.accion { text-align: right; }
+.solo-lectores {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+.aviso-ok {
+  background: var(--ok-tenue); color: var(--ok); border: 1px solid #bfe0cb;
+  padding: .65rem .85rem; border-radius: 8px; margin: 0 0 1rem;
+}
+
+.cabecera-atencion {
+  display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  margin-bottom: 1rem;
+}
+.cabecera-datos h2 { margin: 0; font-size: 1.25rem; }
+.cabecera-datos > p { margin: .1rem 0 .75rem; color: var(--tinta-suave); }
+.datos-cita { margin: 0; display: grid; gap: .35rem; }
+.datos-cita div { display: flex; gap: .5rem; }
+.datos-cita dt { min-width: 6.5rem; color: var(--tinta-suave); font-size: .88rem; }
+.datos-cita dd { margin: 0; font-weight: 600; }
+
+/* Los antecedentes se destacan: es lo primero que hay que leer antes de atender. */
+.antecedentes {
+  background: var(--aviso-tenue); border: 1px solid #f0d9a8; border-left: 4px solid var(--aviso);
+  border-radius: 8px; padding: .8rem 1rem;
+}
+.antecedentes h3 {
+  margin: 0 0 .3rem; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--aviso);
+}
+.antecedentes p { margin: 0; font-weight: 600; }
+.antecedentes.vacios { background: var(--fondo); border-color: var(--borde); }
+.antecedentes.vacios h3 { color: var(--tinta-suave); }
+.antecedentes.vacios p { font-weight: 400; color: var(--tinta-suave); }
+
+textarea {
+  width: 100%; padding: .55rem .7rem; font: inherit; color: inherit; resize: vertical;
+  background: var(--superficie); border: 1px solid var(--borde); border-radius: 8px;
+}
+textarea:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
+.ayuda { margin: .3rem 0 0; font-size: .82rem; color: var(--tinta-suave); }
+
 .filtros { display: flex; gap: .75rem; align-items: flex-end; flex-wrap: wrap; margin-bottom: 1rem; }
 .filtros .campo { margin: 0; min-width: 200px; }
 
@@ -158,4 +207,5 @@ td.numero { font-variant-numeric: tabular-nums; }
   .barra { padding: .6rem .9rem; }
   .barra .derecha { width: 100%; justify-content: space-between; margin-left: 0; }
   table { font-size: .88rem; }
+  .cabecera-atencion { grid-template-columns: 1fr; }
 }
