@@ -21,6 +21,8 @@ from apps.core.contexto import fijar_contexto, limpiar_contexto
 from apps.core.contexto_http import fijar_centro_en_la_sesion
 from apps.core.errores import ReglaDeNegocio
 from apps.core.models import Centro
+from apps.inventario.models import MovimientoInventario, Producto, Stock
+from apps.inventario.servicios import registrar_movimiento
 from apps.pacientes.models import Consentimiento, Paciente
 from apps.sedes.models import HorarioSede, Sede
 from apps.usuarios.models import AsignacionSede, Usuario
@@ -106,6 +108,10 @@ class Command(BaseCommand):
             # El RLS filtra por `app.centro_id`; sin fijarlo, ni se ve ni se borra.
             fijar_centro_en_la_sesion(existente.pk)
             fijar_contexto(centro_id=existente.pk)
+            # Los movimientos y el stock protegen producto, sede y usuario.
+            MovimientoInventario.objects.filter(centro=existente).delete()
+            Stock.objects.filter(centro=existente).delete()
+            Producto.objects.filter(centro=existente).delete()
             # La atención protege su cita (PROTECT): va antes que las citas.
             Atencion.objects.filter(centro=existente).delete()
             Cita.objects.filter(centro=existente).delete()
@@ -148,7 +154,33 @@ class Command(BaseCommand):
         # Después de variar los estados, para que no se marquen como atendidas.
         creadas += self._citas_en_curso(centro, sedes, podologas, servicios, pacientes,
                                         admin_centro)
+        self._inventario(centro, sedes, admin_centro)
         self._resumen(centro, sedes, pacientes, creadas)
+
+    def _inventario(self, centro, sedes, usuario):
+        """Productos del wireframe de P12 con existencias en las dos sedes.
+
+        Entran como movimientos de entrada, igual que en la realidad: el stock
+        no se escribe nunca directamente. Algunos quedan bajo el mínimo para
+        que el filtro de P12 tenga algo que mostrar.
+        """
+        # (código, nombre, unidad, mínimo, existencia en cada sede)
+        guion = [
+            ("INS-004", "Crema urea 10 %", "unidad", 4, (1, 8)),
+            ("INS-011", "Apósito hidrocoloide", "caja", 5, (3, 6)),
+            ("INS-001", "Fresa de pulido desechable", "unidad", 10, (12, 15)),
+            ("INS-007", "Solución antiséptica", "unidad", 6, (9, 2)),
+            ("INS-015", "Gasa estéril", "paquete", 8, (20, 11)),
+            ("INS-020", "Guantes de nitrilo", "caja", 3, (4, 5)),
+        ]
+        for codigo, nombre, unidad, minimo, existencias in guion:
+            producto = Producto.objects.create(centro=centro, codigo=codigo, nombre=nombre,
+                                               unidad=unidad)
+            for sede, cantidad in zip(sedes, existencias, strict=True):
+                registrar_movimiento(centro=centro, usuario=usuario, sede_id=sede.pk,
+                                     producto_id=producto.pk, tipo="ENTRADA", cantidad=cantidad,
+                                     motivo="Inventario inicial de la demostración")
+            Stock.objects.filter(producto=producto).update(minimo=minimo)
 
     def _citas_en_curso(self, centro, sedes, podologas, servicios, pacientes, usuario):
         """Siembra una cita por podóloga que empezó hace 10 minutos.
@@ -377,6 +409,7 @@ class Command(BaseCommand):
         self.stdout.write(f"  Servicios      : {Servicio.objects.filter(centro=centro).count()}")
         self.stdout.write(f"  Pacientes      : {len(pacientes)}")
         self.stdout.write(f"  Citas en agenda: {citas}")
+        self.stdout.write(f"  Productos      : {Producto.objects.filter(centro=centro).count()}")
         self.stdout.write("")
         self.stdout.write("Cuentas de acceso (todas con la contraseña " + CLAVE + "):")
         for usuario in Usuario.objects.filter(

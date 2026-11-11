@@ -146,6 +146,18 @@ def test_deja_citas_en_curso_que_ya_se_pueden_atender(demo):
 
 
 @pytest.mark.django_db
+def test_siembra_inventario_en_las_dos_sedes_con_alguno_bajo_el_minimo(demo):
+    # Garantiza que P12 y P14 tienen algo que enseñar en la sustentación: el
+    # mismo producto con stock en las dos sedes, y el filtro «bajo el mínimo»
+    # con filas. El stock entra por movimientos, como en la realidad.
+    from apps.inventario.models import MovimientoInventario, Stock
+
+    assert Stock.objects.values("sede").distinct().count() == 2
+    assert any(fila.bajo_minimo for fila in Stock.objects.all())
+    assert MovimientoInventario.objects.filter(tipo="ENTRADA").count() == Stock.objects.count()
+
+
+@pytest.mark.django_db
 def test_con_conservar_no_toca_la_demostracion_existente(demo):
     # Protege los datos ya cargados cuando alguien repite el comando por
     # costumbre y no quiere perder lo que estuvo mostrando.
