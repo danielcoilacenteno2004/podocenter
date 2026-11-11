@@ -41,6 +41,7 @@ function cambiarSede () {
         <template v-if="sesion.esAdministradoraDelCentro">
           <router-link :to="{ name: 'usuarios' }">Usuarios</router-link>
           <router-link :to="{ name: 'sedes' }">Sedes</router-link>
+          <router-link :to="{ name: 'servicios' }">Servicios</router-link>
         </template>
       </nav>
 

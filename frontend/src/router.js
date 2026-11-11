@@ -14,6 +14,7 @@ const rutas = [
   // Administración del centro: solo la administradora (Práctica N.° 7, Tabla 1).
   { path: '/usuarios', name: 'usuarios', component: () => import('./views/UsuariosView.vue'), meta: { roles: ['ADMIN_CENTRO'] } },
   { path: '/sedes', name: 'sedes', component: () => import('./views/SedesView.vue'), meta: { roles: ['ADMIN_CENTRO'] } },
+  { path: '/servicios', name: 'servicios', component: () => import('./views/ServiciosView.vue'), meta: { roles: ['ADMIN_CENTRO'] } },
   { path: '/:rutaNoEncontrada(.*)*', name: 'error', component: () => import('./views/ErrorView.vue'), meta: { publica: true } }
 ]
 
