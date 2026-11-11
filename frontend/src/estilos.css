@@ -197,6 +197,19 @@ label.casilla .ayuda { display: block; }
 .secundario-celda { display: block; color: var(--tinta-suave); font-size: .85rem; }
 .confirmacion span { font-weight: 600; color: var(--alerta); font-size: .9rem; }
 table.administracion td.accion { width: 1%; }
+/* --- inventario (P12, P13, P14) ---------------------------------------- */
+/* Bajo el mínimo se distingue por texto («Bajo mín.») y por fondo, no solo por color. */
+table.inventario tr.bajo-minimo { background: var(--aviso-tenue); }
+table.inventario tr.bajo-minimo td strong { color: var(--aviso); }
+.filtros .filtro-casilla { margin: 0 0 .1rem; border: 0; padding: .55rem 0; }
+.nota-pendiente { margin-top: 1rem; }
+.texto-alerta { color: var(--alerta); }
+.aviso-ajuste {
+  background: var(--aviso-tenue); color: var(--aviso); border: 1px solid #f0d9a8;
+  padding: .6rem .8rem; border-radius: 8px;
+}
+table.disponibilidad tr.activa td { font-weight: 700; }
+
 /* --- registro diario (P16) y monto de P11 ------------------------------ */
 table.registro-diario .monto { text-align: right; }
 table.registro-diario tfoot th, table.registro-diario tfoot td {

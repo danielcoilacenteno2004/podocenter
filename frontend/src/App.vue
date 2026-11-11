@@ -40,6 +40,7 @@ function cambiarSede () {
           <router-link :to="{ name: 'panel' }">Panel del día</router-link>
           <router-link :to="{ name: 'agenda' }">Agenda</router-link>
           <router-link :to="{ name: 'pacientes' }">Pacientes</router-link>
+          <router-link :to="{ name: 'inventario' }">Inventario</router-link>
           <router-link :to="{ name: 'registro-diario' }">Registro diario</router-link>
         </template>
         <template v-if="sesion.esAdministradoraDelCentro">

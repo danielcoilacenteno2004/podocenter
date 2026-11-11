@@ -16,6 +16,7 @@ const rutas = [
   { path: '/pacientes', name: 'pacientes', component: () => import('./views/PacientesView.vue'), meta: { roles: CENTRO } },
   { path: '/pacientes/nuevo', name: 'nuevo-paciente', component: () => import('./views/NuevoPacienteView.vue'), meta: { roles: CENTRO } },
   { path: '/pacientes/:pacienteId', name: 'ficha-paciente', component: () => import('./views/FichaPacienteView.vue'), props: true, meta: { roles: CENTRO } },
+  { path: '/inventario', name: 'inventario', component: () => import('./views/InventarioView.vue'), meta: { roles: CENTRO } },
   { path: '/registro-diario', name: 'registro-diario', component: () => import('./views/RegistroDiarioView.vue'), meta: { roles: CENTRO } },
   // Administración del centro: solo la administradora (Práctica N.° 7, Tabla 1).
   { path: '/usuarios', name: 'usuarios', component: () => import('./views/UsuariosView.vue'), meta: { roles: ['ADMIN_CENTRO'] } },
