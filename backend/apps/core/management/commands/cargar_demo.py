@@ -124,6 +124,8 @@ class Command(BaseCommand):
 
         centro = Centro.objects.create(
             razon_social="Centro de Podología Pies Sanos E.I.R.L.",
+            nombre_comercial="Pies Sanos",
+            correo_contacto="gerencia@piessanos.pe",
             ruc="20601234567",
             subdominio=SUBDOMINIO,
         )

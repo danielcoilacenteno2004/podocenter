@@ -81,6 +81,19 @@ class IniciarSesion(APIView):
                 status=status.HTTP_401_UNAUTHORIZED,
                 content_type="application/problem+json",
             )
+        centro = usuario.centro
+        if centro is not None and not centro.esta_operativo:
+            # Tabla 31: un centro suspendido no puede iniciar sesión. Las
+            # credenciales eran válidas, así que se puede decir por qué; el
+            # motivo de la suspensión queda para la plataforma.
+            fijar_centro_en_la_sesion(centro.pk)
+            fijar_contexto(centro_id=centro.pk, usuario_id=usuario.pk)
+            registrar("ACCESO_DENEGADO", "sesion", usuario.pk, {"motivo": "centro-suspendido"})
+            raise ReglaDeNegocio(
+                "centro-suspendido",
+                f"El acceso de {centro.nombre_comercial or centro.razon_social} está "
+                "suspendido. Consulte con el proveedor del sistema.",
+            )
         login(request, usuario)
         usuario.ultimo_acceso_en = timezone.now()
         usuario.save(update_fields=["ultimo_acceso_en"])

@@ -13,9 +13,15 @@ class Centro(SelloDeTiempo):
         DEMO = "DEMO", "Demostración"
 
     razon_social = models.CharField(max_length=150)
+    # Práctica N.° 7, Tabla 32: el nombre que ven los usuarios del centro y el
+    # correo que figura en el contrato de arriendo.
+    nombre_comercial = models.CharField(max_length=100)
+    correo_contacto = models.EmailField(max_length=150)
     ruc = models.CharField(max_length=11, unique=True)
     subdominio = models.SlugField(max_length=40, unique=True)
     estado = models.CharField(max_length=12, choices=Estado.choices, default=Estado.ACTIVO)
+    # Tabla 31: suspender «pide confirmación y motivo».
+    motivo_suspension = models.CharField(max_length=200, blank=True)
 
     class Meta:
         db_table = "centro"

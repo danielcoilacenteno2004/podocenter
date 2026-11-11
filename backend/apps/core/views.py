@@ -1,12 +1,13 @@
 """Vistas transversales: estado del servicio y centros clientes (RF17)."""
-from rest_framework import viewsets
+from rest_framework import mixins, status, viewsets
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Centro
 from .permisos import EsAdministradorDePlataforma
-from .serializers import CentroSerializer
+from .serializers import AltaDeCentroSerializer, CentroSerializer
+from .servicios import crear_centro, registrar_cambio_de_centro
 
 
 class EstadoDelServicio(APIView):
@@ -18,10 +19,38 @@ class EstadoDelServicio(APIView):
         return Response({"estado": "operativo", "version": "0.4.0"})
 
 
-class CentroViewSet(viewsets.ModelViewSet):
-    """RF17 — alta y mantenimiento de los centros clientes."""
+class CentroViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin,
+                    mixins.UpdateModelMixin, viewsets.GenericViewSet):
+    """RF17 — alta y mantenimiento de los centros clientes (P19 y P29).
+
+    No hay DELETE: un centro cliente no se borra, se suspende con motivo; y
+    borrar uno con datos fallaba con un 500.
+    """
 
     queryset = Centro.objects.all()
-    serializer_class = CentroSerializer
     permission_classes = [EsAdministradorDePlataforma]
     filterset_fields = ["estado"]
+
+    def get_serializer_class(self):
+        return AltaDeCentroSerializer if self.action == "create" else CentroSerializer
+
+    def create(self, request, *args, **kwargs):
+        entrada = AltaDeCentroSerializer(data=request.data)
+        entrada.is_valid(raise_exception=True)
+        datos = dict(entrada.validated_data)
+        administrador = datos.pop("administrador")
+        centro, admin, temporal = crear_centro(datos=datos, administrador=administrador,
+                                               usuario=request.user)
+        respuesta = dict(CentroSerializer(centro).data)
+        respuesta["administrador"] = {
+            "id": admin.pk, "correo": admin.correo, "nombre_completo": admin.nombre_completo,
+        }
+        # Única vez que sale: no se guarda en claro ni se puede volver a pedir.
+        respuesta["contrasena_temporal"] = temporal
+        return Response(respuesta, status=status.HTTP_201_CREATED)
+
+    def perform_update(self, serializer):
+        centro = serializer.save()
+        registrar_cambio_de_centro(centro, self.request.user, {
+            "estado": centro.estado, "motivo_suspension": centro.motivo_suspension,
+        })
