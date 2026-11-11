@@ -208,4 +208,25 @@ textarea:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
   .barra .derecha { width: 100%; justify-content: space-between; margin-left: 0; }
   table { font-size: .88rem; }
   .cabecera-atencion { grid-template-columns: 1fr; }
+
+  /* En el celular cada cita es una tarjeta: con seis columnas la tabla se
+     salía de la pantalla y «Registrar atención» quedaba fuera de alcance,
+     lo que sumaba un desplazamiento al recorrido del RNF02. */
+  table.agenda thead {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);
+  }
+  table.agenda, table.agenda tbody, table.agenda td { display: block; }
+  table.agenda caption { display: block; }
+  table.agenda tr {
+    display: grid; grid-template-columns: 1fr auto; gap: .15rem .75rem;
+    padding: .8rem 0; border-bottom: 1px solid var(--borde);
+  }
+  table.agenda td { border: 0; padding: 0; grid-column: 1 / -1; }
+  table.agenda td.hora { grid-column: 1; font-weight: 600; }
+  table.agenda td.estado { grid-column: 2; grid-row: 1; }
+  table.agenda td.paciente { font-weight: 600; }
+  table.agenda td.detalle { color: var(--tinta-suave); font-size: .85rem; }
+  table.agenda td.accion:empty { display: none; }
+  table.agenda td.accion { text-align: left; margin-top: .45rem; }
+  table.agenda a.boton { display: block; text-align: center; padding: .6rem .85rem; }
 }

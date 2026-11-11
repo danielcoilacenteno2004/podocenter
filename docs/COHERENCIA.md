@@ -23,7 +23,7 @@ El comando de la columna derecha devuelve el valor real.
 | Práctica 7, Tabla 42 | CC-18 verificado con **ocho** pruebas | `grep -c "^def test_" backend/apps/citas/tests/test_agenda_filtros.py` menos las del panel |
 | Práctica 7, Tabla 42 | CC-19 verificado con **diez** pruebas | Las del panel dentro del mismo archivo |
 | Práctica 7, Tabla 13 | Tipos de movimiento: Entrada, Ajuste, Merma; las salidas las genera el sistema | Módulo de inventario no construido: nada que contrastar todavía |
-| Práctica 7, 4.5 | El recorrido del RNF02 usa cuatro interacciones | Medido con Playwright el 10/11/2026: **tres** (pulsar la cita, escribir la observación, confirmar), en escritorio. Son menos porque P11 no tiene todavía monto ni insumos: el paso «revisar servicio, monto e insumos» no existe. Pendiente: la medición con la podóloga |
+| Práctica 7, 4.5 | El recorrido del RNF02 usa cuatro interacciones | Medido con Playwright el 10/11/2026: **tres** (pulsar la cita, escribir la observación, confirmar), en escritorio y a 390 px. Son menos porque P11 no tiene todavía monto ni insumos: el paso «revisar servicio, monto e insumos» no existe. Pendiente: la medición con la podóloga |
 
 ## Afirmaciones que hoy no se pueden comprobar
 

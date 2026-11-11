@@ -152,7 +152,7 @@ onMounted(cargar)
           ? 'Ninguna cita del día coincide con los filtros elegidos.'
           : 'No hay citas programadas para esta fecha.' }}
       </p>
-      <table v-else>
+      <table v-else class="agenda">
         <caption>
           {{ citas.length }} de {{ jornada.length }} cita(s) del día
           <template v-if="hayFiltros"> · filtro aplicado</template>
@@ -169,11 +169,11 @@ onMounted(cargar)
         </thead>
         <tbody>
           <tr v-for="cita in citas" :key="cita.id">
-            <td class="numero">{{ hora(cita.inicio) }} – {{ hora(cita.fin) }}</td>
-            <td>{{ cita.paciente_nombre }}</td>
-            <td>{{ cita.servicio_nombre }}</td>
-            <td>{{ cita.profesional_nombre }}</td>
-            <td><span class="etiqueta" :class="cita.estado">
+            <td class="numero hora">{{ hora(cita.inicio) }} – {{ hora(cita.fin) }}</td>
+            <td class="paciente">{{ cita.paciente_nombre }}</td>
+            <td class="detalle">{{ cita.servicio_nombre }}</td>
+            <td class="detalle">{{ cita.profesional_nombre }}</td>
+            <td class="estado"><span class="etiqueta" :class="cita.estado">
               {{ (ESTADOS.find(([v]) => v === cita.estado) ?? [])[1] ?? cita.estado }}
             </span></td>
             <td class="accion">
