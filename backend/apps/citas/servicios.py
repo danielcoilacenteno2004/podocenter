@@ -2,6 +2,7 @@
 from datetime import timedelta
 
 from django.db import IntegrityError, transaction
+from django.db.models import BooleanField, ExpressionWrapper, Q
 from django.utils import timezone
 
 from apps.core.auditoria import registrar
@@ -10,6 +11,18 @@ from apps.core.errores import ReglaDeNegocio
 from .models import Cita
 
 ANTICIPACION_MINIMA = timedelta(minutes=15)
+
+
+def con_marca_de_atencion(consulta):
+    """Añade `tiene_atencion` a cada cita con un solo LEFT JOIN.
+
+    La agenda lo necesita para no ofrecer «Registrar atención» sobre una
+    cita que ya la tiene; resolverlo cita por cita sería una consulta más
+    por fila de la jornada.
+    """
+    return consulta.annotate(
+        tiene_atencion=ExpressionWrapper(Q(atencion__isnull=False), output_field=BooleanField())
+    )
 
 
 def _validar_horario_de_sede(sede, inicio, fin) -> None:
@@ -95,4 +108,6 @@ def agenda_del_dia(*, centro_id: int, sede_id: int, fecha, estado=None,
         consulta = consulta.filter(profesional_id=profesional_id)
     if servicio_id:
         consulta = consulta.filter(servicio_id=servicio_id)
-    return consulta.select_related("paciente", "profesional", "servicio").order_by("inicio")
+    return con_marca_de_atencion(
+        consulta.select_related("paciente", "profesional", "servicio")
+    ).order_by("inicio")

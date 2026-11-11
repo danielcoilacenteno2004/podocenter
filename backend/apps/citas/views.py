@@ -12,7 +12,7 @@ from apps.usuarios.roles import Rol
 
 from .models import Cita
 from .serializers import CancelacionSerializer, CitaSerializer
-from .servicios import agenda_del_dia, cancelar_cita, programar_cita
+from .servicios import agenda_del_dia, cancelar_cita, con_marca_de_atencion, programar_cita
 
 
 def _entero(valor):
@@ -30,8 +30,10 @@ class CitaViewSet(ContextoDeCentro, viewsets.ModelViewSet):
     filterset_fields = ["estado", "sede", "profesional", "paciente"]
 
     def get_queryset(self):
-        return Cita.objects.filter(centro_id=self.request.centro_id).select_related(
-            "paciente", "profesional", "servicio", "sede"
+        return con_marca_de_atencion(
+            Cita.objects.filter(centro_id=self.request.centro_id).select_related(
+                "paciente", "profesional", "servicio", "sede"
+            )
         )
 
     def perform_create(self, serializer):

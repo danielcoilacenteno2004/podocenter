@@ -1,5 +1,9 @@
-"""Pruebas de la API de atenciones: forma de la respuesta, errores y auditoría."""
+"""Pruebas de la API de atenciones: contrato, errores, permisos y aislamiento."""
+from datetime import timedelta
+
 import pytest
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from rest_framework.test import APIClient
 
 from apps.atenciones.models import Atencion
@@ -153,3 +157,42 @@ def test_la_api_no_permite_editar_ni_borrar_una_atencion(cliente, cita):
     assert cliente.patch(ruta, {"observaciones_clinicas": "x"}, format="json").status_code == 405
     assert cliente.delete(ruta).status_code == 405
     assert Atencion.objects.count() == 1
+
+
+# --- La agenda indica qué citas ya tienen atención ---------------------------
+
+@pytest.mark.django_db
+def test_la_agenda_marca_la_cita_que_ya_tiene_atencion(cliente, cita):
+    # Garantiza lo que P05 necesita para no ofrecer «Registrar atención» dos
+    # veces: la marca la calcula el servidor a partir de la atención misma.
+    fecha = cita.inicio.date().isoformat()
+    antes = cliente.get("/api/v1/citas/agenda/", {"fecha": fecha}).data["citas"][0]
+
+    cliente.post("/api/v1/atenciones/", {"cita": cita.pk}, format="json")
+    despues = cliente.get("/api/v1/citas/agenda/", {"fecha": fecha}).data["citas"][0]
+    ficha = cliente.get(f"/api/v1/citas/{cita.pk}/").data
+
+    assert antes["tiene_atencion"] is False
+    assert despues["tiene_atencion"] is True
+    assert ficha["tiene_atencion"] is True
+
+
+@pytest.mark.django_db
+def test_la_marca_de_atencion_no_suma_una_consulta_por_cita(
+    cliente, centro, podologa, sede, servicio, paciente, cita
+):
+    # Garantiza que la marca sale de la misma consulta de la agenda y no de
+    # una consulta por fila: una jornada llena no puede volver lenta la P05.
+    fecha = cita.inicio.date().isoformat()
+    with CaptureQueriesContext(connection) as con_una:
+        cliente.get("/api/v1/citas/agenda/", {"fecha": fecha})
+
+    programar_cita(
+        centro=centro, usuario=podologa, sede=sede, paciente=paciente, profesional=podologa,
+        servicio=servicio, inicio=cita.fin + timedelta(minutes=15),
+    )
+    with CaptureQueriesContext(connection) as con_dos:
+        respuesta = cliente.get("/api/v1/citas/agenda/", {"fecha": fecha})
+
+    assert respuesta.data["total"] == 2
+    assert len(con_dos) == len(con_una)

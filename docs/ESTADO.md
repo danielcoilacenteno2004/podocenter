@@ -30,7 +30,7 @@ se hizo en ellas.
 
 ## 2. Lo que está sólido
 
-- **115 pruebas** en verde, **93.0 %** de cobertura de sentencias, sobre
+- **117 pruebas** en verde, **93.2 %** de cobertura de sentencias, sobre
   PostgreSQL real y no sobre una base en memoria.
 - **Cero vulnerabilidades** conocidas en las dependencias tras subir a Django
   5.2 LTS, DRF 3.18.2, django-filter 25.2 y cryptography 50.0.2.
