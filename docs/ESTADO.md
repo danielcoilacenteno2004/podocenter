@@ -19,29 +19,86 @@ Contra eso, el estado real es:
 | Pacientes con consentimiento | Terminado |
 | Citas sin recordatorios | Terminado, con filtros y panel |
 | Servicios | API terminada; **sin pantalla de gestión** |
-| **Atenciones** | Terminado con su pantalla P11, que se abre desde la agenda. **Sin monto cobrado y sin insumos** |
+| **Atenciones** | **Parcial.** Registro de la atención con su pantalla P11, que se abre desde la agenda. **Sin monto cobrado, sin insumos y sin registro diario** |
 | Desplegado en producción | **No**: la infraestructura está escrita, nada corre en la nube |
 | Validado con la usuaria | **No**: la prueba de usabilidad está diseñada, no aplicada |
 
-Atenciones es el módulo que cierra el ciclo de la consulta y su pantalla P11 es
-la que la Práctica N.° 7 llama «pantalla crítica»; es también donde se verifica
-el RNF02. Sin él, el sistema registra citas pero no deja constancia de lo que
-se hizo en ellas.
+### Qué tiene y qué no tiene Atenciones
+
+Construido:
+
+- Modelo `Atencion` con vínculo uno a uno a la cita. Copia paciente,
+  profesional, servicio y sede al registrarse, para que la ficha no cambie si
+  después alguien edita la cita.
+- Observación clínica cifrada, como los antecedentes del paciente.
+- Política de seguridad por fila sobre la tabla `atencion`. Son **ocho**
+  tablas con RLS.
+- Reglas en el servicio, cada una con su código RFC 9457:
+  - `cita-no-atendible`: la cita no está programada.
+  - `atencion-duplicada`: la cita ya tiene atención.
+  - `cita-fuera-del-centro`: la cita no es del centro.
+  - `sin-sede-activa` y `cita-de-otra-sede`: falta la sede activa o la cita es
+    de otra.
+  - `usuario-sin-sede`: el usuario no trabaja en esa sede.
+- La cita pasa a atendida en la misma transacción, y queda constancia en la
+  bitácora de auditoría.
+- API de solo creación, listado y ficha; la lectura de la ficha queda
+  auditada.
+- La agenda marca qué citas ya tienen atención (`tiene_atencion`).
+- Pantalla P11 con los antecedentes del paciente en la cabecera.
+- RNF02 (cinco interacciones o menos): **3 interacciones medidas con el
+  alcance construido; el recorrido diseñado prevé 4 al incorporar monto e
+  insumos.** Medidas con Playwright el 10/11/2026, en escritorio y a 390 px.
+
+No construido, y lo pide el CU10 o la P11 de la Práctica N.° 7:
+
+- **Monto cobrado.** Sin él, el registro diario (RF14) no tiene de dónde
+  calcular los ingresos.
+- **Insumos consumidos** y descuento de stock (depende de Inventario).
+- **Servicio editable** («si se brindó otro»).
+- **Notas separadas** en diagnóstico, tratamiento y observaciones. Hoy hay una
+  sola observación.
+- **Anulación de una atención** con motivo.
+
+La diferencia entre las 3 medidas y las 4 diseñadas está en el monto y los
+insumos, que aún no existen. Hay que volver a medir cuando se añadan, y la
+medición válida para el RNF02 es la que se haga con la podóloga.
 
 ## 2. Lo que está sólido
 
 - **120 pruebas** en verde, **93.5 %** de cobertura de sentencias, sobre
-  PostgreSQL real y no sobre una base en memoria.
+  PostgreSQL real y no sobre una base en memoria. La cifra varía unas
+  décimas entre ejecuciones (93.15–93.53 %).
 - **Cero vulnerabilidades** conocidas en las dependencias tras subir a Django
   5.2 LTS, DRF 3.18.2, django-filter 25.2 y cryptography 50.0.2.
-- `ruff` y `bandit` limpios.
-- **Aislamiento multi-inquilino probado**: tres pruebas comprueban que un
-  centro no ve, no abre y no modifica datos de otro. Es lo que sostiene el
-  modelo de arriendo ante el jurado.
-- **42 commits** con «un commit, un cambio», repartidos entre los dos
-  integrantes.
+- `ruff`, `bandit` 1.9.4 y `npm run lint` limpios. `bandit` se comprobó
+  además contra un archivo deliberadamente inseguro, en Python 3.12 y 3.14,
+  para asegurar que **sí falla** cuando debe.
+- **Aislamiento multi-inquilino probado con nueve pruebas**: tres en `core`,
+  tres en la API de usuarios y tres en atenciones. Comprueban que un centro
+  no ve, no abre, no modifica y no registra atenciones sobre datos de otro. Es
+  lo que sostiene el modelo de arriendo ante el jurado.
+- **55 commits** con «un commit, un cambio», contando el que actualiza este
+  documento: 30 de Sergio Daniel Coila Centeno y 25 de Andre Nicolas Huaroc
+  Condori. La identidad de git está fijada en la configuración del
+  repositorio para que no vuelva a entrar un autor con otro nombre.
 - Entorno de demostración reproducible con un comando y probado con nueve
   pruebas, incluida una que verifica que las credenciales publicadas funcionan.
+- Frontend: **7 pantallas** de las 29 diseñadas.
+
+### Pipeline: corregido, pendiente de ver en verde
+
+Tres defectos del pipeline se corrigieron el 10 y el 11/11. Las correcciones
+aún no se han ejecutado en GitHub:
+
+- Las pruebas corrían con el superusuario de la imagen de PostgreSQL, que se
+  salta siempre las políticas de seguridad por fila. Ahora usan un rol sin
+  privilegios (`a4777da`).
+- `npm run lint` no podía pasar desde el 28/10: no había configuración de
+  ESLint 9 (`453ef9c`).
+- `bandit` 1.8.0 aprobaba en falso con Python 3.14: se saltaba todos los
+  archivos y salía con código 0. Se subió a 1.9.4 (`5398bee`). El pipeline ya
+  usaba Python 3.12, la versión que exige el proyecto (ver `CLAUDE.md`).
 
 ## 3. Brechas de diseño levantadas y no resueltas
 
@@ -70,10 +127,12 @@ Registradas en la Práctica N.° 7 y pendientes de decisión de alcance:
 
 ## 5. Lo que hay que decidir
 
-- **Atenciones antes del 12/11**, o renegociar la Tabla 64 por escrito. Lo que
-  no es defendible es dejar la fecha en el documento y no cumplirla.
+- **Qué entra de Atenciones el 12/11.** O se añade al menos el monto cobrado
+  (una migración, el campo en P11 y su validación), o se deja por escrito que
+  la primera entrega registra la atención sin cobro e insumos. Lo que no es
+  defendible es presentar el CU10 como completo.
 - **El despliegue en producción** necesita una cuenta de nube real con tarjeta;
   no se resuelve escribiendo código.
 - **La prueba de usabilidad** necesita una hora de la dueña y una de la
   podóloga. Es el requisito más barato de los tres y el que lleva más tiempo
-  parado.
+  parado. Además, es la que valida de verdad el RNF02.
