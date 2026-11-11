@@ -65,6 +65,23 @@ def desactivar_usuario(usuario: Usuario) -> Usuario:
     return usuario
 
 
+def profesionales_de_la_sede(*, centro_id: int, sede_id: int):
+    """Quién puede atender una cita en la sede (lista de P06).
+
+    Es la misma condición que exige `programar_cita` a la profesional
+    (`puede_usar_sede`): cuenta activa y asignación vigente a la sede. Así la
+    pantalla no ofrece nunca a alguien que el servidor rechazaría.
+    """
+    return (
+        Usuario.objects.filter(
+            centro_id=centro_id, esta_activo=True,
+            asignaciones__sede_id=sede_id, asignaciones__esta_activa=True,
+        )
+        .distinct()
+        .order_by("apellidos", "nombres")
+    )
+
+
 def sedes_disponibles(usuario: Usuario):
     """Sedes entre las que el usuario puede elegir al iniciar sesión (P03)."""
     return usuario.asignaciones.filter(

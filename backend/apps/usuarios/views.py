@@ -5,13 +5,19 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.core.auditoria import registrar
+from apps.core.errores import ReglaDeNegocio
 from apps.core.permisos import TieneRol
 from apps.core.vistas import ContextoDeCentro
 
 from .models import Usuario
 from .roles import Rol
 from .serializers import SedeAsignadaSerializer, UsuarioSerializer
-from .servicios import crear_usuario, desactivar_usuario, sedes_disponibles
+from .servicios import (
+    crear_usuario,
+    desactivar_usuario,
+    profesionales_de_la_sede,
+    sedes_disponibles,
+)
 
 
 class UsuarioViewSet(ContextoDeCentro, viewsets.ModelViewSet):
@@ -60,3 +66,24 @@ class SedesDeLaSesion(ContextoDeCentro, APIView):
     def get(self, request):
         datos = SedeAsignadaSerializer(sedes_disponibles(request.user), many=True).data
         return Response({"sedes": datos, "requiere_eleccion": len(datos) > 1})
+
+
+class ProfesionalesDeLaSede(ContextoDeCentro, APIView):
+    """Profesionales de la sede activa, para el campo Profesional de P06.
+
+    `/usuarios/` es solo de la administradora; la podóloga también agenda
+    citas y necesita saber a quién puede asignarlas, sin ver el padrón.
+    """
+
+    permission_classes = [TieneRol]
+    roles_permitidos = {Rol.ADMIN_CENTRO, Rol.PODOLOGA}
+
+    def get(self, request):
+        if request.sede_id is None:
+            raise ReglaDeNegocio("sin-sede-activa", "Elija la sede en la que está trabajando.")
+        profesionales = profesionales_de_la_sede(
+            centro_id=request.centro_id, sede_id=request.sede_id
+        )
+        return Response({"profesionales": [
+            {"id": p.pk, "nombre_completo": p.nombre_completo} for p in profesionales
+        ]})
