@@ -6,6 +6,7 @@
 // tenga ninguna cita detrás.
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import NuevaCitaDialogo from '../components/NuevaCitaDialogo.vue'
 import { api } from '../services/api'
 import { useSesion } from '../stores/sesion'
 
@@ -22,8 +23,18 @@ const filtros = ref({
 })
 
 // Al volver de P11 la agenda confirma el registro; la fila ya aparece atendida.
-const aviso = computed(() =>
-  ruta.query.aviso === 'atencion-registrada' ? 'Atención registrada.' : null)
+const aviso = ref(ruta.query.aviso === 'atencion-registrada' ? 'Atención registrada.' : null)
+
+// P06 se abre como modal sobre la agenda, «sin horario precargado».
+const nuevaCitaAbierta = ref(false)
+
+async function citaCreada (cita) {
+  nuevaCitaAbierta.value = false
+  aviso.value = `Cita registrada: ${cita.paciente_nombre}, a las ${hora(cita.inicio)}`
+  const dia = cita.inicio.slice(0, 10)
+  if (dia !== fecha.value) fecha.value = dia  // el watch recarga la jornada
+  else await cargar()
+}
 
 // Se ofrece registrar solo donde el servidor lo aceptaría: cita programada y
 // sin atención. Así el botón no aparece dos veces para la misma cita.
@@ -100,9 +111,14 @@ onMounted(cargar)
 
 <template>
   <main>
-    <div class="encabezado">
-      <h1>Agenda de citas</h1>
-      <p v-if="sesion.sedeActiva">{{ sesion.sedeActiva.nombre }} — {{ sesion.sedeActiva.direccion }}</p>
+    <div class="encabezado encabezado-con-accion">
+      <div>
+        <h1>Agenda de citas</h1>
+        <p v-if="sesion.sedeActiva">{{ sesion.sedeActiva.nombre }} — {{ sesion.sedeActiva.direccion }}</p>
+      </div>
+      <button type="button" :disabled="!sesion.sedeActiva" @click="nuevaCitaAbierta = true">
+        + Nueva cita
+      </button>
     </div>
 
     <form class="filtros" aria-label="Filtros de la agenda" @submit.prevent="cargar">
@@ -188,5 +204,11 @@ onMounted(cargar)
         </tbody>
       </table>
     </section>
+    <NuevaCitaDialogo
+      :abierto="nuevaCitaAbierta"
+      :fecha="fecha"
+      @cerrar="nuevaCitaAbierta = false"
+      @creada="citaCreada"
+    />
   </main>
 </template>
