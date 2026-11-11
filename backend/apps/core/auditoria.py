@@ -1,6 +1,8 @@
 """Punto único de escritura de la bitácora de auditoría."""
 import logging
 
+from django.db import transaction
+
 from .contexto import contexto_actual
 from .models import RegistroAuditoria
 
@@ -18,14 +20,19 @@ def registrar(accion: str, entidad: str, entidad_id="", datos=None, ip=None) -> 
         logger.warning("Auditoría sin centro en contexto: %s %s", accion, entidad)
         return
     try:
-        RegistroAuditoria.objects.create(
-            centro_id=contexto.centro_id,
-            usuario_id=contexto.usuario_id,
-            accion=accion,
-            entidad=entidad,
-            entidad_id=str(entidad_id),
-            datos=datos or {},
-            direccion_ip=ip,
-        )
+        # Punto de guardado propio: si el INSERT falla (por ejemplo, contra la
+        # política RLS), se deshace solo él y la transacción de la petición
+        # sigue sana. Sin esto, capturar la excepción no bastaba: la petición
+        # terminaba en un 500 con la transacción rota.
+        with transaction.atomic():
+            RegistroAuditoria.objects.create(
+                centro_id=contexto.centro_id,
+                usuario_id=contexto.usuario_id,
+                accion=accion,
+                entidad=entidad,
+                entidad_id=str(entidad_id),
+                datos=datos or {},
+                direccion_ip=ip,
+            )
     except Exception:
         logger.exception("No se pudo escribir la auditoría de %s %s", accion, entidad)
