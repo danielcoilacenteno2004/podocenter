@@ -4,7 +4,7 @@ La autenticación es por sesión de Django sobre cookie, no por token en el
 navegador: así la credencial queda fuera del alcance de JavaScript y el
 CSRF lo cubre el propio framework (Práctica N.° 5, RNF01).
 """
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -16,6 +16,9 @@ from rest_framework.views import APIView
 from apps.core.auditoria import registrar
 from apps.core.contexto import fijar_contexto
 from apps.core.errores import ReglaDeNegocio
+from apps.core.vistas import ContextoDeCentro
+
+from .servicios import cambiar_contrasena
 
 
 def _datos_de(usuario) -> dict:
@@ -30,6 +33,7 @@ def _datos_de(usuario) -> dict:
         "centro": usuario.centro_id,
         "centro_nombre": usuario.centro.razon_social if usuario.centro_id else None,
         "segundo_factor_activo": usuario.segundo_factor_activo,
+        "ultimo_acceso_en": usuario.ultimo_acceso_en,
     }
 
 
@@ -95,3 +99,24 @@ class CerrarSesion(APIView):
             registrar("SALIDA", "sesion", request.user.pk)
         logout(request)
         return Response({"autenticado": False})
+
+
+class CambiarContrasena(ContextoDeCentro, APIView):
+    """P20 — el usuario conectado cambia su propia contraseña.
+
+    Al guardar, Django cambia el hash de sesión: las demás sesiones abiertas
+    de la cuenta dejan de valer (lo que pide la Tabla 33), y
+    `update_session_auth_hash` mantiene abierta solo la actual.
+    """
+
+    def post(self, request):
+        datos = request.data
+        cambiar_contrasena(
+            request.user,
+            actual=datos.get("contrasena_actual") or "",
+            nueva=datos.get("contrasena_nueva") or "",
+            confirmacion=datos.get("confirmacion") or "",
+        )
+        update_session_auth_hash(request, request.user)
+        return Response({"cambiada": True})
+

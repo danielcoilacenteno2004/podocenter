@@ -5,7 +5,9 @@ funciones, que son las que conocen las reglas y dejan la auditoría.
 """
 import secrets
 
+from django.contrib.auth.forms import PasswordChangeForm
 from django.db import transaction
+from rest_framework.exceptions import ValidationError
 
 from apps.core.auditoria import registrar
 from apps.core.errores import ReglaDeNegocio
@@ -62,6 +64,35 @@ def desactivar_usuario(usuario: Usuario) -> Usuario:
     usuario.esta_activo = False
     usuario.save(update_fields=["esta_activo", "actualizado_en"])
     registrar("BAJA", "usuario", usuario.pk)
+    return usuario
+
+
+@transaction.atomic
+def cambiar_contrasena(usuario: Usuario, *, actual: str, nueva: str, confirmacion: str) -> Usuario:
+    """El usuario cambia su propia contraseña (P20, RF18).
+
+    Se apoya en `PasswordChangeForm` de Django: comprueba la contraseña
+    actual y aplica los validadores de AUTH_PASSWORD_VALIDATORS (mínimo 10
+    caracteres, no parecida a los datos del usuario, no común, no solo
+    números), así que la política vive en un solo lugar. La auditoría no
+    guarda ninguna de las contraseñas.
+    """
+    formulario = PasswordChangeForm(usuario, data={
+        "old_password": actual, "new_password1": nueva, "new_password2": confirmacion,
+    })
+    if not formulario.is_valid():
+        errores = formulario.errors
+        if "old_password" in errores:
+            raise ReglaDeNegocio(
+                "contrasena-actual-incorrecta", "La contraseña actual no es correcta."
+            )
+        # Coincidencia y política: errores de forma, por campo, como el resto
+        # de validaciones de la API (400).
+        mensajes = [str(m) for m in errores.get("new_password2", [])]
+        mensajes = mensajes or [str(m) for lista in errores.values() for m in lista]
+        raise ValidationError({"contrasena_nueva": mensajes})
+    formulario.save()
+    registrar("EDICION", "usuario", usuario.pk, {"contrasena": "cambiada"})
     return usuario
 
 
