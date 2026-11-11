@@ -13,6 +13,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
 
+from apps.atenciones.models import Atencion
 from apps.catalogo.models import Servicio
 from apps.citas.models import Cita
 from apps.citas.servicios import cancelar_cita, programar_cita
@@ -105,6 +106,8 @@ class Command(BaseCommand):
             # El RLS filtra por `app.centro_id`; sin fijarlo, ni se ve ni se borra.
             fijar_centro_en_la_sesion(existente.pk)
             fijar_contexto(centro_id=existente.pk)
+            # La atención protege su cita (PROTECT): va antes que las citas.
+            Atencion.objects.filter(centro=existente).delete()
             Cita.objects.filter(centro=existente).delete()
             Consentimiento.objects.filter(paciente__centro=existente).delete()
             Paciente.objects.filter(centro=existente).delete()
