@@ -19,7 +19,7 @@ Contra eso, el estado real es:
 | Pacientes con consentimiento | Pantallas: búsqueda (P08), alta con consentimiento (P09), ficha con historial (P10) y detalle de atención (P25). **Sin edición: se quitaron PUT, PATCH y DELETE de `/pacientes/`** porque escribían sin auditoría; vuelve con un servicio que la audite |
 | Citas sin recordatorios | Terminado: agenda con filtros (P05), nueva cita (P06), cancelación con reemplazo (P07) y panel del día (P04) |
 | Servicios | Terminado: pantallas P15/P26 |
-| **Atenciones** | **Parcial.** Registro de la atención con su pantalla P11, que se abre desde la agenda. **Sin monto cobrado, sin insumos y sin registro diario** |
+| **Atenciones** | **Parcial.** Registro de la atención con su monto cobrado (P11) y registro diario por sede y fecha (P16). **Sin insumos** (depende de Inventario) |
 | Desplegado en producción | **No**: la infraestructura está escrita, nada corre en la nube |
 | Validado con la usuaria | **No**: la prueba de usabilidad está diseñada, no aplicada |
 
@@ -46,27 +46,31 @@ Construido:
   auditada.
 - La agenda marca qué citas ya tienen atención (`tiene_atencion`).
 - Pantalla P11 con los antecedentes del paciente en la cabecera.
-- RNF02 (cinco interacciones o menos): **3 interacciones medidas con el
-  alcance construido; el recorrido diseñado prevé 4 al incorporar monto e
-  insumos.** Medidas con Playwright el 10/11/2026, en escritorio y a 390 px.
+- Monto cobrado obligatorio, precargado con el precio del servicio y
+  editable; la base impide montos negativos.
+- Registro diario (P16): atenciones e ingresos de la sede activa en una
+  fecha, calculado desde las atenciones (`GET /reportes/registro-diario/`).
+- RNF02 (cinco interacciones o menos): **3 interacciones medidas con el alcance construido, aceptando el monto precargado; el recorrido diseñado prevé 4 al incorporar los insumos.** Medidas con Playwright el
+  10 y el 11/11/2026, en escritorio y a 390 px.
 
 No construido, y lo pide el CU10 o la P11 de la Práctica N.° 7:
 
-- **Monto cobrado.** Sin él, el registro diario (RF14) no tiene de dónde
-  calcular los ingresos.
 - **Insumos consumidos** y descuento de stock (depende de Inventario).
 - **Servicio editable** («si se brindó otro»).
 - **Notas separadas** en diagnóstico, tratamiento y observaciones. Hoy hay una
   sola observación.
 - **Anulación de una atención** con motivo.
 
-La diferencia entre las 3 medidas y las 4 diseñadas está en el monto y los
-insumos, que aún no existen. Hay que volver a medir cuando se añadan, y la
-medición válida para el RNF02 es la que se haga con la podóloga.
+La diferencia entre las 3 medidas y las 4 diseñadas está en los insumos, que
+aún no existen. **Si la podóloga edita el monto**, el recorrido suma pulsar
+el campo, escribir y volver a la observación: contado paso a paso, llega a 6
+con observación escrita, por encima del límite. Ese caso **no se ha medido**
+(el recorrido automático rellena el campo sin pulsarlo). La medición válida
+para el RNF02 es la que se haga con la podóloga.
 
 ## 2. Lo que está sólido
 
-- **161 pruebas** en verde, **94.4 %** de cobertura de sentencias, sobre
+- **173 pruebas** en verde, **94.5 %** de cobertura de sentencias, sobre
   PostgreSQL real y no sobre una base en memoria. La cifra varía unas
   décimas entre ejecuciones.
 - **Cero vulnerabilidades** conocidas en las dependencias tras subir a Django
@@ -78,13 +82,13 @@ medición válida para el RNF02 es la que se haga con la podóloga.
   tres en la API de usuarios y tres en atenciones. Comprueban que un centro
   no ve, no abre, no modifica y no registra atenciones sobre datos de otro. Es
   lo que sostiene el modelo de arriendo ante el jurado.
-- **89 commits** con «un commit, un cambio», contando el que actualiza este
-  documento: 46 de Sergio Daniel Coila Centeno y 43 de Andre Nicolas Huaroc
+- **91 commits** con «un commit, un cambio», contando el que actualiza este
+  documento: 47 de Sergio Daniel Coila Centeno y 44 de Andre Nicolas Huaroc
   Condori. La identidad de git está fijada en la configuración del
   repositorio para que no vuelva a entrar un autor con otro nombre.
 - Entorno de demostración reproducible con un comando y probado con nueve
   pruebas, incluida una que verifica que las credenciales publicadas funcionan.
-- Frontend: **21 pantallas de las 29 diseñadas en la Práctica N.° 7 (P01, P03, P04, P05, P06, P07, P08, P09, P10, P11, P15, P17, P18, P19, P20, P21, P25, P26, P27, P28, P29)**. El frontend no tiene pruebas automáticas; cada pantalla se comprobó con un recorrido en Playwright.
+- Frontend: **22 pantallas de las 29 diseñadas en la Práctica N.° 7 (P01, P03, P04, P05, P06, P07, P08, P09, P10, P11, P15, P16, P17, P18, P19, P20, P21, P25, P26, P27, P28, P29)**. El frontend no tiene pruebas automáticas; cada pantalla se comprobó con un recorrido en Playwright.
 
 ### Pipeline: corregido, pendiente de ver en verde
 
@@ -150,10 +154,15 @@ del servidor:
   cambiar (¿el documento?) y pasarlos por un servicio auditado; la baja ya
   existe como `esta_activo`.
 
-- **Qué entra de Atenciones el 12/11.** O se añade al menos el monto cobrado
-  (una migración, el campo en P11 y su validación), o se deja por escrito que
-  la primera entrega registra la atención sin cobro e insumos. Lo que no es
-  defendible es presentar el CU10 como completo.
+- **Qué entra de Atenciones el 12/11.** El monto cobrado y el registro diario
+  ya existen; faltan los insumos, que dependen de Inventario. Hay que dejar
+  por escrito que la primera entrega registra la atención sin insumos: lo
+  que no es defendible es presentar el CU10 como completo.
+- **El panel del día y el registro diario pueden no cuadrar.** El «ingreso
+  confirmado» del panel (P04) suma el precio de catálogo de las citas
+  atendidas; el registro diario (P16) suma lo cobrado de verdad. Con un
+  descuento, las dos cifras difieren. Habría que decidir si el panel pasa a
+  usar el monto cobrado.
 - **El despliegue en producción** necesita una cuenta de nube real con tarjeta;
   no se resuelve escribiendo código.
 - **La prueba de usabilidad** necesita una hora de la dueña y una de la
