@@ -239,3 +239,16 @@ def test_la_marca_de_atencion_no_suma_una_consulta_por_cita(
 
     assert respuesta.data["total"] == 2
     assert len(con_dos) == len(con_una)
+
+
+@pytest.mark.django_db
+def test_el_historial_de_un_paciente_trae_el_nombre_de_la_sede(cliente, cita, sede):
+    # Garantiza lo que necesita el historial de P10: abarca todas las sedes del
+    # centro y la podóloga no puede consultar /sedes/, así que el nombre tiene
+    # que llegar en la propia fila y no solo su identificador.
+    cliente.post("/api/v1/atenciones/", {"cita": cita.pk}, format="json")
+
+    fila = cliente.get("/api/v1/atenciones/", {"paciente": cita.paciente_id}).data["results"][0]
+
+    assert fila["sede"] == sede.pk
+    assert fila["sede_nombre"] == sede.nombre

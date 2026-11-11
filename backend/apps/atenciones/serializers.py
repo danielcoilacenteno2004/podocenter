@@ -8,6 +8,7 @@ _COPIADOS_DE_LA_CITA = ["sede", "paciente", "profesional", "servicio"]
 class AtencionResumenSerializer(serializers.ModelSerializer):
     """Fila del listado: sin las observaciones clínicas, que solo da la ficha auditada."""
 
+    sede_nombre = serializers.CharField(source="sede.nombre", read_only=True)
     paciente_nombre = serializers.CharField(source="paciente.nombre_completo", read_only=True)
     profesional_nombre = serializers.CharField(source="profesional.nombre_completo", read_only=True)
     servicio_nombre = serializers.CharField(source="servicio.nombre", read_only=True)
@@ -15,7 +16,7 @@ class AtencionResumenSerializer(serializers.ModelSerializer):
     class Meta:
         model = Atencion
         fields = [
-            "id", "cita", "sede", "paciente", "paciente_nombre", "profesional",
+            "id", "cita", "sede", "sede_nombre", "paciente", "paciente_nombre", "profesional",
             "profesional_nombre", "servicio", "servicio_nombre", "registrada_por",
             "registrada_en",
         ]

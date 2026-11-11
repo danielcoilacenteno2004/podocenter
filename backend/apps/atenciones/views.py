@@ -23,7 +23,7 @@ class AtencionViewSet(ContextoDeCentro, mixins.CreateModelMixin, mixins.ListMode
 
     def get_queryset(self):
         return Atencion.objects.filter(centro_id=self.request.centro_id).select_related(
-            "paciente", "profesional", "servicio"
+            "sede", "paciente", "profesional", "servicio"
         )
 
     def get_serializer_class(self):
