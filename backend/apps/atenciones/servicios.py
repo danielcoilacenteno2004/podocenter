@@ -1,5 +1,9 @@
 """Reglas de aplicación de la atención (CU10)."""
+from datetime import timedelta
+from decimal import Decimal
+
 from django.db import transaction
+from django.db.models import Sum
 from django.utils import timezone
 
 from apps.citas.models import Cita
@@ -47,7 +51,7 @@ def _cita_atendible(*, centro, usuario, sede_id, cita_id) -> Cita:
 
 
 @transaction.atomic
-def registrar_atencion(*, centro, usuario, sede_id, cita_id,
+def registrar_atencion(*, centro, usuario, sede_id, cita_id, monto_cobrado,
                        observaciones_clinicas="") -> Atencion:
     """Registra la atención de una cita programada y la marca como atendida (CU10).
 
@@ -63,6 +67,7 @@ def registrar_atencion(*, centro, usuario, sede_id, cita_id,
         centro=centro, sede_id=cita.sede_id, cita=cita,
         paciente_id=cita.paciente_id, profesional_id=cita.profesional_id,
         servicio_id=cita.servicio_id, observaciones_clinicas=observaciones_clinicas,
+        monto_cobrado=monto_cobrado,
         registrada_por=usuario,
     )
     cita.estado = Cita.Estado.ATENDIDA
@@ -73,6 +78,31 @@ def registrar_atencion(*, centro, usuario, sede_id, cita_id,
     registrar("ALTA", "atencion", atencion.pk, {"cita": cita.pk})
     registrar("EDICION", "cita", cita.pk, {"estado": "ATENDIDA"})
     return atencion
+
+
+def registro_del_dia(*, centro_id: int, sede_id: int, fecha) -> dict:
+    """Atenciones e ingresos de una sede en un día (P16, RF14).
+
+    Se calcula siempre desde las atenciones, sin una tabla de ingresos aparte
+    que pueda descuadrar con lo atendido (Informe, Tabla 39). El día es el de
+    la atención, en la hora local de la sede. Las atenciones anteriores al
+    campo monto_cobrado se cuentan aparte y no suman al total: sumarlas como
+    cero falsearía el día.
+    """
+    inicio = timezone.make_aware(timezone.datetime.combine(fecha, timezone.datetime.min.time()))
+    atenciones = (
+        Atencion.objects.filter(centro_id=centro_id, sede_id=sede_id,
+                                registrada_en__gte=inicio,
+                                registrada_en__lt=inicio + timedelta(days=1))
+        .select_related("paciente", "profesional", "servicio")
+        .order_by("registrada_en")
+    )
+    total = atenciones.aggregate(total=Sum("monto_cobrado"))["total"] or Decimal("0.00")
+    return {
+        "atenciones": atenciones,
+        "total": total,
+        "sin_monto": atenciones.filter(monto_cobrado__isnull=True).count(),
+    }
 
 
 def atencion_con_auditoria(atencion: Atencion) -> Atencion:

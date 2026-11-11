@@ -7,13 +7,17 @@ class CitaSerializer(serializers.ModelSerializer):
     paciente_nombre = serializers.CharField(source="paciente.nombre_completo", read_only=True)
     profesional_nombre = serializers.CharField(source="profesional.nombre_completo", read_only=True)
     servicio_nombre = serializers.CharField(source="servicio.nombre", read_only=True)
+    # P11 precarga con él el monto cobrado (Práctica 7, Tabla 10).
+    servicio_precio = serializers.DecimalField(source="servicio.precio", max_digits=8,
+                                               decimal_places=2, read_only=True)
     tiene_atencion = serializers.SerializerMethodField()
 
     class Meta:
         model = Cita
         fields = [
             "id", "sede", "paciente", "paciente_nombre", "profesional", "profesional_nombre",
-            "servicio", "servicio_nombre", "inicio", "fin", "estado", "observaciones",
+            "servicio", "servicio_nombre", "servicio_precio", "inicio", "fin", "estado",
+            "observaciones",
             "motivo_cancelacion", "tiene_atencion", "creado_en",
         ]
         read_only_fields = ["id", "fin", "estado", "motivo_cancelacion", "creado_en"]

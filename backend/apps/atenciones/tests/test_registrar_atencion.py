@@ -1,4 +1,6 @@
 """Pruebas del registro de la atención (CU10): una por regla del servicio."""
+from decimal import Decimal
+
 import pytest
 from django.db import IntegrityError, connection, transaction
 
@@ -28,11 +30,11 @@ def cita(centro, podologa, sede, servicio, paciente, proximo_lunes_a_las_nueve):
     ))
 
 
-def _registrar(centro, usuario, cita, sede_id=None, notas=""):
+def _registrar(centro, usuario, cita, sede_id=None, notas="", monto=Decimal("60.00")):
     return registrar_atencion(
         centro=centro, usuario=usuario, cita_id=cita.pk,
         sede_id=cita.sede_id if sede_id is None else sede_id,
-        observaciones_clinicas=notas,
+        monto_cobrado=monto, observaciones_clinicas=notas,
     )
 
 
@@ -121,7 +123,7 @@ def test_rechaza_una_cita_que_no_pertenece_al_centro_que_registra(
     # una atención cruzada entre centros clientes.
     with pytest.raises(ReglaDeNegocio) as error:
         registrar_atencion(centro=otro_centro, usuario=podologa, cita_id=cita.pk,
-                           sede_id=cita.sede_id)
+                           sede_id=cita.sede_id, monto_cobrado=Decimal("60.00"))
 
     assert error.value.codigo == "cita-fuera-del-centro"
 
@@ -145,7 +147,8 @@ def test_rechaza_el_registro_si_no_hay_sede_activa(centro, podologa, cita):
     # elegida no hay contra qué comprobar la cita, y se rechaza en lugar de
     # aceptarla por omisión.
     with pytest.raises(ReglaDeNegocio) as error:
-        registrar_atencion(centro=centro, usuario=podologa, cita_id=cita.pk, sede_id=None)
+        registrar_atencion(centro=centro, usuario=podologa, cita_id=cita.pk, sede_id=None,
+                           monto_cobrado=Decimal("60.00"))
 
     assert error.value.codigo == "sin-sede-activa"
 
@@ -278,3 +281,17 @@ def test_la_auditoria_registra_el_alta_y_el_cierre_sin_copiar_las_notas(
     assert alta.usuario_id == podologa.pk
     assert cierre.datos == {"estado": "ATENDIDA"}
     assert "hallux" not in str(alta.datos)
+
+
+@pytest.mark.django_db(transaction=True)
+def test_la_base_rechaza_un_monto_negativo_aunque_se_salte_el_servicio(centro, podologa, cita):
+    # Garantiza que la restricción vive en la base: ni un script ni una vista
+    # futura pueden dejar un monto negativo que descuadre el registro diario.
+    with pytest.raises(IntegrityError), transaction.atomic():
+        Atencion.objects.create(
+            centro=centro, sede_id=cita.sede_id, cita=cita, paciente_id=cita.paciente_id,
+            profesional_id=cita.profesional_id, servicio_id=cita.servicio_id,
+            registrada_por=podologa, monto_cobrado=Decimal("-1.00"),
+        )
+
+    connection.close()

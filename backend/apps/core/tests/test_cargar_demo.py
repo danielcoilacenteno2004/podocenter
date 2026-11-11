@@ -115,7 +115,8 @@ def test_rehace_la_demostracion_aunque_ya_tenga_atenciones_registradas(demo):
         Cita.objects.filter(estado=Cita.Estado.PROGRAMADA).order_by("inicio").first()
     )
     registrar_atencion(centro=demo, usuario=cita.profesional, sede_id=cita.sede_id,
-                       cita_id=cita.pk, observaciones_clinicas="Ensayo de la exposición")
+                       cita_id=cita.pk, monto_cobrado=cita.servicio.precio,
+                       observaciones_clinicas="Ensayo de la exposición")
 
     call_command("cargar_demo", verbosity=0)
 
@@ -137,7 +138,8 @@ def test_deja_citas_en_curso_que_ya_se_pueden_atender(demo):
 
     cita = en_curso[0]
     atencion = registrar_atencion(centro=demo, usuario=cita.profesional,
-                                  sede_id=cita.sede_id, cita_id=cita.pk)
+                                  sede_id=cita.sede_id, cita_id=cita.pk,
+                                  monto_cobrado=cita.servicio.precio)
 
     assert atencion.cita_id == cita.pk
     assert cita.paciente.antecedentes  # para que P11 muestre la cabecera completa

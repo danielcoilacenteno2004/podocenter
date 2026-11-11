@@ -20,6 +20,8 @@ from apps.usuarios.roles import Rol
 from ...conftest import CLAVE_DE_PRUEBA
 
 NOTAS = "Hiperqueratosis plantar; se deslamina"
+# El monto cobrado es obligatorio al registrar (Práctica 7, Tabla 10).
+MONTO = {"monto_cobrado": "60.00"}
 
 
 @pytest.fixture
@@ -46,7 +48,7 @@ def test_post_registra_la_atencion_y_devuelve_los_datos_copiados_de_la_cita(clie
     # cita, no lo que envíe el navegador.
     respuesta = cliente.post(
         "/api/v1/atenciones/",
-        {"cita": cita.pk, "observaciones_clinicas": NOTAS, "servicio": 999999},
+        {"cita": cita.pk, **MONTO, "observaciones_clinicas": NOTAS, "servicio": 999999},
         format="json",
     )
 
@@ -63,7 +65,7 @@ def test_una_cita_no_atendible_devuelve_el_error_en_formato_rfc_9457(cliente, ci
     # genérico ni un 500.
     cancelar_cita(cita=cita, motivo="Reprogramada por el paciente")
 
-    respuesta = cliente.post("/api/v1/atenciones/", {"cita": cita.pk}, format="json")
+    respuesta = cliente.post("/api/v1/atenciones/", {"cita": cita.pk, **MONTO}, format="json")
 
     assert respuesta.status_code == 422
     assert respuesta["Content-Type"] == "application/problem+json"
@@ -75,9 +77,9 @@ def test_una_cita_no_atendible_devuelve_el_error_en_formato_rfc_9457(cliente, ci
 def test_la_segunda_atencion_de_una_cita_llega_con_su_propio_codigo(cliente, cita):
     # Garantiza que un reenvío desde P11 se distingue de una cita cancelada:
     # la interfaz puede decir «ya estaba registrada» y llevar a la ficha.
-    cliente.post("/api/v1/atenciones/", {"cita": cita.pk}, format="json")
+    cliente.post("/api/v1/atenciones/", {"cita": cita.pk, **MONTO}, format="json")
 
-    respuesta = cliente.post("/api/v1/atenciones/", {"cita": cita.pk}, format="json")
+    respuesta = cliente.post("/api/v1/atenciones/", {"cita": cita.pk, **MONTO}, format="json")
 
     assert respuesta.status_code == 422
     assert respuesta.data["codigo"] == "atencion-duplicada"
@@ -90,7 +92,7 @@ def test_sin_la_cabecera_de_sede_la_api_rechaza_el_registro(podologa, cita):
     cliente = APIClient()
     cliente.force_authenticate(user=podologa)
 
-    respuesta = cliente.post("/api/v1/atenciones/", {"cita": cita.pk}, format="json")
+    respuesta = cliente.post("/api/v1/atenciones/", {"cita": cita.pk, **MONTO}, format="json")
 
     assert respuesta.status_code == 422
     assert respuesta.data["codigo"] == "sin-sede-activa"
@@ -119,8 +121,10 @@ def test_una_cita_de_otro_centro_responde_como_si_no_existiera(
     )
     activar_centro(cita.centro_id)
 
-    ajena = cliente.post("/api/v1/atenciones/", {"cita": de_otro_centro.pk}, format="json")
-    inexistente = cliente.post("/api/v1/atenciones/", {"cita": 999999}, format="json")
+    ajena = cliente.post("/api/v1/atenciones/", {"cita": de_otro_centro.pk, **MONTO},
+                         format="json")
+    inexistente = cliente.post("/api/v1/atenciones/", {"cita": 999999, **MONTO},
+                               format="json")
 
     assert ajena.status_code == inexistente.status_code == 422
     assert ajena.data["codigo"] == inexistente.data["codigo"] == "cita-fuera-del-centro"
@@ -135,7 +139,8 @@ def test_el_listado_no_expone_las_observaciones_y_la_ficha_deja_rastro(cliente, 
     # Garantiza que la nota clínica solo sale por la ficha, y que cada lectura
     # de la ficha queda en la auditoría, igual que la del paciente (RF05).
     creada = cliente.post("/api/v1/atenciones/",
-                          {"cita": cita.pk, "observaciones_clinicas": NOTAS}, format="json")
+                          {"cita": cita.pk, **MONTO, "observaciones_clinicas": NOTAS},
+                          format="json")
 
     listado = cliente.get("/api/v1/atenciones/")
     ficha = cliente.get(f"/api/v1/atenciones/{creada.data['id']}/")
@@ -152,7 +157,7 @@ def test_la_api_no_permite_editar_ni_borrar_una_atencion(cliente, cita):
     # Garantiza que la atención es inmutable desde la API: es un hecho
     # clínico ya ocurrido, y corregirla o anularla será una acción explícita
     # con motivo, no un PATCH o un DELETE.
-    creada = cliente.post("/api/v1/atenciones/", {"cita": cita.pk}, format="json")
+    creada = cliente.post("/api/v1/atenciones/", {"cita": cita.pk, **MONTO}, format="json")
     ruta = f"/api/v1/atenciones/{creada.data['id']}/"
 
     assert cliente.patch(ruta, {"observaciones_clinicas": "x"}, format="json").status_code == 405
@@ -170,7 +175,7 @@ def test_la_administradora_del_centro_tambien_registra_atenciones(administradora
     cliente.force_authenticate(user=administradora)
     cliente.credentials(HTTP_X_SEDE=str(sede.pk))
 
-    respuesta = cliente.post("/api/v1/atenciones/", {"cita": cita.pk}, format="json")
+    respuesta = cliente.post("/api/v1/atenciones/", {"cita": cita.pk, **MONTO}, format="json")
 
     assert respuesta.status_code == 201
     assert respuesta.data["registrada_por"] == administradora.pk
@@ -187,7 +192,7 @@ def test_el_administrador_de_plataforma_no_registra_ni_lee_atenciones(cita):
     cliente = APIClient()
     cliente.force_authenticate(user=plataforma)
 
-    assert cliente.post("/api/v1/atenciones/", {"cita": cita.pk},
+    assert cliente.post("/api/v1/atenciones/", {"cita": cita.pk, **MONTO},
                         format="json").status_code == 403
     assert cliente.get("/api/v1/atenciones/").status_code == 403
     assert Atencion.objects.count() == 0
@@ -197,7 +202,8 @@ def test_el_administrador_de_plataforma_no_registra_ni_lee_atenciones(cita):
 def test_sin_sesion_no_se_registra_ninguna_atencion(cita):
     # Garantiza que el dato clínico no se escribe sin una persona
     # identificada detrás: sin sesión, la API responde antes de tocar la base.
-    respuesta = APIClient().post("/api/v1/atenciones/", {"cita": cita.pk}, format="json")
+    respuesta = APIClient().post("/api/v1/atenciones/", {"cita": cita.pk, **MONTO},
+                                 format="json")
 
     assert respuesta.status_code == 403
     assert Atencion.objects.count() == 0
@@ -212,7 +218,7 @@ def test_la_agenda_marca_la_cita_que_ya_tiene_atencion(cliente, cita):
     fecha = cita.inicio.date().isoformat()
     antes = cliente.get("/api/v1/citas/agenda/", {"fecha": fecha}).data["citas"][0]
 
-    cliente.post("/api/v1/atenciones/", {"cita": cita.pk}, format="json")
+    cliente.post("/api/v1/atenciones/", {"cita": cita.pk, **MONTO}, format="json")
     despues = cliente.get("/api/v1/citas/agenda/", {"fecha": fecha}).data["citas"][0]
     ficha = cliente.get(f"/api/v1/citas/{cita.pk}/").data
 
@@ -247,9 +253,46 @@ def test_el_historial_de_un_paciente_trae_el_nombre_de_la_sede(cliente, cita, se
     # Garantiza lo que necesita el historial de P10: abarca todas las sedes del
     # centro y la podóloga no puede consultar /sedes/, así que el nombre tiene
     # que llegar en la propia fila y no solo su identificador.
-    cliente.post("/api/v1/atenciones/", {"cita": cita.pk}, format="json")
+    cliente.post("/api/v1/atenciones/", {"cita": cita.pk, **MONTO}, format="json")
 
     fila = cliente.get("/api/v1/atenciones/", {"paciente": cita.paciente_id}).data["results"][0]
 
     assert fila["sede"] == sede.pk
     assert fila["sede_nombre"] == sede.nombre
+
+
+# --- Monto cobrado (P11, Tabla 10) -------------------------------------------------
+
+@pytest.mark.django_db
+def test_el_monto_cobrado_es_obligatorio(cliente, cita):
+    # Garantiza que el registro diario no tenga huecos: una atención nueva
+    # sin monto no se registra y la cita sigue programada.
+    respuesta = cliente.post("/api/v1/atenciones/", {"cita": cita.pk}, format="json")
+
+    assert respuesta.status_code == 400
+    assert "monto_cobrado" in respuesta.data["detail"]
+    assert Atencion.objects.count() == 0
+    cita.refresh_from_db()
+    assert cita.estado == Cita.Estado.PROGRAMADA
+
+
+@pytest.mark.django_db
+def test_no_admite_un_monto_negativo(cliente, cita):
+    # Garantiza que un error de tecleo no reste del total del día.
+    respuesta = cliente.post("/api/v1/atenciones/", {"cita": cita.pk, "monto_cobrado": "-5.00"},
+                             format="json")
+
+    assert respuesta.status_code == 400
+    assert Atencion.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_el_monto_cobrado_puede_diferir_del_precio_del_catalogo(cliente, cita):
+    # Garantiza que se guarda lo que se cobró de verdad, no el precio de
+    # lista: un descuento o un servicio distinto se reflejan en la caja.
+    respuesta = cliente.post("/api/v1/atenciones/", {"cita": cita.pk, "monto_cobrado": "45.50"},
+                             format="json")
+
+    assert respuesta.status_code == 201
+    assert respuesta.data["monto_cobrado"] == "45.50"
+    assert str(cita.servicio.precio) != "45.50"

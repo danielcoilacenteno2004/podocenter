@@ -19,6 +19,10 @@ const LIMITE = 2000
 const cita = ref(null)
 const paciente = ref(null)
 const observaciones = ref('')
+// Precargado con el precio del servicio y editable (Práctica 7, Tabla 10): lo
+// que se guarda es lo que se cobró de verdad, que alimenta el registro diario.
+const monto = ref('')
+const montoConError = ref(false)
 const cargando = ref(true)
 const guardando = ref(false)
 const errorDeCarga = ref(null)
@@ -54,6 +58,7 @@ async function cargar () {
   try {
     const { data } = await api.get(`/citas/${props.citaId}/`)
     cita.value = data
+    monto.value = data.servicio_precio ?? ''
     // Lectura de la ficha clínica: el servidor la deja en la auditoría.
     paciente.value = (await api.get(`/pacientes/${data.paciente}/`)).data
   } catch (problema) {
@@ -70,9 +75,11 @@ async function cargar () {
 async function confirmar () {
   guardando.value = true
   errorAlGuardar.value = null
+  montoConError.value = false
   try {
     await api.post('/atenciones/', {
       cita: cita.value.id,
+      monto_cobrado: monto.value,
       observaciones_clinicas: observaciones.value.trim()
     })
     router.push({
@@ -81,6 +88,7 @@ async function confirmar () {
     })
   } catch (problema) {
     errorAlGuardar.value = problema.mensaje
+    montoConError.value = 'monto_cobrado' in (problema.campos ?? {})
     guardando.value = false
   }
 }
@@ -137,6 +145,22 @@ onMounted(cargar)
       </p>
 
       <form v-else class="tarjeta" aria-label="Atención" @submit.prevent="confirmar">
+        <div class="campo campo-monto">
+          <label for="monto">Monto cobrado (S/) *</label>
+          <input
+            id="monto"
+            v-model="monto"
+            type="number"
+            step="0.01"
+            inputmode="decimal"
+            required
+            :aria-invalid="montoConError"
+            aria-describedby="ayuda-monto"
+          >
+          <p id="ayuda-monto" class="ayuda">
+            Precio del servicio; cámbielo si cobró otro importe.
+          </p>
+        </div>
         <div class="campo">
           <label for="observaciones">Observación clínica</label>
           <textarea
@@ -155,7 +179,7 @@ onMounted(cargar)
 
         <p v-if="errorAlGuardar" role="alert">{{ errorAlGuardar }}</p>
 
-        <button type="submit" :disabled="guardando">
+        <button type="submit" :disabled="guardando || monto === '' || monto === null">
           {{ guardando ? 'Guardando…' : 'Confirmar atención' }}
         </button>
       </form>

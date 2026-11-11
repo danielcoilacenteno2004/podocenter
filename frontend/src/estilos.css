@@ -197,6 +197,14 @@ label.casilla .ayuda { display: block; }
 .secundario-celda { display: block; color: var(--tinta-suave); font-size: .85rem; }
 .confirmacion span { font-weight: 600; color: var(--alerta); font-size: .9rem; }
 table.administracion td.accion { width: 1%; }
+/* --- registro diario (P16) y monto de P11 ------------------------------ */
+table.registro-diario .monto { text-align: right; }
+table.registro-diario tfoot th, table.registro-diario tfoot td {
+  border-top: 2px solid var(--borde); border-bottom: 0; font-weight: 700; padding-top: .75rem;
+}
+table.registro-diario tfoot .total { font-size: 1.15rem; }
+.campo-monto { max-width: 14rem; }
+
 /* --- centros clientes (P19) -------------------------------------------- */
 .aviso-ok p { margin: 0; }
 .credencial-temporal { margin-top: .6rem; padding-top: .6rem; border-top: 1px dashed #bfe0cb; }

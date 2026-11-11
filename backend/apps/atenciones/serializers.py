@@ -17,8 +17,8 @@ class AtencionResumenSerializer(serializers.ModelSerializer):
         model = Atencion
         fields = [
             "id", "cita", "sede", "sede_nombre", "paciente", "paciente_nombre", "profesional",
-            "profesional_nombre", "servicio", "servicio_nombre", "registrada_por",
-            "registrada_en",
+            "profesional_nombre", "servicio", "servicio_nombre", "monto_cobrado",
+            "registrada_por", "registrada_en",
         ]
         read_only_fields = fields
 
@@ -28,6 +28,8 @@ class AtencionSerializer(AtencionResumenSerializer):
     # cita los decide el servicio, con su código estable, y no un 400 genérico
     # del serializador.
     cita = serializers.IntegerField(source="cita_id")
+    # Tabla 10 de la Práctica 7: obligatorio, mayor o igual a 0, dos decimales.
+    monto_cobrado = serializers.DecimalField(max_digits=8, decimal_places=2, min_value=0)
     # Límite fijado en la especificación de P11 (Práctica N.° 7, Tabla 10).
     observaciones_clinicas = serializers.CharField(
         max_length=2000, required=False, allow_blank=True, default=""

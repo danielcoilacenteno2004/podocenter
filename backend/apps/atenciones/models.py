@@ -5,6 +5,7 @@ eso guarda su propia copia de paciente, profesional y servicio tomada al
 registrarla: si después alguien edita la cita, la ficha clínica no puede
 cambiar con ella.
 """
+from django.core.validators import MinValueValidator
 from django.db import models
 
 from apps.core.campos import TextoCifrado
@@ -21,6 +22,11 @@ class Atencion(ModeloDeCentro):
     servicio = models.ForeignKey("catalogo.Servicio", on_delete=models.PROTECT,
                                  related_name="atenciones")
     observaciones_clinicas = TextoCifrado(blank=True, default="")
+    # Lo que se cobró de verdad (P11, Tabla 10): puede diferir del precio del
+    # catálogo. Nulo solo en las atenciones registradas antes de existir el
+    # campo; desde entonces el registro lo exige.
+    monto_cobrado = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
+                                        validators=[MinValueValidator(0)])
     registrada_por = models.ForeignKey("usuarios.Usuario", on_delete=models.PROTECT,
                                        related_name="atenciones_registradas")
     registrada_en = models.DateTimeField(auto_now_add=True)
@@ -32,6 +38,13 @@ class Atencion(ModeloDeCentro):
         ordering = ["-registrada_en"]
         indexes = [
             models.Index(fields=["paciente", "-registrada_en"], name="idx_atencion_paciente"),
+            models.Index(fields=["sede", "registrada_en"], name="idx_atencion_sede_dia"),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(monto_cobrado__gte=0) | models.Q(monto_cobrado__isnull=True),
+                name="ck_atencion_monto_no_negativo",
+            ),
         ]
 
     def __str__(self) -> str:
