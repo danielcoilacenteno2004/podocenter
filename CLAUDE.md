@@ -50,6 +50,25 @@ Cuentas del entorno de demostración, todas con la contraseña `Podocenter2026`:
 `cargar_demo` borra y rehace el centro de demostración; con `--conservar` no
 toca nada si ya existe.
 
+## Python 3.12, no otra versión
+
+El proyecto **exige Python 3.12**. Es la versión de la imagen de producción
+(`infra/Dockerfile`: `python:3.12-slim`), la del pipeline
+(`.github/workflows/ci.yml`) y la que declara el informe (2.2). Las pruebas,
+la cobertura y el análisis de seguridad que cita el informe se obtienen con
+esa versión.
+
+Con otra versión la verificación deja de ser fiable:
+
+- `psycopg[binary]==3.2.3` no tiene binarios para Python 3.14: `pip install`
+  falla y `pip-audit -r requirements.txt` también.
+- `bandit` 1.8.0 en Python 3.14 se saltaba todos los archivos y terminaba con
+  código 0, es decir, aprobaba en falso (corregido al subir a 1.9.4, que se
+  comprobó contra un archivo deliberadamente inseguro en 3.12 y en 3.14).
+
+Si en tu máquina hay otra versión, crea el entorno con 3.12 (por ejemplo,
+`uv venv --python 3.12 .venv`) antes de dar por buena cualquier verificación.
+
 ## Verificación antes de dar algo por terminado
 
 ```bash
