@@ -197,10 +197,18 @@ label.casilla .ayuda { display: block; }
 .secundario-celda { display: block; color: var(--tinta-suave); font-size: .85rem; }
 .confirmacion span { font-weight: 600; color: var(--alerta); font-size: .9rem; }
 table.administracion td.accion { width: 1%; }
+/* --- sin permiso o error (P21) ----------------------------------------- */
+.error-tarjeta { max-width: 520px; text-align: center; padding: 2rem 1.5rem; }
+.error-tarjeta p { margin: .4rem 0; }
+.error-icono { font-size: 2.4rem; line-height: 1; color: var(--aviso); margin-bottom: .6rem !important; }
+.error-ayuda { color: var(--tinta-suave); }
+.error-tarjeta a.boton { margin-top: 1.1rem; }
+.error-codigo { margin-top: 1.4rem !important; font-size: .8rem; color: var(--tinta-suave); font-style: italic; }
+
 /* --- registrar paciente (P09) ------------------------------------------ */
 .fila-tres { grid-template-columns: 1fr 1fr 1fr; }
 .fila-documento { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); }
-a.boton-grande { padding: .55rem 1.1rem; font-size: 1rem; }
+a.boton.boton-grande { padding: .55rem 1.1rem; font-size: 1rem; }
 a.boton-secundario {
   display: inline-block; padding: .55rem 1.1rem; border-radius: 8px; font-weight: 600;
   background: transparent; color: var(--marca-oscura); border: 1px solid var(--marca); text-decoration: none;

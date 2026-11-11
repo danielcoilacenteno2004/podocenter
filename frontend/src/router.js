@@ -16,7 +16,9 @@ const rutas = [
   { path: '/usuarios', name: 'usuarios', component: () => import('./views/UsuariosView.vue'), meta: { roles: ['ADMIN_CENTRO'] } },
   { path: '/sedes', name: 'sedes', component: () => import('./views/SedesView.vue'), meta: { roles: ['ADMIN_CENTRO'] } },
   { path: '/servicios', name: 'servicios', component: () => import('./views/ServiciosView.vue'), meta: { roles: ['ADMIN_CENTRO'] } },
-  { path: '/:rutaNoEncontrada(.*)*', name: 'error', component: () => import('./views/ErrorView.vue'), meta: { publica: true } }
+  // P21: la misma plantilla para la falta de permiso y para la ruta inexistente.
+  { path: '/sin-permiso', name: 'sin-permiso', component: () => import('./views/ErrorView.vue'), props: { codigo: 403 } },
+  { path: '/:rutaNoEncontrada(.*)*', name: 'error', component: () => import('./views/ErrorView.vue'), props: { codigo: 404 }, meta: { publica: true } }
 ]
 
 export const router = createRouter({ history: createWebHistory(), routes: rutas })
@@ -30,9 +32,10 @@ router.beforeEach((destino) => {
     return { name: 'elegir-sede' }
   }
   // El menú ya no muestra lo que el rol no permite; esto cubre a quien
-  // escribe la dirección a mano. El servidor responde 403 de todos modos.
+  // escribe la dirección a mano: ve P21 en lugar de volver al panel sin
+  // saber por qué. El servidor responde 403 de todos modos.
   if (destino.meta.roles && !destino.meta.roles.includes(sesion.usuario?.rol)) {
-    return { name: 'panel' }
+    return { name: 'sin-permiso', replace: true }
   }
   return true
 })
