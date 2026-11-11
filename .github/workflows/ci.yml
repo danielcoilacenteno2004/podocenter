@@ -13,12 +13,14 @@ jobs:
     services:
       postgres:
         image: postgres:17
+        # El usuario de la imagen es superusuario y un superusuario se salta
+        # siempre el RLS: la aplicación y las pruebas usan otro rol, «podo»,
+        # que se crea sin privilegios en el primer paso.
         env:
-          POSTGRES_DB: podocenter
-          POSTGRES_USER: podo
-          POSTGRES_PASSWORD: podo
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
         options: >-
-          --health-cmd "pg_isready -U podo"
+          --health-cmd "pg_isready -U postgres"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -31,6 +33,12 @@ jobs:
       DJANGO_SECRET_KEY: clave-solo-para-la-integracion-continua
 
     steps:
+      - name: Rol de la aplicación sin superusuario
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -v ON_ERROR_STOP=1             -c "CREATE ROLE podo LOGIN PASSWORD 'podo' CREATEDB NOSUPERUSER NOBYPASSRLS"             -c "CREATE DATABASE podocenter OWNER podo"
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
