@@ -56,7 +56,7 @@ toca nada si ya existe.
 ruff check .                                   # estilo; debe salir limpio
 bandit -c pyproject.toml -r backend/apps       # seguridad del código
 pip-audit -r requirements.txt                  # dependencias vulnerables
-pytest --cov --cov-fail-under=80               # 108 pruebas, cobertura ≥ 80 %
+pytest --cov --cov-fail-under=80               # 115 pruebas, cobertura ≥ 80 %
 ```
 
 El pipeline rechaza un hallazgo sin corregir, una prueba en rojo, cobertura por

@@ -1,7 +1,5 @@
 from rest_framework import serializers
 
-from apps.citas.models import Cita
-
 from .models import Atencion
 
 _COPIADOS_DE_LA_CITA = ["sede", "paciente", "profesional", "servicio"]
@@ -25,9 +23,10 @@ class AtencionResumenSerializer(serializers.ModelSerializer):
 
 
 class AtencionSerializer(AtencionResumenSerializer):
-    # Declarado a mano para que no se añada el validador de unicidad del uno a
-    # uno: una cita ya atendida la rechaza el servicio con su código estable.
-    cita = serializers.PrimaryKeyRelatedField(queryset=Cita.objects.all())
+    # Entero y no relación: así la existencia, el centro y la unicidad de la
+    # cita los decide el servicio, con su código estable, y no un 400 genérico
+    # del serializador.
+    cita = serializers.IntegerField(source="cita_id")
     # Límite fijado en la especificación de P11 (Práctica N.° 7, Tabla 10).
     observaciones_clinicas = serializers.CharField(
         max_length=2000, required=False, allow_blank=True, default=""

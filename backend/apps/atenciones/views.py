@@ -36,7 +36,8 @@ class AtencionViewSet(ContextoDeCentro, mixins.CreateModelMixin, mixins.ListMode
         serializer.instance = registrar_atencion(
             centro=self.request.user.centro,
             usuario=self.request.user,
-            cita=datos["cita"],
+            sede_id=self.request.sede_id,
+            cita_id=datos["cita_id"],
             observaciones_clinicas=datos.get("observaciones_clinicas", ""),
         )
 

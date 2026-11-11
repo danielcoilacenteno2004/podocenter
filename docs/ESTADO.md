@@ -30,7 +30,7 @@ se hizo en ellas.
 
 ## 2. Lo que está sólido
 
-- **108 pruebas**, **93.1 %** de cobertura de sentencias, sobre PostgreSQL
+- **115 pruebas**, **93.0 %** de cobertura de sentencias, sobre PostgreSQL
   real y no sobre una base en memoria. Una falla por la intercalación de la
   base: `test_el_listado_viene_ordenado_por_apellidos` compara con `sorted()`
   de Python, que pone «Álvarez» después de «Zapata».
