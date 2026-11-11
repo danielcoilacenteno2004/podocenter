@@ -78,8 +78,8 @@ medición válida para el RNF02 es la que se haga con la podóloga.
   tres en la API de usuarios y tres en atenciones. Comprueban que un centro
   no ve, no abre, no modifica y no registra atenciones sobre datos de otro. Es
   lo que sostiene el modelo de arriendo ante el jurado.
-- **81 commits** con «un commit, un cambio», contando el que actualiza este
-  documento: 42 de Sergio Daniel Coila Centeno y 39 de Andre Nicolas Huaroc
+- **84 commits** con «un commit, un cambio», contando el que actualiza este
+  documento: 44 de Sergio Daniel Coila Centeno y 40 de Andre Nicolas Huaroc
   Condori. La identidad de git está fijada en la configuración del
   repositorio para que no vuelva a entrar un autor con otro nombre.
 - Entorno de demostración reproducible con un comando y probado con nueve
