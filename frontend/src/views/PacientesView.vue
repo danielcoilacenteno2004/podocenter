@@ -77,7 +77,11 @@ onMounted(cargar)
         <tbody>
           <tr v-for="paciente in pacientes" :key="paciente.id">
             <td class="numero">{{ paciente.documento }}</td>
-            <td>{{ paciente.apellidos }}, {{ paciente.nombres }}</td>
+            <td>
+              <router-link :to="{ name: 'ficha-paciente', params: { pacienteId: paciente.id } }">
+                {{ paciente.apellidos }}, {{ paciente.nombres }}
+              </router-link>
+            </td>
             <td>{{ edad(paciente.fecha_nacimiento) }}</td>
             <td class="numero">{{ paciente.telefono || '—' }}</td>
             <td>

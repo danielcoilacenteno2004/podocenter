@@ -215,13 +215,20 @@ td.accion { text-align: right; }
   background: var(--aviso-tenue); border: 1px solid #f0d9a8; border-left: 4px solid var(--aviso);
   border-radius: 8px; padding: .8rem 1rem;
 }
-.antecedentes h3 {
+.antecedentes h2, .antecedentes h3 {
   margin: 0 0 .3rem; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em;
   color: var(--aviso);
 }
 .antecedentes p { margin: 0; font-weight: 600; }
 .antecedentes.vacios { background: var(--fondo); border-color: var(--borde); }
-.antecedentes.vacios h3 { color: var(--tinta-suave); }
+.antecedentes.vacios h2, .antecedentes.vacios h3 { color: var(--tinta-suave); }
+
+/* --- ficha del paciente (P10) ------------------------------------------ */
+.bloques-ficha { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); margin-bottom: 1.25rem; }
+.consentimiento { border: 1px dashed var(--borde); border-radius: 8px; padding: .8rem 1rem; background: var(--superficie); }
+.consentimiento h2 { margin: 0 0 .3rem; font-size: .95rem; }
+.consentimiento p { margin: 0; color: var(--tinta-suave); font-size: .92rem; }
+.ver-mas { margin-top: .9rem; }
 .antecedentes.vacios p { font-weight: 400; color: var(--tinta-suave); }
 
 textarea {
@@ -241,6 +248,7 @@ textarea:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
   table { font-size: .88rem; }
   .cabecera-atencion { grid-template-columns: 1fr; }
   .fila-campos { grid-template-columns: 1fr; }
+  .bloques-ficha { grid-template-columns: 1fr; }
 
   /* En el celular cada cita es una tarjeta: con seis columnas la tabla se
      salía de la pantalla y «Registrar atención» quedaba fuera de alcance,

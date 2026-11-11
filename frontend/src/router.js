@@ -10,6 +10,7 @@ const rutas = [
   { path: '/agenda', name: 'agenda', component: () => import('./views/AgendaView.vue') },
   { path: '/citas/:citaId/atencion', name: 'registrar-atencion', component: () => import('./views/RegistrarAtencionView.vue'), props: true },
   { path: '/pacientes', name: 'pacientes', component: () => import('./views/PacientesView.vue') },
+  { path: '/pacientes/:pacienteId', name: 'ficha-paciente', component: () => import('./views/FichaPacienteView.vue'), props: true },
   { path: '/:rutaNoEncontrada(.*)*', name: 'error', component: () => import('./views/ErrorView.vue'), meta: { publica: true } }
 ]
 
