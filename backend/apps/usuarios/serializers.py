@@ -9,14 +9,23 @@ class UsuarioSerializer(serializers.ModelSerializer):
     sedes_ids = serializers.ListField(
         child=serializers.IntegerField(), write_only=True, required=False, default=list
     )
+    # Columna «Sedes» de P17: lectura de las asignaciones vigentes. Escribirlas
+    # sigue siendo solo cosa del alta (sedes_ids).
+    sedes = serializers.SerializerMethodField()
 
     class Meta:
         model = Usuario
         fields = [
             "id", "correo", "nombres", "apellidos", "nombre_completo", "rol",
-            "esta_activo", "segundo_factor_activo", "sedes_ids", "creado_en",
+            "esta_activo", "segundo_factor_activo", "sedes_ids", "sedes", "creado_en",
         ]
         read_only_fields = ["id", "creado_en", "segundo_factor_activo"]
+
+    def get_sedes(self, usuario) -> list[dict]:
+        return [
+            {"id": a.sede_id, "nombre": a.sede.nombre}
+            for a in usuario.asignaciones.all() if a.esta_activa
+        ]
 
     def validate_rol(self, valor: str) -> str:
         if valor == Rol.ADMIN_PLATAFORMA:

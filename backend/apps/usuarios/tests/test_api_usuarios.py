@@ -346,3 +346,13 @@ def test_el_usuario_nuevo_puede_iniciar_sesion_con_la_clave_que_se_le_asigna(
 
     creada = Usuario.objects.get(correo="clave@centro.pe")
     assert creada.check_password(CLAVE_DE_PRUEBA)
+
+
+@pytest.mark.django_db
+def test_el_listado_trae_las_sedes_asignadas_de_cada_usuario(cliente, podologa, sede):
+    # Garantiza la columna «Sedes» de P17: sin ella la administradora no ve
+    # en qué sede trabaja cada persona sin abrirla una por una.
+    filas = cliente.get(USUARIOS).data["results"]
+
+    fila = next(f for f in filas if f["id"] == podologa.pk)
+    assert fila["sedes"] == [{"id": sede.pk, "nombre": sede.nombre}]
