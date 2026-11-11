@@ -66,7 +66,7 @@ medición válida para el RNF02 es la que se haga con la podóloga.
 
 ## 2. Lo que está sólido
 
-- **124 pruebas** en verde, **93.7 %** de cobertura de sentencias, sobre
+- **128 pruebas** en verde, **93.8 %** de cobertura de sentencias, sobre
   PostgreSQL real y no sobre una base en memoria. La cifra varía unas
   décimas entre ejecuciones.
 - **Cero vulnerabilidades** conocidas en las dependencias tras subir a Django
@@ -78,8 +78,8 @@ medición válida para el RNF02 es la que se haga con la podóloga.
   tres en la API de usuarios y tres en atenciones. Comprueban que un centro
   no ve, no abre, no modifica y no registra atenciones sobre datos de otro. Es
   lo que sostiene el modelo de arriendo ante el jurado.
-- **62 commits** con «un commit, un cambio», contando el que actualiza este
-  documento: 33 de Sergio Daniel Coila Centeno y 29 de Andre Nicolas Huaroc
+- **66 commits** con «un commit, un cambio», contando el que actualiza este
+  documento: 35 de Sergio Daniel Coila Centeno y 31 de Andre Nicolas Huaroc
   Condori. La identidad de git está fijada en la configuración del
   repositorio para que no vuelva a entrar un autor con otro nombre.
 - Entorno de demostración reproducible con un comando y probado con nueve
@@ -126,6 +126,15 @@ Registradas en la Práctica N.° 7 y pendientes de decisión de alcance:
 | RF07 | Recordatorios por mensajería, pendientes de aprobación del proveedor |
 
 ## 5. Lo que hay que decidir
+
+- **La escritura directa en `/pacientes/`, antes de construir P09.** El
+  `PATCH` cambia los antecedentes (dato clínico cifrado) sin pasar por
+  `servicios.py` y sin dejar rastro en la auditoría, y el `DELETE` de un
+  paciente con citas responde con un 500 (comprobado el 11/11/2026). Es el
+  mismo agujero que se cerró en `/citas/`, pero aquí no basta con quitarlos:
+  P09 necesita editar. Falta decidir qué se puede editar (¿el documento?) y
+  pasarlo por un servicio auditado; el borrado debería ser la baja lógica
+  que ya existe (`esta_activo`).
 
 - **Qué entra de Atenciones el 12/11.** O se añade al menos el monto cobrado
   (una migración, el campo en P11 y su validación), o se deja por escrito que

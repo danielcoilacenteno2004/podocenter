@@ -75,7 +75,7 @@ Si en tu máquina hay otra versión, crea el entorno con 3.12 (por ejemplo,
 ruff check .                                   # estilo; debe salir limpio
 bandit -c pyproject.toml -r backend/apps       # seguridad del código
 pip-audit -r requirements.txt                  # dependencias vulnerables
-pytest --cov --cov-fail-under=80               # 124 pruebas, cobertura ≥ 80 %
+pytest --cov --cov-fail-under=80               # 128 pruebas, cobertura ≥ 80 %
 ```
 
 El pipeline rechaza un hallazgo sin corregir, una prueba en rojo, cobertura por
