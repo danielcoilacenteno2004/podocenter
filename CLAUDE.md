@@ -56,7 +56,7 @@ toca nada si ya existe.
 ruff check .                                   # estilo; debe salir limpio
 bandit -c pyproject.toml -r backend/apps       # seguridad del código
 pip-audit -r requirements.txt                  # dependencias vulnerables
-pytest --cov --cov-fail-under=80               # 95 pruebas, cobertura ≥ 80 %
+pytest --cov --cov-fail-under=80               # 108 pruebas, cobertura ≥ 80 %
 ```
 
 El pipeline rechaza un hallazgo sin corregir, una prueba en rojo, cobertura por
@@ -88,9 +88,10 @@ documento deja de ser cierto.
 
 Construido: Cuentas y centros, Usuarios y roles, Sedes con horario, Catálogo de
 servicios, Pacientes con consentimiento versionado y antecedentes cifrados,
-Citas con agenda filtrable y panel del día segmentado.
+Citas con agenda filtrable y panel del día segmentado, Atenciones en el
+backend (modelo, API y RLS; sin monto ni insumos).
 
-No construido: **Atenciones** (pantalla P11, caso de uso CU10 — comprometido
+No construido: **pantalla P11 de Atenciones** (caso de uso CU10 — comprometido
 para la primera entrega), Inventario, Registro diario, Notificaciones
 (RF07, pendiente de aprobación del proveedor de mensajería).
 

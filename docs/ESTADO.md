@@ -19,7 +19,7 @@ Contra eso, el estado real es:
 | Pacientes con consentimiento | Terminado |
 | Citas sin recordatorios | Terminado, con filtros y panel |
 | Servicios | API terminada; **sin pantalla de gestión** |
-| **Atenciones** | **No existe**: ni modelo, ni endpoint, ni pantalla |
+| **Atenciones** | **Solo backend**: modelo, `POST /api/v1/atenciones/` y RLS. Sin pantalla P11, sin monto cobrado y sin insumos |
 | Desplegado en producción | **No**: la infraestructura está escrita, nada corre en la nube |
 | Validado con la usuaria | **No**: la prueba de usabilidad está diseñada, no aplicada |
 
@@ -30,8 +30,10 @@ se hizo en ellas.
 
 ## 2. Lo que está sólido
 
-- **95 pruebas** en verde, **93.6 %** de cobertura de sentencias, sobre
-  PostgreSQL 17 real y no sobre una base en memoria.
+- **108 pruebas**, **93.1 %** de cobertura de sentencias, sobre PostgreSQL
+  real y no sobre una base en memoria. Una falla por la intercalación de la
+  base: `test_el_listado_viene_ordenado_por_apellidos` compara con `sorted()`
+  de Python, que pone «Álvarez» después de «Zapata».
 - **Cero vulnerabilidades** conocidas en las dependencias tras subir a Django
   5.2 LTS, DRF 3.18.2, django-filter 25.2 y cryptography 50.0.2.
 - `ruff` y `bandit` limpios.
