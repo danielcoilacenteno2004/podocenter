@@ -8,11 +8,13 @@
 // Abrir la ficha queda en la bitácora de auditoría: lo registra el servidor
 // al responder GET /pacientes/{id}/.
 //
-// Del wireframe no se construyen aún: «Editar paciente» (P09), «Ver
-// evidencia» del consentimiento, el filtro por año, las columnas Monto e
-// Insumos (no existen en la atención) y «Ver detalle» (P25).
+// «Ver detalle» abre P25. Del wireframe no se construyen aún: «Editar
+// paciente» (la edición espera a un servicio que la audite), «Ver evidencia»
+// del consentimiento, el filtro por año y las columnas Monto e Insumos (no
+// existen en la atención).
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import DetalleAtencionDialogo from '../components/DetalleAtencionDialogo.vue'
 import { api } from '../services/api'
 
 const props = defineProps({ pacienteId: { type: String, required: true } })
@@ -24,6 +26,7 @@ const total = ref(0)
 const cargando = ref(true)
 const cargandoMas = ref(false)
 const error = ref(null)
+const atencionAbierta = ref(null)   // id de la atención que muestra P25
 // Al venir de P09 se confirma el alta.
 const aviso = useRoute().query.aviso === 'paciente-registrado' ? 'Paciente registrado con su consentimiento.' : null
 
@@ -179,6 +182,9 @@ onMounted(cargar)
               <th scope="col">
                 Profesional
               </th>
+              <th scope="col">
+                <span class="solo-lectores">Detalle</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -189,6 +195,16 @@ onMounted(cargar)
               <td>{{ atencion.sede_nombre }}</td>
               <td>{{ atencion.servicio_nombre }}</td>
               <td>{{ atencion.profesional_nombre }}</td>
+              <td class="accion">
+                <button
+                  class="secundario boton-fila"
+                  type="button"
+                  :aria-label="`Ver detalle de la atención del ${fechaCorta(atencion.registrada_en)}`"
+                  @click="atencionAbierta = atencion.id"
+                >
+                  Ver detalle
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -197,5 +213,6 @@ onMounted(cargar)
         </button>
       </section>
     </template>
+    <DetalleAtencionDialogo :atencion-id="atencionAbierta" @cerrar="atencionAbierta = null" />
   </main>
 </template>

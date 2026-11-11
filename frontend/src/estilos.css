@@ -260,6 +260,8 @@ td.accion { text-align: right; }
 .consentimiento h2 { margin: 0 0 .3rem; font-size: .95rem; }
 .consentimiento p { margin: 0; color: var(--tinta-suave); font-size: .92rem; }
 .ver-mas { margin-top: .9rem; }
+.resumen-atencion { margin: 0 0 .9rem; color: var(--tinta-suave); }
+.dialogo .antecedentes { margin-bottom: .6rem; }
 .antecedentes.vacios p { font-weight: 400; color: var(--tinta-suave); }
 
 textarea {
