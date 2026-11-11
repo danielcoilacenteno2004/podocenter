@@ -10,7 +10,7 @@ from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 
 from django.core.management.base import BaseCommand
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from apps.atenciones.models import Atencion
@@ -143,7 +143,49 @@ class Command(BaseCommand):
         pacientes = self._pacientes(centro, admin_centro)
         creadas = self._agenda(centro, sedes, podologas, servicios, pacientes, admin_centro)
         self._variar_estados(centro)
+        # Después de variar los estados, para que no se marquen como atendidas.
+        creadas += self._citas_en_curso(centro, sedes, podologas, servicios, pacientes,
+                                        admin_centro)
         self._resumen(centro, sedes, pacientes, creadas)
+
+    def _citas_en_curso(self, centro, sedes, podologas, servicios, pacientes, usuario):
+        """Siembra una cita por podóloga que empezó hace 10 minutos.
+
+        Desde que no se puede registrar la atención de una cita que todavía no
+        llega (cita-aun-no-llega), una demostración recién cargada no tenía
+        ninguna cita atendible: el resto de la agenda empieza en el futuro.
+        Estas se crean directamente y no con programar_cita, que exige 15
+        minutos de anticipación; por eso solo existen en la demostración.
+
+        Usan el servicio más corto: terminan antes de que empiece la primera
+        cita del guion de hoy, que va al menos 20 minutos por delante. Si aun
+        así chocaran, la restricción EXCLUDE lo impide y la cita se omite.
+        Fuera del horario de la sede (por ejemplo, de noche) se crean igual:
+        sirven para atender, no para mostrar una agenda realista.
+        """
+        corto = min(servicios, key=lambda s: s.duracion_minutos)
+        con_antecedentes = [p for p in pacientes if p.antecedentes] or pacientes
+        inicio = timezone.localtime().replace(second=0, microsecond=0) - timedelta(minutes=10)
+        creadas = 0
+        # Lucía en Cercado y Karina en Bustamante: cada una en una sede que tiene.
+        for indice, (podologa, sede) in enumerate(zip(podologas, sedes, strict=False)):
+            paciente = con_antecedentes[indice % len(con_antecedentes)]
+            try:
+                with transaction.atomic():
+                    Cita.objects.create(
+                        centro=centro, sede=sede, paciente=paciente, profesional=podologa,
+                        servicio=corto, inicio=inicio,
+                        fin=inicio + timedelta(minutes=corto.duracion_minutos),
+                        creada_por=usuario,
+                    )
+                creadas += 1
+            except IntegrityError:
+                self.stdout.write(self.style.WARNING(
+                    f"  cita en curso omitida para {podologa.nombre_completo}: se solapaba."))
+        if creadas:
+            self.stdout.write(f"  {creadas} cita(s) en curso desde las {inicio:%H:%M}, "
+                              "lista(s) para registrar la atención.")
+        return creadas
 
     def _variar_estados(self, centro):
         """Deja la jornada con estados variados.

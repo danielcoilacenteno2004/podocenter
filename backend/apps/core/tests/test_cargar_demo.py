@@ -8,6 +8,7 @@ mismas reglas que la agenda real.
 import pytest
 from django.contrib.auth import authenticate
 from django.core.management import call_command
+from django.utils import timezone
 
 from apps.atenciones.models import Atencion
 from apps.atenciones.servicios import registrar_atencion
@@ -123,6 +124,23 @@ def test_rehace_la_demostracion_aunque_ya_tenga_atenciones_registradas(demo):
     assert Centro.objects.filter(subdominio="piessanos").count() == 1
     assert Atencion.objects.count() == 0
     assert Cita.objects.filter(centro=nuevo).count() >= 10
+
+
+@pytest.mark.django_db
+def test_deja_citas_en_curso_que_ya_se_pueden_atender(demo):
+    # Garantiza que la sustentación puede mostrar el flujo central sin
+    # esperar a que llegue la hora de una cita: al menos una cita programada
+    # ya empezó, y registrar su atención no choca con cita-aun-no-llega.
+    en_curso = list(Cita.objects.filter(estado=Cita.Estado.PROGRAMADA,
+                                        inicio__lte=timezone.now()))
+    assert 1 <= len(en_curso) <= 2
+
+    cita = en_curso[0]
+    atencion = registrar_atencion(centro=demo, usuario=cita.profesional,
+                                  sede_id=cita.sede_id, cita_id=cita.pk)
+
+    assert atencion.cita_id == cita.pk
+    assert cita.paciente.antecedentes  # para que P11 muestre la cabecera completa
 
 
 @pytest.mark.django_db

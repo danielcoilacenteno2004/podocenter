@@ -66,7 +66,7 @@ medición válida para el RNF02 es la que se haga con la podóloga.
 
 ## 2. Lo que está sólido
 
-- **145 pruebas** en verde, **93.7 %** de cobertura de sentencias, sobre
+- **146 pruebas** en verde, **93.6 %** de cobertura de sentencias, sobre
   PostgreSQL real y no sobre una base en memoria. La cifra varía unas
   décimas entre ejecuciones.
 - **Cero vulnerabilidades** conocidas en las dependencias tras subir a Django
@@ -144,14 +144,6 @@ del servidor:
   Tabla 24 dice entre 10 y 240).
 
 ## 6. Lo que hay que decidir
-
-- **La demostración no tiene ninguna cita que se pueda atender al cargarla.**
-  Desde el 11/11 no se registra la atención de una cita que todavía no
-  llega (`cita-aun-no-llega`), y `cargar_demo` siembra las citas de hoy a
-  partir de la media hora siguiente. Comprobado: recién cargada, 0 citas
-  atendibles. En la sustentación, «Registrar atención» no aparece hasta que
-  llegue la hora de alguna cita. Hay que decidir cómo sembrar una cita en
-  curso.
 
 - **La edición de pacientes.** Se quitaron PUT, PATCH y DELETE de
   `/pacientes/`. Para volver a editar falta decidir qué campos se pueden
