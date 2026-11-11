@@ -20,7 +20,7 @@ tras añadir Atenciones):
 
 | Apartado | Afirma | Estado | Cómo comprobarlo |
 |---|---|---|---|
-| 2.6.5 | 32 pruebas, 90 % de cobertura | **Fechada** | En el commit del corte (`2d4a9b8`, 28/10) hay 32 pruebas: `git grep -hE "^def test_\|^    def test_" 2d4a9b8 -- 'backend/**/test_*.py' \| wc -l`. Hoy: 129 pruebas y 93.9 %. |
+| 2.6.5 | 32 pruebas, 90 % de cobertura | **Fechada** | En el commit del corte (`2d4a9b8`, 28/10) hay 32 pruebas: `git grep -hE "^def test_\|^    def test_" 2d4a9b8 -- 'backend/**/test_*.py' \| wc -l`. Hoy: 132 pruebas y 94.0 %. |
 | 2.6.3 | 29 commits entre el 15 y el 28 de octubre, 15 y 14 por integrante | **No coincide** | `git log --since=2026-10-15 --until=2026-10-29 --format=%an \| sort \| uniq -c` da **26 commits, 13 y 13**. La diferencia es anterior a Atenciones. |
 | 2.6.3 | Nada entra a la rama de integración con el pipeline en rojo | **No coincide** | Desde el 28/10, `npm run lint` del trabajo `frontend` no podía pasar: no había `eslint.config.js` y ESLint 9 rechaza `--ext`. Se corrigió en `453ef9c`. Las ejecuciones en GitHub no se han revisado. |
 | 2.2 | Python 3.12, Django 5.2 LTS, Django REST Framework | **Cierta** | `grep -E '^(Django\|djangorestframework)' requirements.txt` → 5.2.19 y 3.18.2; `grep FROM infra/Dockerfile` → `python:3.12-slim` |
@@ -41,7 +41,7 @@ tras añadir Atenciones):
 
 | Apartado | Afirma | Estado | Cómo comprobarlo |
 |---|---|---|---|
-| Tabla 1 | 29 pantallas diseñadas | **Cierta** | El documento dice «Se construye», no «construida». Construidas **15**: P01, P03, P04, P05, P08, P10, P11, P15, P17 y P18 en `frontend/src/views/` (los formularios P26, P27 y P28 van como ventana dentro de su listado), y P06 y P07 como ventanas en `frontend/src/components/`. `ErrorView.vue` es P21 solo a medias: cubre la página no encontrada, no la falta de permiso. |
+| Tabla 1 | 29 pantallas diseñadas | **Cierta** | El documento dice «Se construye», no «construida». Construidas **18**: P01, P03, P04, P05, P08, P09, P10, P11, P15, P17, P18 y P21 en `frontend/src/views/` (los formularios P26, P27 y P28 van como ventana dentro de su listado), y P06, P07 y P25 como ventanas en `frontend/src/components/`. P09 solo cubre el alta; P21 cubre 403 y 404. |
 | Tabla 1 | P04 «Se construye (3 segmentos)» | **Cierta** | `backend/apps/citas/panel.py` devuelve citas, ingresos y ocupación |
 | Tabla 1 | P05 «Se construye (con filtros)» | **Cierta** | `grep -n "estado\|profesional\|servicio" backend/apps/citas/servicios.py` |
 | Tabla 1 | P11 «Se construye» | **Cierta** | `frontend/src/views/RegistrarAtencionView.vue`, ruta `/citas/:citaId/atencion` |

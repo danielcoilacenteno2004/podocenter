@@ -16,7 +16,7 @@ Contra eso, el estado real es:
 |---|---|
 | Usuarios y roles | Pantallas: ingreso (P01), elección de sede (P03) y gestión de usuarios (P17/P27). **Sin P02 (dos pasos) ni P20/P23/P24 (perfil y contraseña): un usuario nuevo no puede ingresar, porque no hay forma de darle contraseña.** La edición no cambia rol ni sedes (ver sección 6) |
 | Sedes | Pantallas P18/P28. **El horario de atención se ve pero no se edita: la API no tiene ruta para escribirlo**, así que una sede nueva nace cerrada |
-| Pacientes con consentimiento | API terminada. Pantallas: búsqueda (P08) y ficha con historial (P10). **Sin P09: el alta y la edición de pacientes no tienen pantalla** |
+| Pacientes con consentimiento | Pantallas: búsqueda (P08), alta con consentimiento (P09), ficha con historial (P10) y detalle de atención (P25). **Sin edición: se quitaron PUT, PATCH y DELETE de `/pacientes/`** porque escribían sin auditoría; vuelve con un servicio que la audite |
 | Citas sin recordatorios | Terminado: agenda con filtros (P05), nueva cita (P06), cancelación con reemplazo (P07) y panel del día (P04) |
 | Servicios | Terminado: pantallas P15/P26 |
 | **Atenciones** | **Parcial.** Registro de la atención con su pantalla P11, que se abre desde la agenda. **Sin monto cobrado, sin insumos y sin registro diario** |
@@ -66,7 +66,7 @@ medición válida para el RNF02 es la que se haga con la podóloga.
 
 ## 2. Lo que está sólido
 
-- **129 pruebas** en verde, **93.9 %** de cobertura de sentencias, sobre
+- **132 pruebas** en verde, **94.0 %** de cobertura de sentencias, sobre
   PostgreSQL real y no sobre una base en memoria. La cifra varía unas
   décimas entre ejecuciones.
 - **Cero vulnerabilidades** conocidas en las dependencias tras subir a Django
@@ -78,13 +78,13 @@ medición válida para el RNF02 es la que se haga con la podóloga.
   tres en la API de usuarios y tres en atenciones. Comprueban que un centro
   no ve, no abre, no modifica y no registra atenciones sobre datos de otro. Es
   lo que sostiene el modelo de arriendo ante el jurado.
-- **71 commits** con «un commit, un cambio», contando el que actualiza este
-  documento: 38 de Sergio Daniel Coila Centeno y 33 de Andre Nicolas Huaroc
+- **77 commits** con «un commit, un cambio», contando el que actualiza este
+  documento: 40 de Sergio Daniel Coila Centeno y 37 de Andre Nicolas Huaroc
   Condori. La identidad de git está fijada en la configuración del
   repositorio para que no vuelva a entrar un autor con otro nombre.
 - Entorno de demostración reproducible con un comando y probado con nueve
   pruebas, incluida una que verifica que las credenciales publicadas funcionan.
-- Frontend: **15 pantallas de las 29 diseñadas en la Práctica N.° 7 (P01, P03, P04, P05, P06, P07, P08, P10, P11, P15, P17, P18, P26, P27, P28); P21 solo cubre la página no encontrada**. El frontend no tiene pruebas automáticas; cada pantalla se comprobó con un recorrido en Playwright.
+- Frontend: **18 pantallas de las 29 diseñadas en la Práctica N.° 7 (P01, P03, P04, P05, P06, P07, P08, P09, P10, P11, P15, P17, P18, P21, P25, P26, P27, P28)**. El frontend no tiene pruebas automáticas; cada pantalla se comprobó con un recorrido en Playwright.
 
 ### Pipeline: corregido, pendiente de ver en verde
 
@@ -145,14 +145,18 @@ del servidor:
 
 ## 6. Lo que hay que decidir
 
-- **La escritura directa en `/pacientes/`, antes de construir P09.** El
-  `PATCH` cambia los antecedentes (dato clínico cifrado) sin pasar por
-  `servicios.py` y sin dejar rastro en la auditoría, y el `DELETE` de un
-  paciente con citas responde con un 500 (comprobado el 11/11/2026). Es el
-  mismo agujero que se cerró en `/citas/`, pero aquí no basta con quitarlos:
-  P09 necesita editar. Falta decidir qué se puede editar (¿el documento?) y
-  pasarlo por un servicio auditado; el borrado debería ser la baja lógica
-  que ya existe (`esta_activo`).
+- **La demostración no tiene ninguna cita que se pueda atender al cargarla.**
+  Desde el 11/11 no se registra la atención de una cita que todavía no
+  llega (`cita-aun-no-llega`), y `cargar_demo` siembra las citas de hoy a
+  partir de la media hora siguiente. Comprobado: recién cargada, 0 citas
+  atendibles. En la sustentación, «Registrar atención» no aparece hasta que
+  llegue la hora de alguna cita. Hay que decidir cómo sembrar una cita en
+  curso.
+
+- **La edición de pacientes.** Se quitaron PUT, PATCH y DELETE de
+  `/pacientes/`. Para volver a editar falta decidir qué campos se pueden
+  cambiar (¿el documento?) y pasarlos por un servicio auditado; la baja ya
+  existe como `esta_activo`.
 
 - **Qué entra de Atenciones el 12/11.** O se añade al menos el monto cobrado
   (una migración, el campo en P11 y su validación), o se deja por escrito que
