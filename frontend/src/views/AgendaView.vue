@@ -6,6 +6,7 @@
 // tenga ninguna cita detrás.
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import CancelarCitaDialogo from '../components/CancelarCitaDialogo.vue'
 import NuevaCitaDialogo from '../components/NuevaCitaDialogo.vue'
 import { api } from '../services/api'
 import { useSesion } from '../stores/sesion'
@@ -25,11 +26,33 @@ const filtros = ref({
 // Al volver de P11 la agenda confirma el registro; la fila ya aparece atendida.
 const aviso = ref(ruta.query.aviso === 'atencion-registrada' ? 'Atención registrada.' : null)
 
-// P06 se abre como modal sobre la agenda, «sin horario precargado».
+// P06 se abre como modal sobre la agenda, «sin horario precargado». Si viene
+// de cancelar con reemplazo (P07, CC-16), trae paciente y servicio.
 const nuevaCitaAbierta = ref(false)
+const plantillaNuevaCita = ref(null)
+
+function abrirNuevaCita (plantilla = null) {
+  plantillaNuevaCita.value = plantilla
+  nuevaCitaAbierta.value = true
+}
+
+function cerrarNuevaCita () {
+  nuevaCitaAbierta.value = false
+  plantillaNuevaCita.value = null
+}
+
+// P07 se abre sobre la cita elegida en la tabla.
+const citaACancelar = ref(null)
+
+async function citaCancelada ({ cita, plantilla }) {
+  citaACancelar.value = null
+  aviso.value = `Cita cancelada: ${cita.paciente_nombre}, a las ${hora(cita.inicio)}`
+  await cargar()
+  if (plantilla) abrirNuevaCita(plantilla)
+}
 
 async function citaCreada (cita) {
-  nuevaCitaAbierta.value = false
+  cerrarNuevaCita()
   aviso.value = `Cita registrada: ${cita.paciente_nombre}, a las ${hora(cita.inicio)}`
   const dia = cita.inicio.slice(0, 10)
   if (dia !== fecha.value) fecha.value = dia  // el watch recarga la jornada
@@ -116,7 +139,7 @@ onMounted(cargar)
         <h1>Agenda de citas</h1>
         <p v-if="sesion.sedeActiva">{{ sesion.sedeActiva.nombre }} — {{ sesion.sedeActiva.direccion }}</p>
       </div>
-      <button type="button" :disabled="!sesion.sedeActiva" @click="nuevaCitaAbierta = true">
+      <button type="button" :disabled="!sesion.sedeActiva" @click="abrirNuevaCita()">
         + Nueva cita
       </button>
     </div>
@@ -193,12 +216,22 @@ onMounted(cargar)
               {{ (ESTADOS.find(([v]) => v === cita.estado) ?? [])[1] ?? cita.estado }}
             </span></td>
             <td class="accion">
-              <router-link
-                v-if="atendible(cita)"
-                class="boton"
-                :to="{ name: 'registrar-atencion', params: { citaId: cita.id } }"
-                :aria-label="`Registrar atención de ${cita.paciente_nombre}`"
-              >Registrar atención</router-link>
+              <div v-if="cita.estado === 'PROGRAMADA'" class="acciones-fila">
+                <router-link
+                  v-if="atendible(cita)"
+                  class="boton"
+                  :to="{ name: 'registrar-atencion', params: { citaId: cita.id } }"
+                  :aria-label="`Registrar atención de ${cita.paciente_nombre}`"
+                >Registrar atención</router-link>
+                <button
+                  class="secundario boton-fila"
+                  type="button"
+                  :aria-label="`Cancelar la cita de ${cita.paciente_nombre}`"
+                  @click="citaACancelar = cita"
+                >
+                  Cancelar
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -207,8 +240,14 @@ onMounted(cargar)
     <NuevaCitaDialogo
       :abierto="nuevaCitaAbierta"
       :fecha="fecha"
-      @cerrar="nuevaCitaAbierta = false"
+      :plantilla="plantillaNuevaCita"
+      @cerrar="cerrarNuevaCita"
       @creada="citaCreada"
+    />
+    <CancelarCitaDialogo
+      :cita="citaACancelar"
+      @cerrar="citaACancelar = null"
+      @cancelada="citaCancelada"
     />
   </main>
 </template>

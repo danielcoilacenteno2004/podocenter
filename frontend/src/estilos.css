@@ -166,6 +166,17 @@ td.numero { font-variant-numeric: tabular-nums; }
 .dialogo-cabecera .enlace { font-size: 1.4rem; line-height: 1; text-decoration: none; }
 .dialogo-cuerpo { padding: 1.1rem 1.25rem 1.25rem; }
 .dialogo > [role="alert"] { margin: 1rem 1.25rem; }
+.acciones-fila { display: flex; gap: .5rem; justify-content: flex-end; align-items: center; }
+button.boton-fila { padding: .4rem .85rem; font-size: .88rem; white-space: nowrap; }
+.resumen-cita { margin-bottom: 1rem; }
+.resumen-cita p { margin: 0; }
+.resumen-cita p + p { color: var(--tinta-suave); font-size: .92rem; }
+fieldset.opciones { border: 1px solid var(--borde); border-radius: 8px; padding: .6rem .9rem .7rem; }
+fieldset.opciones legend { font-weight: 600; font-size: .88rem; padding: 0 .3rem; }
+fieldset.opciones label, label.casilla { display: flex; gap: .55rem; align-items: flex-start; font-weight: 400; font-size: .95rem; margin: .35rem 0; }
+fieldset.opciones input, label.casilla input { width: auto; margin-top: .3rem; }
+label.casilla { border: 1px dashed var(--borde); border-radius: 8px; padding: .6rem .8rem; margin-bottom: 1rem; }
+label.casilla .ayuda { display: block; }
 .dialogo-acciones { display: flex; justify-content: flex-end; gap: .75rem; margin-top: .5rem; }
 .fila-campos { display: grid; gap: .75rem; grid-template-columns: 1fr 1fr; }
 [aria-invalid="true"] { border-color: var(--alerta); background: var(--alerta-tenue); }
@@ -269,5 +280,7 @@ textarea:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
   table.agenda td.detalle { color: var(--tinta-suave); font-size: .85rem; }
   table.agenda td.accion:empty { display: none; }
   table.agenda td.accion { text-align: left; margin-top: .45rem; }
-  table.agenda a.boton { display: block; text-align: center; padding: .6rem .85rem; }
+  table.agenda .acciones-fila { justify-content: stretch; }
+  table.agenda a.boton { display: block; flex: 1; text-align: center; padding: .6rem .85rem; }
+  table.agenda button.boton-fila { padding: .6rem .85rem; }
 }
