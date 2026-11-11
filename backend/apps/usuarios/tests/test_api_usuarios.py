@@ -180,14 +180,17 @@ def test_el_error_de_negocio_llega_en_el_formato_acordado(cliente):
 @pytest.mark.django_db
 def test_el_listado_viene_ordenado_por_apellidos(cliente, centro, sede):
     # La pantalla P17 no reordena en el navegador: el orden llega resuelto del
-    # servidor para que la paginación sea coherente entre páginas.
+    # servidor para que la paginación sea coherente entre páginas. Se compara
+    # con la lista esperada y no con sorted(): Python ordena por código de
+    # carácter y pondría «Álvarez» después de «Zapata», que es justo el orden
+    # que la usuaria no espera.
     for correo, apellidos in [("z@centro.pe", "Zapata"), ("a@centro.pe", "Álvarez")]:
         crear_usuario(centro=centro, correo=correo, nombres="N", apellidos=apellidos,
                       rol=Rol.PODOLOGA, sedes_ids=[sede.pk])
 
     apellidos = [fila["apellidos"] for fila in cliente.get(USUARIOS).data["results"]]
 
-    assert apellidos == sorted(apellidos)
+    assert apellidos == ["Álvarez", "Ramos", "Zapata"]
 
 
 @pytest.mark.django_db
