@@ -13,6 +13,7 @@ from .models import Usuario
 from .roles import Rol
 from .serializers import SedeAsignadaSerializer, UsuarioSerializer
 from .servicios import (
+    actualizar_usuario,
     crear_usuario,
     desactivar_usuario,
     profesionales_de_la_sede,
@@ -57,6 +58,15 @@ class UsuarioViewSet(ContextoDeCentro, viewsets.ModelViewSet):
         # Única vez que sale: no se guarda en claro ni se puede volver a pedir.
         datos["contrasena_temporal"] = serializer.instance.contrasena_temporal
         return Response(datos, status=status.HTTP_201_CREATED)
+
+    def perform_update(self, serializer):
+        datos = dict(serializer.validated_data)
+        # `sedes_ids` vale [] por defecto: solo se reasigna si la petición lo trae.
+        sedes_ids = datos.pop("sedes_ids", None)
+        if "sedes_ids" not in self.request.data:
+            sedes_ids = None
+        serializer.instance = actualizar_usuario(serializer.instance, datos=datos,
+                                                 sedes_ids=sedes_ids)
 
     def perform_destroy(self, instance):
         desactivar_usuario(instance)

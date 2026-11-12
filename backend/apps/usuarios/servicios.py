@@ -44,6 +44,7 @@ def crear_usuario(*, centro, correo, nombres, apellidos, rol, sedes_ids, passwor
         raise ReglaDeNegocio(
             "sin-sede", "Un usuario del centro debe tener al menos una sede asignada."
         )
+    _sedes_del_centro(centro.pk, sedes_ids)
 
     temporal = None if password else contrasena_temporal()
     usuario = Usuario.objects.create_user(
@@ -64,20 +65,99 @@ def crear_usuario(*, centro, correo, nombres, apellidos, rol, sedes_ids, passwor
     return usuario
 
 
+def _sedes_del_centro(centro_id: int, sedes_ids) -> None:
+    """La clave foránea no mira el centro: sin esto se podía asignar a un
+    usuario una sede de otro centro pasando su identificador."""
+    from apps.sedes.models import Sede
+
+    propias = Sede.objects.filter(centro_id=centro_id, pk__in=set(sedes_ids)).count()
+    if propias != len(set(sedes_ids)):
+        raise ReglaDeNegocio("sede-fuera-del-centro", "Alguna de las sedes no es de este centro.")
+
+
+def _quedaria_sin_administrador(usuario: Usuario) -> bool:
+    if usuario.rol != Rol.ADMIN_CENTRO or not usuario.esta_activo:
+        return False
+    return not (
+        Usuario.objects.filter(centro=usuario.centro, rol=Rol.ADMIN_CENTRO, esta_activo=True)
+        .exclude(pk=usuario.pk)
+        .exists()
+    )
+
+
+@transaction.atomic
+def actualizar_usuario(usuario: Usuario, *, datos: dict, sedes_ids=None) -> Usuario:
+    """Edición de un usuario del centro (P27): datos, rol y sedes.
+
+    Activar y desactivar tienen sus propias rutas. Aquí se aplican las mismas
+    reglas que en el alta (correo único, rol permitido, al menos una sede de
+    este centro) y la del último administrador: quitarle el rol a la única
+    administradora dejaría al centro sin nadie que gestione a su personal.
+    """
+    # Bloquea a las administradoras del centro: dos ediciones simultáneas no
+    # pueden quitarse el rol la una a la otra y dejar el centro sin ninguna.
+    list(Usuario.objects.select_for_update().filter(centro=usuario.centro,
+                                                    rol=Rol.ADMIN_CENTRO))
+    correo = datos.get("correo")
+    if correo and Usuario.objects.filter(correo__iexact=correo).exclude(pk=usuario.pk).exists():
+        raise ReglaDeNegocio("correo-duplicado", "Ya existe un usuario con ese correo.")
+    rol = datos.get("rol", usuario.rol)
+    if rol == Rol.ADMIN_PLATAFORMA:
+        raise ReglaDeNegocio(
+            "rol-no-permitido", "El administrador de plataforma no se crea desde un centro."
+        )
+    if rol != usuario.rol and _quedaria_sin_administrador(usuario):
+        raise ReglaDeNegocio(
+            "ultimo-administrador",
+            "El centro quedaría sin administrador. Designe otro antes de cambiar este rol.",
+        )
+
+    cambios = {}
+    for campo in ("nombres", "apellidos", "correo", "rol"):
+        if campo in datos and datos[campo] != getattr(usuario, campo):
+            cambios[campo] = datos[campo]
+            setattr(usuario, campo, datos[campo])
+    usuario.save()
+
+    if sedes_ids is not None:
+        if not sedes_ids:
+            raise ReglaDeNegocio(
+                "sin-sede", "Un usuario del centro debe tener al menos una sede asignada."
+            )
+        _sedes_del_centro(usuario.centro_id, sedes_ids)
+        _reasignar_sedes(usuario, list(dict.fromkeys(sedes_ids)))
+        cambios["sedes"] = list(dict.fromkeys(sedes_ids))
+
+    if cambios:
+        registrar("EDICION", "usuario", usuario.pk, cambios)
+    return usuario
+
+
+def _reasignar_sedes(usuario: Usuario, sedes_ids: list[int]) -> None:
+    """Deja vigentes exactamente esas sedes. Las retiradas se desactivan,
+    no se borran: la asignación explica en qué sede trabajó la persona."""
+    from .models import AsignacionSede
+
+    usuario.asignaciones.exclude(sede_id__in=sedes_ids).update(
+        esta_activa=False, es_predeterminada=False
+    )
+    for sede_id in sedes_ids:
+        AsignacionSede.objects.update_or_create(
+            usuario=usuario, sede_id=sede_id, defaults={"esta_activa": True}
+        )
+    vigentes = usuario.asignaciones.filter(esta_activa=True)
+    if not vigentes.filter(es_predeterminada=True).exists():
+        vigentes.filter(sede_id=sedes_ids[0]).update(es_predeterminada=True)
+
+
 @transaction.atomic
 def desactivar_usuario(usuario: Usuario) -> Usuario:
     """Baja lógica: el histórico de atenciones debe seguir siendo trazable."""
-    if usuario.rol == Rol.ADMIN_CENTRO:
-        quedan = (
-            Usuario.objects.filter(centro=usuario.centro, rol=Rol.ADMIN_CENTRO, esta_activo=True)
-            .exclude(pk=usuario.pk)
-            .count()
+    if _quedaria_sin_administrador(usuario):
+        raise ReglaDeNegocio(
+            "ultimo-administrador",
+            "El centro quedaría sin administrador. Designe otro antes de desactivar este.",
         )
-        if quedan == 0:
-            raise ReglaDeNegocio(
-                "ultimo-administrador",
-                "El centro quedaría sin administrador. Designe otro antes de desactivar este.",
-            )
     usuario.esta_activo = False
     usuario.save(update_fields=["esta_activo", "actualizado_en"])
     registrar("BAJA", "usuario", usuario.pk)

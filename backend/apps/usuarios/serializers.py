@@ -9,8 +9,8 @@ class UsuarioSerializer(serializers.ModelSerializer):
     sedes_ids = serializers.ListField(
         child=serializers.IntegerField(), write_only=True, required=False, default=list
     )
-    # Columna «Sedes» de P17: lectura de las asignaciones vigentes. Escribirlas
-    # sigue siendo solo cosa del alta (sedes_ids).
+    # Columna «Sedes» de P17: lectura de las asignaciones vigentes. Se
+    # escriben con `sedes_ids`, en el alta y en la edición.
     sedes = serializers.SerializerMethodField()
 
     class Meta:
@@ -19,7 +19,9 @@ class UsuarioSerializer(serializers.ModelSerializer):
             "id", "correo", "nombres", "apellidos", "nombre_completo", "rol",
             "esta_activo", "segundo_factor_activo", "sedes_ids", "sedes", "creado_en",
         ]
-        read_only_fields = ["id", "creado_en", "segundo_factor_activo"]
+        # Activar y desactivar van por sus rutas (DELETE y reactivar), que
+        # aplican la regla del último administrador.
+        read_only_fields = ["id", "creado_en", "segundo_factor_activo", "esta_activo"]
 
     def get_sedes(self, usuario) -> list[dict]:
         return [
