@@ -375,6 +375,17 @@ textarea:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
 .cita-elegida > div:first-child { display: flex; flex-direction: column; gap: .15rem; }
 .cita-elegida .etiqueta { align-self: flex-start; }
 
+/* --- insumos consumidos (P11) ------------------------------------------ */
+.insumos { border: 1px solid var(--borde); border-radius: var(--radio); padding: .6rem .8rem; }
+.insumos legend { padding: 0 .3rem; font-weight: 600; }
+.tabla-insumos { width: 100%; border-collapse: collapse; margin-bottom: .6rem; }
+.tabla-insumos th, .tabla-insumos td { padding: .35rem .4rem; border-bottom: 1px solid var(--borde); text-align: left; }
+.tabla-insumos .numero { text-align: right; }
+.tabla-insumos tr.bajo-minimo { background: var(--alerta-tenue); }
+.tabla-insumos .secundario-celda { display: block; }
+.aviso-stock { display: block; font-size: .85rem; }
+input.cantidad-insumo { width: 5rem; text-align: right; }
+
 /* --- editor del horario de la sede (P28) ------------------------------ */
 .editor-horario { border: 1px solid var(--borde); border-radius: var(--radio); padding: .6rem .8rem; }
 .editor-horario legend { padding: 0 .3rem; font-weight: 600; }
