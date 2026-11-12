@@ -232,7 +232,7 @@ def test_la_agenda_marca_la_cita_que_ya_tiene_atencion(cliente, cita):
 
 @pytest.mark.django_db
 def test_la_marca_de_atencion_no_suma_una_consulta_por_cita(
-    cliente, centro, podologa, sede, servicio, paciente, cita
+    cliente, centro, podologa, sede, servicio, paciente, cita, proximo_lunes_a_las_nueve
 ):
     # Garantiza que la marca sale de la misma consulta de la agenda y no de
     # una consulta por fila: una jornada llena no puede volver lenta la P05.
@@ -242,10 +242,12 @@ def test_la_marca_de_atencion_no_suma_una_consulta_por_cita(
     with CaptureQueriesContext(connection) as con_una:
         cliente.get("/api/v1/citas/agenda/", {"fecha": fecha})
 
-    programar_cita(
+    # La segunda cita se programa en un día hábil y se trae justo antes de la
+    # primera: programarla después de ella fallaba de noche, fuera del horario.
+    hacer_que_la_cita_ya_empezo(programar_cita(
         centro=centro, usuario=podologa, sede=sede, paciente=paciente, profesional=podologa,
-        servicio=servicio, inicio=cita.fin + timedelta(minutes=15),
-    )
+        servicio=servicio, inicio=proximo_lunes_a_las_nueve + timedelta(hours=2),
+    ), hace_minutos=15 + servicio.duracion_minutos)
     with CaptureQueriesContext(connection) as con_dos:
         respuesta = cliente.get("/api/v1/citas/agenda/", {"fecha": fecha})
 
