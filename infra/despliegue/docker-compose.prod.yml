@@ -26,9 +26,19 @@ services:
              python manage.py collectstatic --noinput &&
              gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 60"
 
-  # El planificador de recordatorios automáticos (RF13) se añadirá como un
-  # servicio más cuando el proveedor de mensajería apruebe la cuenta: el RF07
-  # quedó fuera de la primera entrega por ese trámite (sección 2.7.3).
+  # Temporizador de recordatorios (RF07, CU15): una pasada cada quince
+  # minutos. Sin las variables WHATSAPP_* el envío es simulado y no sale nada.
+  recordatorios:
+    build:
+      context: ../..
+      dockerfile: infra/Dockerfile
+    env_file: .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+    depends_on: [api]
+    restart: unless-stopped
+    command: >
+      sh -c "while true; do python manage.py enviar_recordatorios; sleep 900; done"
 
   web:
     # Nginx con la SPA compilada dentro (infra/web.Dockerfile).

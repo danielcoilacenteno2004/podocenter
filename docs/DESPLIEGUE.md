@@ -115,6 +115,29 @@ Luego, en `https://<dominio>`:
 Si alguien olvida su contraseña, la administradora pulsa **Restablecer
 contraseña** en Usuarios. No hay recuperación por correo (P23/P24).
 
+## 6 bis. Recordatorios por WhatsApp
+
+El servicio `recordatorios` corre cada quince minutos y manda el recordatorio
+de las citas de las próximas 24 horas a los pacientes que aceptaron
+recordatorios y tienen celular. **Mientras las variables `WHATSAPP_*` estén
+vacías, el envío es simulado**: no sale ningún mensaje; queda anotado en el
+registro del servicio y en la tabla `recordatorio`.
+
+Para que salgan de verdad, el centro necesita una cuenta de WhatsApp Business
+aprobada por Meta, con un número verificado y una **plantilla de mensaje
+aprobada** que reciba seis parámetros, en este orden: nombre del paciente,
+servicio, fecha, hora, nombre del centro y sede con dirección. Luego complete
+en `.env` el token, el identificador del número, la versión de la API que
+indique Meta, el nombre de la plantilla y su idioma, y reinicie el servicio:
+
+```bash
+docker compose -f docker-compose.prod.yml up -d recordatorios
+docker compose -f docker-compose.prod.yml logs -f recordatorios
+```
+
+Sin esa cuenta, la agenda ofrece igual el botón «WhatsApp», que abre el
+mensaje escrito en el teléfono de quien lo pulsa.
+
 ## 7. Actualizar
 
 ```bash
@@ -140,8 +163,9 @@ docker compose -f docker-compose.prod.yml exec web nginx -s reload
 
 ## 9. Lo que no hace todavía
 
-- No envía correos: ni activación de cuentas, ni recuperación de
-  contraseña, ni recordatorios de citas (RF07).
+- No envía correos: ni activación de cuentas ni recuperación de contraseña.
+- No recibe el estado de entrega de WhatsApp (CU16, la llamada de retorno de
+  Meta): guarda lo que responde la API al enviar.
 - No tiene verificación en dos pasos (P02).
 - Las copias de seguridad son las de la base gestionada. La aplicación no
   las programa.
