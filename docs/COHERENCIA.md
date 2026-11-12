@@ -20,13 +20,13 @@ tras los insumos en la atención y el endurecimiento para producción):
 
 | Apartado | Afirma | Estado | Cómo comprobarlo |
 |---|---|---|---|
-| 2.6.5 | 32 pruebas, 90 % de cobertura | **Fechada** | En el commit del corte (`2d4a9b8`, 28/10) hay 32 pruebas: `git grep -hE "^def test_\|^    def test_" 2d4a9b8 -- 'backend/**/test_*.py' \| wc -l`. Hoy: 280 pruebas y 95.7 %, con Python 3.12. |
+| 2.6.5 | 32 pruebas, 90 % de cobertura | **Fechada** | En el commit del corte (`2d4a9b8`, 28/10) hay 32 pruebas: `git grep -hE "^def test_\|^    def test_" 2d4a9b8 -- 'backend/**/test_*.py' \| wc -l`. Hoy: 294 pruebas y 95.6 %, con Python 3.12. |
 | 2.6.3 | 29 commits entre el 15 y el 28 de octubre, 15 y 14 por integrante | **No coincide** | `git log --since=2026-10-15 --until=2026-10-29 --format=%an \| sort \| uniq -c` da **26 commits, 13 y 13**. La diferencia es anterior a Atenciones. |
 | 2.6.3 | Nada entra a la rama de integración con el pipeline en rojo | **No coincide** | Desde el 28/10, `npm run lint` del trabajo `frontend` no podía pasar: no había `eslint.config.js` y ESLint 9 rechaza `--ext`. Se corrigió en `453ef9c`. Las ejecuciones en GitHub no se han revisado. |
 | 2.2 | Python 3.12, Django 5.2 LTS, Django REST Framework | **Cierta** | `grep -E '^(Django\|djangorestframework)' requirements.txt` → 5.2.19 y 3.18.2; `grep FROM infra/Dockerfile` → `python:3.12-slim` |
 | 2.2 | PostgreSQL 17 | **Cierta** | `grep image infra/docker-compose.yml .github/workflows/ci.yml` |
 | 2.6.5, Tabla 58 | Mínimo exigido de cobertura: 80 % | **Cierta** | `grep cov-fail-under .github/workflows/ci.yml`. No está en `pyproject.toml`, como decía antes esta fila. |
-| 2.6.6, Tabla 59 | Sprint 1: seguridad por fila sobre siete tablas | **Fechada** | Es la bitácora del Sprint 1 y sigue siendo cierta para ese sprint. Hoy son **doce** (se suman `atencion`, `producto`, `stock`, `movimiento_inventario` y `servicio_insumo`): `SELECT relname FROM pg_class WHERE relrowsecurity;` |
+| 2.6.6, Tabla 59 | Sprint 1: seguridad por fila sobre siete tablas | **Fechada** | Es la bitácora del Sprint 1 y sigue siendo cierta para ese sprint. Hoy son **trece** (se suman `atencion`, `producto`, `stock`, `movimiento_inventario`, `servicio_insumo` y `recordatorio`): `SELECT relname FROM pg_class WHERE relrowsecurity;` |
 | 2.5 | Errores de negocio en formato RFC 9457 con campo `codigo` | **Cierta** | `backend/apps/core/errores.py` |
 | 2.1.5, Tabla 38 | Los conflictos de negocio (cruce de cita, DNI duplicado, stock insuficiente) responden **409** | **No coincide** | Toda `ReglaDeNegocio` responde **422**: `grep -n "422" backend/apps/core/errores.py` |
 | 2.1.5, Tabla 38 | `POST /atenciones` registra la atención como transacción | **Cierta** | `backend/apps/atenciones/views.py`; atomicidad probada en `test_si_falla_el_cierre_de_la_cita_no_queda_la_atencion` |
@@ -39,6 +39,8 @@ tras los insumos en la atención y el endurecimiento para producción):
 | 2.1.7, Tabla 39 | Las atenciones no se borran: se anulan con motivo, usuario y fecha | **Parcial** | No se pueden borrar (la API no tiene DELETE y el admin es de solo lectura), pero tampoco existe la anulación con motivo. |
 | 1.11.5, Tabla 14, CU10 | Postcondición: atención vinculada a paciente, cita e inventario; stock y registro diario actualizados; cita atendida | **Cierta** | Atención ligada a paciente y cita, salidas de stock ligadas a la atención (`MovimientoInventario.atencion`), cita atendida y registro diario calculado desde las atenciones. Probado en `test_registrar_atencion.py`, `test_insumos.py` y `test_registro_diario.py` |
 | 2.4.3, Verificación del RNF02 | Cuatro interacciones: abrir la cita, registrar, confirmar servicio e insumos, ingresar el monto y confirmar | **Parcial** | **3 interacciones medidas con los insumos habituales precargados (CC-14)**: pulsar la cita, escribir la observación y confirmar, aceptando el monto y los insumos sugeridos. Medidas con Playwright el 12/11/2026, en escritorio y a 390 px. El diseño cuenta 4 porque incluye un paso de resumen que no está construido. Cada cambio sobre lo precargado suma interacciones. Falta la medición con la podóloga que exige el criterio de aceptación. |
+| 1.11, RF07; Tabla 14, CU15 | Recordatorio automático al paciente 24 horas antes; temporizador cada quince minutos, solo con canal autorizado, hasta tres reintentos y sin duplicar | **Parcial** | `enviar_recordatorios` en `backend/apps/citas/recordatorios.py` y su comando; probado en `test_recordatorios.py`. **El envío real no se ha hecho**: sin la cuenta de WhatsApp Business aprobada por Meta, el proveedor es simulado |
+| Tabla 14, CU16 | El proveedor devuelve el estado de entrega por una llamada de retorno | **Pendiente** | No hay ruta de retorno: se guarda lo que responde la API al enviar |
 | 1.11 | RF01–RF18 | **Cierta** | Los RF construidos son los de `docs/ESTADO.md`; el informe no afirma que estén todos implementados |
 
 ## Práctica N.° 7

@@ -17,7 +17,7 @@ Contra eso, el estado real es:
 | Usuarios y roles | Pantallas: ingreso (P01), elección de sede (P03), gestión de usuarios (P17/P27, con rol y sedes editables) y perfil con cambio de contraseña (P20). El alta y «Restablecer contraseña» dan una **contraseña temporal** que se muestra una vez, y el servidor no deja hacer nada más hasta cambiarla. **Sin P02 (dos pasos) ni P23/P24 (correo): la contraseña olvidada la restablece la administradora** |
 | Sedes | Pantallas P18/P28 con el **horario de atención editable** por día (CC-15). Una sede o un servicio desactivados ya no admiten citas nuevas |
 | Pacientes con consentimiento | Pantallas: búsqueda (P08), alta con consentimiento (P09), ficha con historial (P10) y detalle de atención (P25). **Sin edición: se quitaron PUT, PATCH y DELETE de `/pacientes/`** porque escribían sin auditoría; vuelve con un servicio que la audite |
-| Citas sin recordatorios | Terminado: agenda (P05) en cuadrícula por hora y profesional y en lista con filtros, nueva cita (P06, también desde un hueco de la cuadrícula), cancelación con reemplazo (P07) y panel del día (P04) |
+| Citas sin recordatorios | Terminado: agenda (P05) en cuadrícula por hora y profesional y en lista con filtros, nueva cita (P06, también desde un hueco de la cuadrícula), cancelación con reemplazo (P07) y panel del día (P04). Aunque el compromiso era «sin recordatorios», ya existen (ver RF07 en la sección 4) |
 | Servicios | Terminado: pantallas P15/P26, duración de 10 a 240 minutos (Tabla 24) e **insumos habituales** de cada servicio (CC-14) |
 | Inventario (adelantado de la segunda entrega) | Stock por sede (P12) con el **mínimo editable en línea** por la administradora (CU05), movimientos de Entrada, Ajuste o Merma (P13), disponibilidad entre sedes (P14) y **salida automática** por los insumos de cada atención. Alta, edición y baja de productos desde P12: **no figura entre las 29 pantallas de la Práctica 7**, se añadió porque sin ella un centro nuevo no podía llenar su inventario |
 | **Atenciones** | **Casi completo.** Registro de la atención con monto cobrado, **insumos consumidos** (precargados de los habituales del servicio) y su salida de stock en la misma transacción (P11); registro diario (P16). Falta lo de la sección «No construido» |
@@ -32,7 +32,7 @@ Construido:
   profesional, servicio y sede al registrarse, para que la ficha no cambie si
   después alguien edita la cita.
 - Observación clínica cifrada, como los antecedentes del paciente.
-- Política de seguridad por fila sobre la tabla `atencion`. Hoy son **doce**
+- Política de seguridad por fila sobre la tabla `atencion`. Hoy son **trece**
   tablas con RLS, todas con `FORCE`:
   `SELECT relname FROM pg_class WHERE relrowsecurity;`
 - Reglas en el servicio, cada una con su código RFC 9457:
@@ -79,7 +79,7 @@ válida para el RNF02 es la que se haga con la podóloga.
 
 ## 2. Lo que está sólido
 
-- **280 pruebas** en verde, **95.7 %** de cobertura de sentencias, sobre
+- **294 pruebas** en verde, **95.6 %** de cobertura de sentencias, sobre
   PostgreSQL real y no sobre una base en memoria, con Python 3.12. La cifra
   varía unas décimas entre ejecuciones.
 - **Cero vulnerabilidades** conocidas en las dependencias tras subir a Django
@@ -93,8 +93,8 @@ válida para el RNF02 es la que se haga con la podóloga.
   Comprueban que un centro no ve, no abre y no modifica datos de otro, ni
   usa sus sedes o productos. Es lo que sostiene el modelo de arriendo ante
   el jurado.
-- **127 commits** con «un commit, un cambio», contando el que actualiza este
-  documento: 65 de Sergio Daniel Coila Centeno y 62 de Andre Nicolas Huaroc
+- **132 commits** con «un commit, un cambio», contando el que actualiza este
+  documento: 67 de Sergio Daniel Coila Centeno y 65 de Andre Nicolas Huaroc
   Condori. La identidad de git está fijada en la configuración del
   repositorio para que no vuelva a entrar un autor con otro nombre.
 - Entorno de demostración reproducible con un comando y probado con nueve
@@ -145,7 +145,7 @@ Registradas en la Práctica N.° 7 y pendientes de decisión de alcance:
 | CC-12 | Tercer indicador del panel (stock), alerta automática del RF13, pantalla de reprogramación del RF08 |
 | CC-18 | *Añade* la barra de filtros de la agenda |
 | CC-19 | *Añade* el panel segmentado por decisión; no revierte CC-12 |
-| RF07 | Recordatorios por mensajería, pendientes de aprobación del proveedor |
+| RF07 | **Construido, sin envío real.** El temporizador (CU15) manda cada quince minutos el recordatorio por WhatsApp de las citas de las próximas 24 horas, con tres intentos y anulado si se cancela la cita; **mientras Meta no apruebe la cuenta de WhatsApp Business del centro, el envío es simulado**. La agenda ofrece además «WhatsApp», que abre el mensaje escrito para enviarlo a mano. Falta la llamada de retorno con el estado de entrega (CU16), y el estado se ve en P05, no en P10 como dice la Práctica 7 |
 
 ## 5. Huecos de la API encontrados el 11/11 y cerrados el 12/11
 
