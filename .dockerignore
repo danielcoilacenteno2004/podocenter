@@ -1,0 +1,16 @@
+# Lo que no debe entrar en las imágenes: dependencias locales, compilados,
+# secretos y la documentación del proyecto.
+**/__pycache__
+**/*.pyc
+.venv
+.git
+.github
+docs
+frontend/node_modules
+frontend/dist
+infra/despliegue/.env
+infra/despliegue/certificados
+backend/staticfiles
+**/.pytest_cache
+.coverage
+coverage.xml
