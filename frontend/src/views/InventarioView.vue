@@ -6,8 +6,8 @@
 // RF13 ajustado: no hay alerta automática; el stock bajo el mínimo se ve
 // aquí, resaltado por texto y fondo, y se puede filtrar.
 //
-// No construido aún: editar el mínimo en línea (CU05) y la salida automática
-// por consumo en una atención, que necesita que P11 registre insumos.
+// No construido aún: editar el mínimo en línea (CU05). La salida por consumo
+// la genera P11 al registrar una atención con sus insumos.
 import { computed, onMounted, ref } from 'vue'
 import DisponibilidadDialogo from '../components/DisponibilidadDialogo.vue'
 import MovimientoDialogo from '../components/MovimientoDialogo.vue'
@@ -159,8 +159,8 @@ onMounted(cargar)
         </tbody>
       </table>
       <p class="ayuda nota-pendiente">
-        La salida automática por consumo en una atención todavía no existe: P11 aún no registra
-        insumos. Por ahora el stock cambia solo con entradas, ajustes y mermas.
+        Además de las entradas, ajustes y mermas, el stock baja solo con los insumos que se
+        registran en cada atención.
       </p>
     </section>
 
