@@ -38,6 +38,7 @@ def crear_centro(*, datos: dict, administrador: dict, usuario) -> tuple[Centro, 
     admin = Usuario.objects.create_user(
         correo=correo, password=temporal, nombres=administrador["nombres"],
         apellidos=administrador["apellidos"], rol=Rol.ADMIN_CENTRO, centro=centro,
+        debe_cambiar_contrasena=True,
     )
     _auditar_en(centro, usuario, [
         ("ALTA", "centro", centro.pk, {"ruc": centro.ruc}),

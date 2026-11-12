@@ -35,6 +35,7 @@ def _datos_de(usuario) -> dict:
         "centro_nombre": usuario.centro.razon_social if usuario.centro_id else None,
         "segundo_factor_activo": usuario.segundo_factor_activo,
         "ultimo_acceso_en": usuario.ultimo_acceso_en,
+        "debe_cambiar_contrasena": usuario.debe_cambiar_contrasena,
     }
 
 
@@ -125,6 +126,8 @@ class CambiarContrasena(ContextoDeCentro, APIView):
     de la cuenta dejan de valer (lo que pide la Tabla 33), y
     `update_session_auth_hash` mantiene abierta solo la actual.
     """
+
+    permite_contrasena_pendiente = True
 
     def post(self, request):
         datos = request.data

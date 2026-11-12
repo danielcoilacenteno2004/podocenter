@@ -54,6 +54,9 @@ def test_el_alta_crea_el_centro_con_su_administrador_listo_para_entrar(plataform
     assert centro.nombre_comercial == "Pies Felices"
     ingreso = _ingresar(admin.correo, respuesta.data["contrasena_temporal"])
     assert ingreso.status_code == 200
+    # La temporal la conoce también la plataforma: el administrador debe
+    # cambiarla antes de usar el sistema.
+    assert ingreso.data["usuario"]["debe_cambiar_contrasena"] is True
 
 
 @pytest.mark.django_db

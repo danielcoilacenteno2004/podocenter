@@ -16,9 +16,23 @@ from .models import AsignacionSede, Usuario
 from .roles import ROLES_DE_CENTRO, Rol
 
 
+def contrasena_temporal() -> str:
+    """Contraseña de un solo uso que la administradora entrega en persona.
+
+    Mientras no exista el correo de activación (P24), es la forma de que una
+    cuenta nueva pueda entrar. No se guarda en claro en ningún sitio.
+    """
+    return secrets.token_urlsafe(12)
+
+
 @transaction.atomic
 def crear_usuario(*, centro, correo, nombres, apellidos, rol, sedes_ids, password=None) -> Usuario:
-    """Da de alta un usuario del centro y lo asigna a sus sedes (CU01)."""
+    """Da de alta un usuario del centro y lo asigna a sus sedes (CU01).
+
+    Sin `password`, la cuenta nace con una contraseña temporal que se deja en
+    `usuario.contrasena_temporal` para que la vista la devuelva una sola vez,
+    y con la obligación de cambiarla al entrar.
+    """
     if rol == Rol.ADMIN_PLATAFORMA:
         raise ReglaDeNegocio(
             "rol-no-permitido",
@@ -31,14 +45,17 @@ def crear_usuario(*, centro, correo, nombres, apellidos, rol, sedes_ids, passwor
             "sin-sede", "Un usuario del centro debe tener al menos una sede asignada."
         )
 
+    temporal = None if password else contrasena_temporal()
     usuario = Usuario.objects.create_user(
         correo=correo,
-        password=password or secrets.token_urlsafe(16),
+        password=password or temporal,
         nombres=nombres,
         apellidos=apellidos,
         rol=rol,
         centro=centro,
+        debe_cambiar_contrasena=temporal is not None,
     )
+    usuario.contrasena_temporal = temporal
     for indice, sede_id in enumerate(sedes_ids):
         AsignacionSede.objects.create(
             usuario=usuario, sede_id=sede_id, es_predeterminada=(indice == 0)
@@ -68,6 +85,28 @@ def desactivar_usuario(usuario: Usuario) -> Usuario:
 
 
 @transaction.atomic
+def restablecer_contrasena(usuario: Usuario, *, por: Usuario) -> str:
+    """La administradora da una contraseña temporal nueva a otra cuenta.
+
+    Es el camino para quien olvidó la suya mientras no exista la
+    recuperación por correo (P23/P24). Cambiar la contraseña cambia el hash
+    de sesión, así que las sesiones abiertas de esa cuenta dejan de valer.
+    La propia contraseña se cambia en P20, que pide la actual.
+    """
+    if usuario.pk == por.pk:
+        raise ReglaDeNegocio(
+            "restablecer-la-propia",
+            "Su propia contraseña se cambia desde «Mi perfil».",
+        )
+    temporal = contrasena_temporal()
+    usuario.set_password(temporal)
+    usuario.debe_cambiar_contrasena = True
+    usuario.save(update_fields=["password", "debe_cambiar_contrasena", "actualizado_en"])
+    registrar("EDICION", "usuario", usuario.pk, {"contrasena": "restablecida"})
+    return temporal
+
+
+@transaction.atomic
 def cambiar_contrasena(usuario: Usuario, *, actual: str, nueva: str, confirmacion: str) -> Usuario:
     """El usuario cambia su propia contraseña (P20, RF18).
 
@@ -92,6 +131,9 @@ def cambiar_contrasena(usuario: Usuario, *, actual: str, nueva: str, confirmacio
         mensajes = mensajes or [str(m) for lista in errores.values() for m in lista]
         raise ValidationError({"contrasena_nueva": mensajes})
     formulario.save()
+    if usuario.debe_cambiar_contrasena:
+        usuario.debe_cambiar_contrasena = False
+        usuario.save(update_fields=["debe_cambiar_contrasena", "actualizado_en"])
     registrar("EDICION", "usuario", usuario.pk, {"contrasena": "cambiada"})
     return usuario
 

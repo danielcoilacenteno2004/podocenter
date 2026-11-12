@@ -49,6 +49,9 @@ class Usuario(AbstractBaseUser, PermissionsMixin, SelloDeTiempo):
     segundo_factor_activo = models.BooleanField(default=False)
     secreto_totp = models.CharField(max_length=64, blank=True)
     ultimo_acceso_en = models.DateTimeField(null=True, blank=True)
+    # Encendido mientras la cuenta tenga una contraseña temporal (alta o
+    # restablecimiento): hasta cambiarla, la API solo deja cambiarla.
+    debe_cambiar_contrasena = models.BooleanField(default=False)
 
     is_staff = models.BooleanField(default=False)
 

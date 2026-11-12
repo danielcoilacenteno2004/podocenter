@@ -15,6 +15,7 @@ from .serializers import SedeAsignadaSerializer, UsuarioSerializer
 from .servicios import (
     crear_usuario,
     desactivar_usuario,
+    restablecer_contrasena,
     profesionales_de_la_sede,
     sedes_disponibles,
 )
@@ -48,8 +49,23 @@ class UsuarioViewSet(ContextoDeCentro, viewsets.ModelViewSet):
         )
         serializer.instance = usuario
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        datos = dict(serializer.data)
+        # Única vez que sale: no se guarda en claro ni se puede volver a pedir.
+        datos["contrasena_temporal"] = serializer.instance.contrasena_temporal
+        return Response(datos, status=status.HTTP_201_CREATED)
+
     def perform_destroy(self, instance):
         desactivar_usuario(instance)
+
+    @action(detail=True, methods=["post"], url_path="restablecer-contrasena")
+    def restablecer_contrasena(self, request, pk=None):
+        """Contraseña temporal nueva para otra cuenta del centro; sale una vez."""
+        temporal = restablecer_contrasena(self.get_object(), por=request.user)
+        return Response({"contrasena_temporal": temporal})
 
     @action(detail=True, methods=["post"])
     def reactivar(self, request, pk=None):
@@ -62,6 +78,10 @@ class UsuarioViewSet(ContextoDeCentro, viewsets.ModelViewSet):
 
 class SedesDeLaSesion(ContextoDeCentro, APIView):
     """Sedes entre las que el usuario elige al entrar (pantalla P03)."""
+
+    # Solo lectura de sus propias asignaciones: la interfaz la pide al entrar,
+    # antes de llevar al usuario a cambiar la contraseña temporal.
+    permite_contrasena_pendiente = True
 
     def get(self, request):
         datos = SedeAsignadaSerializer(sedes_disponibles(request.user), many=True).data

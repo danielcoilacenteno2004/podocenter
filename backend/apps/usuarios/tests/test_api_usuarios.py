@@ -113,8 +113,9 @@ def test_la_primera_sede_de_la_lista_queda_como_predeterminada(
 
 @pytest.mark.django_db
 def test_la_respuesta_del_alta_no_expone_la_contrasena(cliente, sede):
-    # `sedes_ids` es de solo escritura y la clave generada no debe salir nunca:
-    # el alta no puede filtrar una credencial recién creada.
+    # `sedes_ids` es de solo escritura y el hash de la clave no sale nunca. La
+    # contraseña temporal sí sale, una vez y a propósito, en otro campo
+    # (test_contrasena_temporal.py).
     respuesta = cliente.post(USUARIOS, {
         "correo": "limpia@centro.pe", "nombres": "C", "apellidos": "D",
         "rol": Rol.PODOLOGA, "sedes_ids": [sede.pk],
