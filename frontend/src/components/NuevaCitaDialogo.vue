@@ -15,6 +15,7 @@ const props = defineProps({
   abierto: { type: Boolean, default: false },
   fecha: { type: String, default: '' },
   // Cita de reemplazo (CC-16): paciente y servicio llegan precargados.
+  // Desde un hueco de la cuadrícula de P05 llegan la hora y la profesional.
   plantilla: { type: Object, default: null }
 })
 const emit = defineEmits(['cerrar', 'creada'])
@@ -86,7 +87,7 @@ function reiniciar () {
   const propia = profesionales.value.some((p) => p.id === sesion.usuario?.id)
   formulario.value = {
     fecha: fechaInicial,
-    hora: '',
+    hora: props.plantilla?.hora ?? '',
     servicio: props.plantilla?.servicio ?? '',
     profesional: props.plantilla?.profesional ?? (propia ? sesion.usuario.id : '')
   }

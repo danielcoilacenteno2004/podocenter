@@ -4,8 +4,13 @@
 // esconde filas, pide solo las que corresponden. Las opciones de cada filtro
 // salen de la propia jornada, de modo que nunca se ofrece un valor que no
 // tenga ninguna cita detrás.
+//
+// Dos vistas de la misma jornada (Práctica N.° 7): la cuadrícula por hora y
+// profesional (Figura 3), para ver la forma del día, y la lista (Figura 4),
+// para responder preguntas con los filtros. Las dos usan la misma respuesta.
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import AgendaCuadricula from '../components/AgendaCuadricula.vue'
 import CancelarCitaDialogo from '../components/CancelarCitaDialogo.vue'
 import NuevaCitaDialogo from '../components/NuevaCitaDialogo.vue'
 import { api } from '../services/api'
@@ -16,12 +21,27 @@ const ruta = useRoute()
 
 // La agenda se puede abrir ya filtrada desde el panel del día: el enlace trae
 // la fecha y, si viene del desglose por servicio, también el servicio.
-const fecha = ref(ruta.query.fecha ?? new Date().toISOString().slice(0, 10))
+const fecha = ref(ruta.query.fecha ?? new Date().toLocaleDateString('en-CA'))
 const filtros = ref({
   estado: ruta.query.estado ?? '',
   profesional: ruta.query.profesional ? Number(ruta.query.profesional) : '',
   servicio: ruta.query.servicio ? Number(ruta.query.servicio) : ''
 })
+
+// La vista elegida se recuerda en este navegador; es solo una comodidad.
+const vista = ref((() => {
+  try { return localStorage.getItem('agenda.vista') === 'lista' ? 'lista' : 'cuadricula' } catch { return 'cuadricula' }
+})())
+watch(vista, (valor) => { try { localStorage.setItem('agenda.vista', valor) } catch { /* sin almacenamiento */ } })
+
+function moverDia (dias) {
+  const d = new Date(`${fecha.value}T12:00:00`)
+  d.setDate(d.getDate() + dias)
+  fecha.value = d.toLocaleDateString('en-CA')
+}
+function irAHoy () {
+  fecha.value = new Date().toLocaleDateString('en-CA')
+}
 
 // Al volver de P11 la agenda confirma el registro; la fila ya aparece atendida.
 const aviso = ref(ruta.query.aviso === 'atencion-registrada' ? 'Atención registrada.' : null)
@@ -41,11 +61,20 @@ function cerrarNuevaCita () {
   plantillaNuevaCita.value = null
 }
 
-// P07 se abre sobre la cita elegida en la tabla.
+// P07 se abre sobre la cita elegida en la tabla o en la cuadrícula.
 const citaACancelar = ref(null)
+
+// En la cuadrícula, pulsar una cita la muestra con sus acciones; pulsar un
+// hueco abre P06 con la hora y la profesional ya puestas (Figura 3).
+const citaElegida = ref(null)
+function huecoElegido ({ hora: horaDelHueco, profesional }) {
+  citaElegida.value = null
+  abrirNuevaCita({ hora: horaDelHueco, profesional })
+}
 
 async function citaCancelada ({ cita, plantilla }) {
   citaACancelar.value = null
+  citaElegida.value = null
   aviso.value = `Cita cancelada: ${cita.paciente_nombre}, a las ${hora(cita.inicio)}`
   await cargar()
   if (plantilla) abrirNuevaCita(plantilla)
@@ -69,6 +98,12 @@ function atendible (cita) {
 
 const citas = ref([])
 const jornada = ref([])      // el día completo, para construir las opciones
+const horario = ref(null)    // apertura y cierre de la sede ese día
+// Fecha a la que pertenecen `jornada` y `horario`. La cuadrícula se dibuja
+// solo cuando coincide con la del selector: si no, durante la carga pintaría
+// los huecos del día nuevo con las citas del día anterior.
+const fechaCargada = ref(null)
+const plantel = ref([])      // profesionales de la sede: columnas de la cuadrícula
 const cargando = ref(false)
 const error = ref(null)
 
@@ -87,6 +122,27 @@ function opciones (campoId, campoNombre) {
   return [...vistos].map(([id, nombre]) => ({ id, nombre }))
 }
 const profesionales = computed(() => opciones('profesional', 'profesional_nombre'))
+
+// Una columna por profesional de la sede, tenga o no citas ese día: así se
+// ven sus huecos libres. Se añade quien tenga citas sin estar ya en la lista
+// (por ejemplo, una cuenta desactivada después de agendar). Con el filtro de
+// profesional queda solo su columna.
+const columnas = computed(() => {
+  const lista = plantel.value.map((p) => ({ id: p.id, nombre: p.nombre_completo }))
+  for (const p of profesionales.value) {
+    if (!lista.some((c) => c.id === p.id)) lista.push(p)
+  }
+  return filtros.value.profesional ? lista.filter((c) => c.id === filtros.value.profesional) : lista
+})
+const ETIQUETAS = Object.fromEntries(ESTADOS)
+
+async function cargarPlantel () {
+  try {
+    plantel.value = (await api.get('/sesion/profesionales/')).data.profesionales
+  } catch {
+    plantel.value = []  // la cuadrícula se arma igual con quienes tienen citas
+  }
+}
 const servicios = computed(() => opciones('servicio', 'servicio_nombre'))
 
 const hayFiltros = computed(() => Object.values(filtros.value).some(Boolean))
@@ -102,7 +158,7 @@ function hora (valor) {
 
 async function pedir (params) {
   const { data } = await api.get('/citas/agenda/', { params: { fecha: fecha.value, ...params } })
-  return data.citas
+  return data
 }
 
 // Cambiar la fecha o un filtro dispara una carga nueva sin esperar a que
@@ -118,15 +174,18 @@ async function cargar () {
   try {
     const delDia = await pedir({})
     const filtradas = hayFiltros.value
-      ? await pedir({
+      ? (await pedir({
           estado: filtros.value.estado || undefined,
           profesional: filtros.value.profesional || undefined,
           servicio: filtros.value.servicio || undefined
-        })
-      : delDia
+        })).citas
+      : delDia.citas
     if (mio !== turno) return
-    jornada.value = delDia
+    jornada.value = delDia.citas
+    horario.value = delDia.horario
+    fechaCargada.value = String(delDia.fecha)
     citas.value = filtradas
+    if (citaElegida.value) citaElegida.value = filtradas.find((c) => c.id === citaElegida.value.id) ?? null
   } catch (problema) {
     if (mio !== turno) return
     error.value = problema.mensaje
@@ -140,9 +199,9 @@ function limpiar () {
   filtros.value = { estado: '', profesional: '', servicio: '' }
 }
 
-watch(fecha, () => { limpiar(); cargar() })
+watch(fecha, () => { citaElegida.value = null; limpiar(); cargar() })
 watch(filtros, cargar, { deep: true })
-onMounted(cargar)
+onMounted(() => { cargar(); cargarPlantel() })
 </script>
 
 <template>
@@ -158,9 +217,20 @@ onMounted(cargar)
     </div>
 
     <form class="filtros" aria-label="Filtros de la agenda" @submit.prevent="cargar">
-      <div class="campo">
+      <div class="campo campo-fecha">
         <label for="fecha">Fecha</label>
-        <input id="fecha" v-model="fecha" type="date">
+        <div class="navegar-dia">
+          <button class="secundario boton-fila" type="button" aria-label="Día anterior" @click="moverDia(-1)">
+            ◀
+          </button>
+          <input id="fecha" v-model="fecha" type="date">
+          <button class="secundario boton-fila" type="button" @click="irAHoy">
+            Hoy
+          </button>
+          <button class="secundario boton-fila" type="button" aria-label="Día siguiente" @click="moverDia(1)">
+            ▶
+          </button>
+        </div>
       </div>
 
       <div class="campo">
@@ -197,7 +267,62 @@ onMounted(cargar)
     <p v-if="error" role="alert">{{ error }}</p>
     <p v-if="aviso" class="aviso-ok" role="status">{{ aviso }}</p>
 
-    <section class="tarjeta">
+    <div class="selector-vista" role="group" aria-label="Vista de la agenda">
+      <button type="button" :class="{ secundario: vista !== 'cuadricula' }" :aria-pressed="vista === 'cuadricula'" @click="vista = 'cuadricula'">
+        Cuadrícula del día
+      </button>
+      <button type="button" :class="{ secundario: vista !== 'lista' }" :aria-pressed="vista === 'lista'" @click="vista = 'lista'">
+        Lista
+      </button>
+    </div>
+
+    <section v-if="vista === 'cuadricula'" class="tarjeta">
+      <p v-if="fechaCargada !== fecha" role="status">Cargando la agenda…</p>
+      <template v-else>
+        <p class="ayuda">
+          {{ citas.length }} de {{ jornada.length }} cita(s) del día<template v-if="hayFiltros"> · filtro aplicado</template>
+          <template v-if="horario"> · la sede atiende de {{ horario.apertura }} a {{ horario.cierre }}</template>
+        </p>
+        <div v-if="citaElegida" class="cita-elegida" role="region" aria-label="Cita elegida">
+          <div>
+            <strong>{{ hora(citaElegida.inicio) }} – {{ hora(citaElegida.fin) }} · {{ citaElegida.paciente_nombre }}</strong>
+            <span>{{ citaElegida.servicio_nombre }} · {{ citaElegida.profesional_nombre }}</span>
+            <span class="etiqueta" :class="citaElegida.estado">{{ ETIQUETAS[citaElegida.estado] ?? citaElegida.estado }}</span>
+          </div>
+          <div class="acciones-fila">
+            <router-link
+              class="boton-secundario"
+              :to="{ name: 'ficha-paciente', params: { pacienteId: citaElegida.paciente } }"
+            >Ficha del paciente</router-link>
+            <template v-if="citaElegida.estado === 'PROGRAMADA'">
+              <router-link
+                v-if="atendible(citaElegida)"
+                class="boton"
+                :to="{ name: 'registrar-atencion', params: { citaId: citaElegida.id } }"
+              >Registrar atención</router-link>
+              <button class="secundario boton-fila" type="button" @click="citaACancelar = citaElegida">
+                Cancelar cita
+              </button>
+            </template>
+            <button class="enlace" type="button" aria-label="Cerrar la cita elegida" @click="citaElegida = null">
+              ×
+            </button>
+          </div>
+        </div>
+        <AgendaCuadricula
+          :fecha="fecha"
+          :citas="citas"
+          :profesionales="columnas"
+          :horario="horario"
+          :etiquetas="ETIQUETAS"
+          :actualizando="cargando"
+          @elegir="citaElegida = $event"
+          @hueco="huecoElegido"
+        />
+      </template>
+    </section>
+
+    <section v-else class="tarjeta">
       <p v-if="cargando" role="status">Cargando la agenda…</p>
       <p v-else-if="!citas.length" class="vacio">
         {{ hayFiltros
