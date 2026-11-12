@@ -52,7 +52,7 @@ def _cita_atendible(*, centro, usuario, sede_id, cita_id) -> Cita:
 
 @transaction.atomic
 def registrar_atencion(*, centro, usuario, sede_id, cita_id, monto_cobrado,
-                       observaciones_clinicas="") -> Atencion:
+                       observaciones_clinicas="", insumos=()) -> Atencion:
     """Registra la atención de una cita programada y la marca como atendida (CU10).
 
     Crear la atención y cerrar la cita van en la misma transacción: si una
@@ -60,6 +60,10 @@ def registrar_atencion(*, centro, usuario, sede_id, cita_id, monto_cobrado,
     atendida sin su atención. Paciente, profesional y servicio se copian de
     la cita en este momento, porque la ficha clínica no debe cambiar si
     después alguien la edita.
+
+    Los insumos consumidos descuentan stock de la sede de la cita en la misma
+    transacción (Informe 2.1.7, Tabla 39): si falta stock, no se registra
+    nada y la cita sigue programada.
     """
     cita = _cita_atendible(centro=centro, usuario=usuario, sede_id=sede_id, cita_id=cita_id)
 
@@ -72,6 +76,11 @@ def registrar_atencion(*, centro, usuario, sede_id, cita_id, monto_cobrado,
     )
     cita.estado = Cita.Estado.ATENDIDA
     cita.save(update_fields=["estado", "periodo", "actualizado_en"])
+    if insumos:
+        from apps.inventario.servicios import descontar_insumos
+
+        descontar_insumos(centro=centro, usuario=usuario, sede=cita.sede, atencion=atencion,
+                          insumos=insumos)
 
     # Las observaciones no entran en la auditoría: la bitácora guarda JSON en
     # claro y anularía el cifrado del campo.

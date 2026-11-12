@@ -44,6 +44,7 @@ class AtencionViewSet(ContextoDeCentro, mixins.CreateModelMixin, mixins.ListMode
             cita_id=datos["cita_id"],
             monto_cobrado=datos["monto_cobrado"],
             observaciones_clinicas=datos.get("observaciones_clinicas", ""),
+            insumos=datos.get("insumos", []),
         )
 
     def retrieve(self, request, *args, **kwargs):

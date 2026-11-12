@@ -122,8 +122,8 @@ def test_la_merma_y_el_ajuste_exigen_motivo(mover, tipo):
 
 @pytest.mark.django_db
 def test_la_salida_por_consumo_no_se_registra_a_mano(mover):
-    # Garantiza que nadie simula a mano la salida por consumo en atención,
-    # que es automática y todavía no existe.
+    # Garantiza que nadie simula a mano la salida por consumo: la genera el
+    # sistema al registrar la atención y queda ligada a ella.
     with pytest.raises(ReglaDeNegocio) as error:
         mover("SALIDA", 1)
 

@@ -59,15 +59,16 @@ class Stock(ModeloDeCentro):
 class MovimientoInventario(ModeloDeCentro):
     """Toda variación de stock, con su usuario, fecha y motivo (CU11).
 
-    Los tipos son los que elige el usuario en P13 (Práctica 7, Tabla 13). La
-    salida por consumo en una atención no existe todavía: P11 no registra
-    insumos, así que no hay de dónde calcularla.
+    Entrada, ajuste y merma los elige el usuario en P13 (Práctica 7, Tabla
+    13). La salida no se elige: la genera el sistema al registrar una
+    atención con sus insumos (P11), y queda ligada a esa atención.
     """
 
     class Tipo(models.TextChoices):
         ENTRADA = "ENTRADA", "Entrada"
         AJUSTE = "AJUSTE", "Ajuste"
         MERMA = "MERMA", "Merma"
+        SALIDA = "SALIDA", "Salida por consumo"
 
     sede = models.ForeignKey("sedes.Sede", on_delete=models.PROTECT,
                              related_name="movimientos_inventario")
@@ -79,6 +80,9 @@ class MovimientoInventario(ModeloDeCentro):
     motivo = models.CharField(max_length=200, blank=True)
     registrado_por = models.ForeignKey("usuarios.Usuario", on_delete=models.PROTECT,
                                        related_name="movimientos_inventario")
+    # Solo en las salidas: la atención que consumió el insumo.
+    atencion = models.ForeignKey("atenciones.Atencion", on_delete=models.PROTECT, null=True,
+                                 blank=True, related_name="insumos")
 
     class Meta:
         db_table = "movimiento_inventario"
@@ -90,4 +94,11 @@ class MovimientoInventario(ModeloDeCentro):
                                    name="ck_movimiento_cantidad_no_cero"),
             models.CheckConstraint(condition=models.Q(existencia_resultante__gte=0),
                                    name="ck_movimiento_existencia_no_negativa"),
+            # Una salida siempre resta y siempre tiene su atención; ningún
+            # otro tipo la tiene.
+            models.CheckConstraint(
+                condition=(models.Q(tipo="SALIDA", atencion__isnull=False, cantidad__lt=0)
+                           | (~models.Q(tipo="SALIDA") & models.Q(atencion__isnull=True))),
+                name="ck_movimiento_salida_con_atencion",
+            ),
         ]

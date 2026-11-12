@@ -9,6 +9,8 @@ from .models import MovimientoInventario, Producto, Stock
 
 Tipo = MovimientoInventario.Tipo
 SENTIDOS = {"ALTA": 1, "BAJA": -1}
+# Los que se eligen en P13. La salida la genera el sistema (descontar_insumos).
+ELEGIBLES = {Tipo.ENTRADA, Tipo.AJUSTE, Tipo.MERMA}
 
 
 def _variacion(tipo, cantidad, sentido) -> int:
@@ -49,7 +51,7 @@ def registrar_movimiento(*, centro, usuario, sede_id, producto_id, tipo, cantida
         raise ReglaDeNegocio("sin-sede-activa", "Elija la sede del movimiento.")
     if producto_id is None:
         raise ReglaDeNegocio("producto-requerido", "Elija el producto del movimiento.")
-    if tipo not in Tipo.values:
+    if tipo not in ELEGIBLES:
         raise ReglaDeNegocio(
             "tipo-no-elegible",
             "El movimiento debe ser una entrada, un ajuste o una merma; las salidas por "
@@ -87,6 +89,71 @@ def registrar_movimiento(*, centro, usuario, sede_id, producto_id, tipo, cantida
     registrar("ALTA", "movimiento_inventario", movimiento.pk,
               {"tipo": tipo, "cantidad": variacion, "sede": sede.pk, "producto": producto.pk})
     return movimiento
+
+
+def _es_cantidad(valor) -> bool:
+    return isinstance(valor, int) and not isinstance(valor, bool) and valor > 0
+
+
+def descontar_insumos(*, centro, usuario, sede, atencion, insumos) -> list:
+    """Salidas por los insumos consumidos en una atención (P11, Informe 2.1.7).
+
+    Corre dentro de la transacción de `registrar_atencion`: si falta stock de
+    un solo insumo no se registra nada, ni la atención ni ninguna salida. Las
+    filas de stock se bloquean en orden de producto, para que dos atenciones
+    simultáneas con los mismos insumos no se crucen ni se bloqueen entre sí.
+    """
+    pedidos = {}
+    for fila in insumos:
+        producto_id, cantidad = fila.get("producto"), fila.get("cantidad")
+        if producto_id is None:
+            raise ReglaDeNegocio("producto-requerido", "Elija el producto de cada insumo.")
+        if not _es_cantidad(cantidad):
+            raise ReglaDeNegocio("cantidad-invalida",
+                                 "La cantidad de cada insumo debe ser un entero mayor que 0.")
+        if producto_id in pedidos:
+            raise ReglaDeNegocio("insumo-repetido",
+                                 "Un mismo producto aparece dos veces; sume las cantidades.")
+        pedidos[producto_id] = cantidad
+
+    productos = {p.pk: p for p in Producto.objects.filter(centro=centro, pk__in=pedidos)}
+    salidas, faltantes = [], []
+    for producto_id in sorted(pedidos):
+        producto = productos.get(producto_id)
+        if producto is None:
+            raise ReglaDeNegocio("producto-fuera-del-centro",
+                                 "Uno de los productos no existe en este centro.")
+        if not producto.esta_activo:
+            raise ReglaDeNegocio("producto-inactivo",
+                                 f"{producto.nombre} ya no está activo.")
+        stock = _stock_bloqueado(centro=centro, sede=sede, producto=producto)
+        cantidad = pedidos[producto_id]
+        if stock.cantidad < cantidad:
+            faltantes.append(f"{producto.nombre}: hay {stock.cantidad} {producto.unidad}, "
+                             f"se piden {cantidad}")
+            continue
+        salidas.append((producto, stock, cantidad))
+    if faltantes:
+        raise ReglaDeNegocio(
+            "stock-insuficiente",
+            f"No hay stock suficiente en {sede.nombre}. " + "; ".join(faltantes) + ".",
+        )
+
+    movimientos = []
+    for producto, stock, cantidad in salidas:
+        stock.cantidad -= cantidad
+        stock.save(update_fields=["cantidad", "actualizado_en"])
+        movimientos.append(MovimientoInventario.objects.create(
+            centro=centro, sede=sede, producto=producto, tipo=Tipo.SALIDA, cantidad=-cantidad,
+            existencia_resultante=stock.cantidad, motivo="Consumo en atención",
+            registrado_por=usuario, atencion=atencion,
+        ))
+    for m in movimientos:
+        registrar("ALTA", "movimiento_inventario", m.pk, {
+            "tipo": Tipo.SALIDA, "cantidad": m.cantidad, "sede": sede.pk,
+            "producto": m.producto_id, "atencion": atencion.pk,
+        })
+    return movimientos
 
 
 def stock_de_la_sede(*, centro_id: int, sede_id: int) -> list[dict]:
