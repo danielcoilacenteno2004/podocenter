@@ -3,8 +3,9 @@
 // solo para la administradora del centro (Práctica N.° 7, Tablas 23 y 24).
 //
 // Desactivar es desmarcar «Servicio activo»: la nueva cita (P06) solo
-// ofrece los activos y las atenciones ya registradas lo conservan. Nunca se
-// borra (el DELETE de la API responde 500 si el servicio tiene citas).
+// ofrece los activos, el servidor rechaza citas nuevas con un servicio
+// inactivo y las atenciones ya registradas lo conservan. Un servicio no se
+// borra: la API no tiene DELETE.
 // Los límites (precio, duración, nombre único) los valida el servidor.
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { api } from '../services/api'
@@ -185,7 +186,10 @@ onMounted(cargar)
           </div>
           <div class="campo">
             <label for="sv-duracion">Duración (min) *</label>
-            <input id="sv-duracion" v-model.number="formulario.duracion_minutos" type="number" step="1" inputmode="numeric" required :aria-invalid="'duracion_minutos' in camposConError">
+            <input id="sv-duracion" v-model.number="formulario.duracion_minutos" type="number" min="10" max="240" step="1" inputmode="numeric" required aria-describedby="ayuda-duracion" :aria-invalid="'duracion_minutos' in camposConError">
+            <p id="ayuda-duracion" class="ayuda">
+              Entre 10 y 240 minutos.
+            </p>
           </div>
         </div>
         <label class="casilla">

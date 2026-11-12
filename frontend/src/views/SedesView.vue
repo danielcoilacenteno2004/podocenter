@@ -2,11 +2,11 @@
 // P18 Sedes y P28 Crear o editar sede (CU02, RF03), solo para la
 // administradora del centro (Práctica N.° 7, Tablas 29 y 30).
 //
-// El horario de atención se muestra pero no se edita: la API devuelve los
-// horarios de solo lectura y no hay ninguna ruta que los escriba. Una sede
-// nueva nace sin horario y, mientras no lo tenga, la agenda la trata como
-// cerrada todos los días. Desactivar es desmarcar «Sede activa»; nunca se
-// borra (el DELETE de la API responde 500 si la sede tiene citas).
+// El horario de atención (CC-15, Tabla 30) se edita aquí: un día marcado
+// con su apertura y cierre; el que no se marca queda cerrado. Se envía la
+// semana completa en la misma petición que la sede, y que el cierre sea
+// posterior a la apertura lo decide el servidor (horario-invalido).
+// Desactivar es desmarcar «Sede activa»; una sede no se borra.
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { api } from '../services/api'
 
@@ -26,8 +26,37 @@ const guardando = ref(false)
 const errorFormulario = ref(null)
 const camposConError = ref({})
 
+// Semana del formulario: un elemento por día, de lunes (0) a domingo (6).
+// Se inicia cerrada: el diálogo está en el DOM desde el primer render.
+const semana = ref(semanaDe(null))
+
+function semanaDe (sede) {
+  return DIAS.map((_, dia) => {
+    const h = sede?.horarios.find((x) => x.dia_semana === dia && x.esta_abierta !== false)
+    return h
+      ? { abierto: true, apertura: hora(h.hora_apertura), cierre: hora(h.hora_cierre) }
+      : { abierto: false, apertura: '', cierre: '' }
+  })
+}
+
+// Al marcar un día se le ponen las horas del último día abierto, para no
+// teclear lo mismo seis veces; se pueden cambiar.
+function alternarDia (dia) {
+  const d = semana.value[dia]
+  if (d.abierto && !d.apertura) {
+    const modelo = semana.value.find((x, i) => i !== dia && x.abierto && x.apertura)
+    d.apertura = modelo?.apertura ?? ''
+    d.cierre = modelo?.cierre ?? ''
+  }
+}
+
+const horarioIncompleto = computed(() =>
+  semana.value.some((d) => d.abierto && (!d.apertura || !d.cierre)))
+const diasAbiertos = computed(() => semana.value.filter((d) => d.abierto).length)
+
 const completo = computed(() =>
-  Boolean(formulario.value.nombre?.trim() && formulario.value.direccion?.trim()))
+  Boolean(formulario.value.nombre?.trim() && formulario.value.direccion?.trim()) &&
+  !horarioIncompleto.value)
 
 const hora = (valor) => valor?.slice(0, 5)
 
@@ -71,6 +100,7 @@ async function abrir (sede = null) {
   formulario.value = sede
     ? { nombre: sede.nombre, direccion: sede.direccion, telefono: sede.telefono, esta_activa: sede.esta_activa }
     : { nombre: '', direccion: '', telefono: '', esta_activa: true }
+  semana.value = semanaDe(sede)
   dialogo.value.showModal()
   await nextTick()
   primerCampo.value?.focus()
@@ -80,14 +110,22 @@ async function guardar () {
   guardando.value = true
   errorFormulario.value = null
   camposConError.value = {}
+  const datos = {
+    ...formulario.value,
+    horario: semana.value.flatMap((d, dia) => d.abierto
+      ? [{ dia_semana: dia, hora_apertura: d.apertura, hora_cierre: d.cierre }]
+      : [])
+  }
   try {
     if (editando.value) {
-      await api.patch(`/sedes/${editando.value.id}/`, formulario.value)
+      await api.patch(`/sedes/${editando.value.id}/`, datos)
       aviso.value = `${formulario.value.nombre} actualizada.`
     } else {
-      await api.post('/sedes/', formulario.value)
-      aviso.value = `${formulario.value.nombre} creada. Aún no tiene horario de atención, ` +
-        'así que no admite citas: el horario todavía no se puede cargar desde el sistema.'
+      await api.post('/sedes/', datos)
+      aviso.value = `${formulario.value.nombre} creada.`
+    }
+    if (!diasAbiertos.value) {
+      aviso.value += ' No tiene ningún día abierto, así que no admitirá citas.'
     }
     dialogo.value.close()
     await cargar()
@@ -200,21 +238,37 @@ onMounted(cargar)
           <input id="s-telefono" v-model="formulario.telefono" type="tel" :aria-invalid="'telefono' in camposConError">
         </div>
 
-        <fieldset class="campo opciones">
+        <fieldset class="campo editor-horario">
           <legend>Horario de atención</legend>
-          <template v-if="editando && editando.horarios.length">
-            <dl class="horario">
-              <div v-for="(nombre, dia) in DIAS" :key="dia">
-                <dt>{{ nombre }}</dt>
-                <dd>{{ horarioDelDia(editando, dia) ?? 'Cerrado' }}</dd>
-              </div>
-            </dl>
-          </template>
-          <p v-else class="ayuda">
-            Sin horario cargado: la sede no admite citas hasta que lo tenga.
-          </p>
           <p class="ayuda">
-            El horario todavía no se puede modificar desde el sistema.
+            Marque los días que atiende la sede. La agenda solo acepta citas dentro de este horario.
+          </p>
+          <div v-for="(nombre, dia) in DIAS" :key="dia" class="dia-horario">
+            <label class="casilla">
+              <input v-model="semana[dia].abierto" type="checkbox" @change="alternarDia(dia)">
+              <span>{{ nombre }}</span>
+            </label>
+            <template v-if="semana[dia].abierto">
+              <input
+                v-model="semana[dia].apertura"
+                type="time"
+                step="900"
+                required
+                :aria-label="`Apertura del ${nombre.toLowerCase()}`"
+              >
+              <span aria-hidden="true">a</span>
+              <input
+                v-model="semana[dia].cierre"
+                type="time"
+                step="900"
+                required
+                :aria-label="`Cierre del ${nombre.toLowerCase()}`"
+              >
+            </template>
+            <span v-else class="ayuda">Cerrado</span>
+          </div>
+          <p v-if="!diasAbiertos" class="ayuda texto-alerta">
+            Sin días abiertos la sede no admite citas.
           </p>
         </fieldset>
 
