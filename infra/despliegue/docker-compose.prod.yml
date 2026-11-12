@@ -3,7 +3,8 @@
 #
 #   docker compose -f docker-compose.prod.yml up -d --build
 #
-# Variables esperadas en un archivo .env junto a este compose:
+# Variables esperadas en un archivo .env junto a este compose (plantilla en
+# .env.ejemplo; pasos completos en docs/DESPLIEGUE.md):
 #   DJANGO_SECRET_KEY, DJANGO_ALLOWED_HOSTS, DJANGO_CSRF_ORIGINS,
 #   CLAVE_CIFRADO_CAMPOS, POSTGRES_HOST, POSTGRES_DB, POSTGRES_USER,
 #   POSTGRES_PASSWORD
@@ -30,14 +31,15 @@ services:
   # quedó fuera de la primera entrega por ese trámite (sección 2.7.3).
 
   web:
-    image: nginx:1.27-alpine
+    # Nginx con la SPA compilada dentro (infra/web.Dockerfile).
+    build:
+      context: ../..
+      dockerfile: infra/web.Dockerfile
     depends_on: [api]
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ../nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ../../frontend/dist:/var/www/spa:ro
       - estaticos:/var/www/estaticos:ro
       - ./certificados:/etc/nginx/certificados:ro
       - certbot:/var/www/certbot
