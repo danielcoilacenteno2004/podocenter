@@ -5,9 +5,9 @@
 //
 // La nota clínica solo sale por GET /atenciones/{id}/, que deja cada
 // apertura en la bitácora de auditoría; el listado del historial no la trae.
-// Del wireframe no se construyen el monto, los bloques separados de
-// diagnóstico y tratamiento ni la tabla de insumos: la atención guarda una
-// sola observación clínica y no tiene cobro ni insumos.
+// Muestra el monto cobrado y los insumos consumidos. Del wireframe no se
+// construyen los bloques separados de diagnóstico y tratamiento: la
+// atención guarda una sola observación clínica.
 import { ref, watch } from 'vue'
 import { api } from '../services/api'
 
@@ -76,6 +76,9 @@ watch(() => props.atencionId, async (id) => {
       <template v-else-if="atencion">
         <p class="resumen-atencion">
           {{ atencion.sede_nombre }} · {{ atencion.profesional_nombre }} · {{ atencion.servicio_nombre }}
+          <template v-if="atencion.monto_cobrado !== null">
+            · S/ {{ Number(atencion.monto_cobrado).toFixed(2) }}
+          </template>
         </p>
         <section class="antecedentes" :class="{ vacios: !atencion.observaciones_clinicas }" aria-labelledby="titulo-observacion">
           <h3 id="titulo-observacion">
@@ -86,6 +89,19 @@ watch(() => props.atencionId, async (id) => {
           </p>
           <p v-else>
             No se registró observación en esta atención.
+          </p>
+        </section>
+        <section aria-labelledby="titulo-insumos">
+          <h3 id="titulo-insumos">
+            Insumos consumidos
+          </h3>
+          <ul v-if="atencion.insumos_consumidos?.length" class="lista-insumos">
+            <li v-for="i in atencion.insumos_consumidos" :key="i.producto">
+              {{ i.nombre }} ({{ i.codigo }}): {{ i.cantidad }} {{ i.unidad }}
+            </li>
+          </ul>
+          <p v-else class="ayuda">
+            No se registraron insumos en esta atención.
           </p>
         </section>
         <p class="ayuda">
