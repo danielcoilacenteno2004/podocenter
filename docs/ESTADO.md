@@ -1,6 +1,6 @@
 # Estado del proyecto
 
-Corte: 10 de noviembre de 2026. Primera entrega comprometida: **12/11/2026**.
+Corte: 12 de noviembre de 2026. Primera entrega comprometida: **12/11/2026**.
 
 ## 1. El riesgo principal
 
@@ -14,14 +14,14 @@ Contra eso, el estado real es:
 
 | Compromiso | Estado |
 |---|---|
-| Usuarios y roles | Pantallas: ingreso (P01), elección de sede (P03), gestión de usuarios (P17/P27) y perfil con cambio de contraseña (P20). **Sin P02 (dos pasos) ni P23/P24 (recuperación de contraseña por correo): un usuario nuevo no puede ingresar, porque nadie conoce la contraseña que le asigna el alta, y P20 exige la actual.** La edición no cambia rol ni sedes (ver sección 5) |
-| Sedes | Pantallas P18/P28. **El horario de atención se ve pero no se edita: la API no tiene ruta para escribirlo**, así que una sede nueva nace cerrada |
+| Usuarios y roles | Pantallas: ingreso (P01), elección de sede (P03), gestión de usuarios (P17/P27, con rol y sedes editables) y perfil con cambio de contraseña (P20). El alta y «Restablecer contraseña» dan una **contraseña temporal** que se muestra una vez, y el servidor no deja hacer nada más hasta cambiarla. **Sin P02 (dos pasos) ni P23/P24 (correo): la contraseña olvidada la restablece la administradora** |
+| Sedes | Pantallas P18/P28 con el **horario de atención editable** por día (CC-15). Una sede o un servicio desactivados ya no admiten citas nuevas |
 | Pacientes con consentimiento | Pantallas: búsqueda (P08), alta con consentimiento (P09), ficha con historial (P10) y detalle de atención (P25). **Sin edición: se quitaron PUT, PATCH y DELETE de `/pacientes/`** porque escribían sin auditoría; vuelve con un servicio que la audite |
 | Citas sin recordatorios | Terminado: agenda (P05) en cuadrícula por hora y profesional y en lista con filtros, nueva cita (P06, también desde un hueco de la cuadrícula), cancelación con reemplazo (P07) y panel del día (P04) |
-| Servicios | Terminado: pantallas P15/P26 |
-| Inventario (adelantado de la segunda entrega) | Stock por sede (P12), movimientos de Entrada, Ajuste o Merma (P13) y disponibilidad entre sedes (P14). **Sin la salida automática por consumo en una atención: P11 no registra insumos, así que no hay de dónde calcularla.** Sin editar el mínimo en línea (CU05) ni crear productos desde la interfaz |
-| **Atenciones** | **Parcial.** Registro de la atención con su monto cobrado (P11) y registro diario por sede y fecha (P16). **Sin insumos:** el inventario ya existe, pero P11 no los registra ni genera la salida |
-| Desplegado en producción | **No**: la infraestructura está escrita, nada corre en la nube |
+| Servicios | Terminado: pantallas P15/P26, duración de 10 a 240 minutos (Tabla 24) e **insumos habituales** de cada servicio (CC-14) |
+| Inventario (adelantado de la segunda entrega) | Stock por sede (P12) con el **mínimo editable en línea** por la administradora (CU05), movimientos de Entrada, Ajuste o Merma (P13), disponibilidad entre sedes (P14) y **salida automática** por los insumos de cada atención. Alta, edición y baja de productos desde P12: **no figura entre las 29 pantallas de la Práctica 7**, se añadió porque sin ella un centro nuevo no podía llenar su inventario |
+| **Atenciones** | **Casi completo.** Registro de la atención con monto cobrado, **insumos consumidos** (precargados de los habituales del servicio) y su salida de stock en la misma transacción (P11); registro diario (P16). Falta lo de la sección «No construido» |
+| Desplegado en producción | **No**: la infraestructura está lista y revisada (`docs/DESPLIEGUE.md`), pero nada corre en la nube y las imágenes no se han construido (la máquina de desarrollo no tiene Docker) |
 | Validado con la usuaria | **No**: la prueba de usabilidad está diseñada, no aplicada |
 
 ### Qué tiene y qué no tiene Atenciones
@@ -32,8 +32,9 @@ Construido:
   profesional, servicio y sede al registrarse, para que la ficha no cambie si
   después alguien edita la cita.
 - Observación clínica cifrada, como los antecedentes del paciente.
-- Política de seguridad por fila sobre la tabla `atencion`. Son **ocho**
-  tablas con RLS.
+- Política de seguridad por fila sobre la tabla `atencion`. Hoy son **doce**
+  tablas con RLS, todas con `FORCE`:
+  `SELECT relname FROM pg_class WHERE relrowsecurity;`
 - Reglas en el servicio, cada una con su código RFC 9457:
   - `cita-no-atendible`: la cita no está programada.
   - `atencion-duplicada`: la cita ya tiene atención.
@@ -51,46 +52,58 @@ Construido:
   editable; la base impide montos negativos.
 - Registro diario (P16): atenciones e ingresos de la sede activa en una
   fecha, calculado desde las atenciones (`GET /reportes/registro-diario/`).
-- RNF02 (cinco interacciones o menos): **3 interacciones medidas con el alcance construido, aceptando el monto precargado; el recorrido diseñado prevé 4 al incorporar los insumos.** Medidas con Playwright el
-  10 y el 11/11/2026, en escritorio y a 390 px.
+- **Insumos consumidos**: P11 precarga los habituales del servicio (CC-14) con
+  el stock de la sede. Cada uno genera una salida ligada a la atención, en la
+  misma transacción y con la fila de stock bloqueada. Si falta stock de uno
+  solo, no se registra nada y la cita sigue programada. La base exige que
+  toda salida tenga su atención.
+- RNF02 (cinco interacciones o menos): **3 interacciones medidas con los
+  insumos habituales precargados** (pulsar la cita, escribir la observación y
+  confirmar), aceptando el monto y los insumos sugeridos. Medidas con
+  Playwright el 12/11/2026, en escritorio y a 390 px.
 
 No construido, y lo pide el CU10 o la P11 de la Práctica N.° 7:
 
-- **Insumos consumidos** y descuento de stock. El inventario ya existe; falta
-  que P11 registre los insumos y genere la salida.
 - **Servicio editable** («si se brindó otro»).
 - **Notas separadas** en diagnóstico, tratamiento y observaciones. Hoy hay una
   sola observación.
+- **Paso de resumen** antes de confirmar.
 - **Anulación de una atención** con motivo.
 
-La diferencia entre las 3 medidas y las 4 diseñadas está en los insumos, que
-aún no existen. **Si la podóloga edita el monto**, el recorrido suma pulsar
-el campo, escribir y volver a la observación: contado paso a paso, llega a 6
-con observación escrita, por encima del límite. Ese caso **no se ha medido**
-(el recorrido automático rellena el campo sin pulsarlo). La medición válida
-para el RNF02 es la que se haga con la podóloga.
+El recorrido diseñado tiene 4 interacciones porque incluye el paso de
+resumen, que no está construido. **Cada cambio sobre lo precargado suma
+interacciones**: editar el monto o la cantidad de un insumo, o agregar un
+insumo que no es habitual (buscarlo y elegirlo, dos más): con uno agregado y
+la observación escrita, el recorrido queda en 5, en el límite. La medición
+válida para el RNF02 es la que se haga con la podóloga.
 
 ## 2. Lo que está sólido
 
-- **198 pruebas** en verde, **94.3 %** de cobertura de sentencias, sobre
-  PostgreSQL real y no sobre una base en memoria. La cifra varía unas
-  décimas entre ejecuciones.
+- **280 pruebas** en verde, **95.7 %** de cobertura de sentencias, sobre
+  PostgreSQL real y no sobre una base en memoria, con Python 3.12. La cifra
+  varía unas décimas entre ejecuciones.
 - **Cero vulnerabilidades** conocidas en las dependencias tras subir a Django
   5.2 LTS, DRF 3.18.2, django-filter 25.2 y cryptography 50.0.2.
 - `ruff`, `bandit` 1.9.4 y `npm run lint` limpios. `bandit` se comprobó
   además contra un archivo deliberadamente inseguro, en Python 3.12 y 3.14,
   para asegurar que **sí falla** cuando debe.
-- **Aislamiento multi-inquilino probado con nueve pruebas**: tres en `core`,
-  tres en la API de usuarios y tres en atenciones. Comprueban que un centro
-  no ve, no abre, no modifica y no registra atenciones sobre datos de otro. Es
-  lo que sostiene el modelo de arriendo ante el jurado.
-- **98 commits** con «un commit, un cambio», contando el que actualiza este
-  documento: 51 de Sergio Daniel Coila Centeno y 47 de Andre Nicolas Huaroc
+- **Aislamiento multi-inquilino probado con 21 pruebas**, contando las que
+  usan el centro ajeno de prueba (`otro_centro`): 5 en `core`, 5 en
+  usuarios, 4 en atenciones, 4 en inventario, 2 en catálogo y 1 en sedes.
+  Comprueban que un centro no ve, no abre y no modifica datos de otro, ni
+  usa sus sedes o productos. Es lo que sostiene el modelo de arriendo ante
+  el jurado.
+- **127 commits** con «un commit, un cambio», contando el que actualiza este
+  documento: 65 de Sergio Daniel Coila Centeno y 62 de Andre Nicolas Huaroc
   Condori. La identidad de git está fijada en la configuración del
   repositorio para que no vuelva a entrar un autor con otro nombre.
 - Entorno de demostración reproducible con un comando y probado con nueve
   pruebas, incluida una que verifica que las credenciales publicadas funcionan.
-- Frontend: **25 pantallas de las 29 diseñadas en la Práctica N.° 7 (P01, P03, P04, P05, P06, P07, P08, P09, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20, P21, P25, P26, P27, P28, P29)**. El frontend no tiene pruebas automáticas; cada pantalla se comprobó con un recorrido en Playwright.
+- Frontend: **25 pantallas de las 29 diseñadas en la Práctica N.° 7 (P01, P03, P04, P05, P06, P07, P08, P09, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20, P21, P25, P26, P27, P28, P29)**, más la ventana de producto sobre P12, que no está en el diseño. El frontend no tiene pruebas automáticas; cada pantalla se comprobó con un recorrido en Playwright.
+- **Configuración de producción endurecida**: no arranca sin `DJANGO_SECRET_KEY`
+  y `CLAVE_CIFRADO_CAMPOS` propias (ni vacías ni con el texto de la
+  plantilla), reconoce el HTTPS que termina Nginx y `check --deploy` pasa sin
+  avisos. `cargar_demo` se niega a correr con ella.
 
 ### Pipeline: corregido, pendiente de ver en verde
 
@@ -105,6 +118,9 @@ aún no se han ejecutado en GitHub:
 - `bandit` 1.8.0 aprobaba en falso con Python 3.14: se saltaba todos los
   archivos y salía con código 0. Se subió a 1.9.4 (`5398bee`). El pipeline ya
   usaba Python 3.12, la versión que exige el proyecto (ver `CLAUDE.md`).
+- El paso `check --deploy` habría fallado: la configuración de producción
+  heredaba un `SECRET_KEY` de respaldo (aviso W009). Ahora el pipeline
+  genera claves de un solo uso (`6471501`).
 
 ## 3. Brechas de diseño levantadas y no resueltas
 
@@ -131,23 +147,23 @@ Registradas en la Práctica N.° 7 y pendientes de decisión de alcance:
 | CC-19 | *Añade* el panel segmentado por decisión; no revierte CC-12 |
 | RF07 | Recordatorios por mensajería, pendientes de aprobación del proveedor |
 
-## 5. Lo que la API permite y no debería (encontrado al construir las pantallas de administración, 11/11/2026)
+## 5. Huecos de la API encontrados el 11/11 y cerrados el 12/11
 
-Las pantallas rodean estos huecos sin inventar reglas; cerrarlos es trabajo
-del servidor:
+Todos tienen ahora su regla en el servidor y sus pruebas:
 
-- **`PATCH /usuarios/{id}/` no pasa por el servicio**: cambia el rol o
-  `esta_activo` de la única administradora (200) sin la regla del último
-  administrador, e ignora `sedes_ids`. Por eso P27 solo edita nombres,
-  apellidos y correo.
-- **Nadie puede dar contraseña a un usuario nuevo**: la API le pone una
-  aleatoria y P24 no existe.
-- **No hay ruta para escribir el horario de una sede.**
-- **Nombre repetido de sede o servicio → 500**, no un error de negocio.
-- **`DELETE` de sede o servicio con citas → 500.** Las pantallas no lo usan.
-- Reglas del diseño que el servidor no aplica: una sede o un servicio
-  inactivo siguen aceptando citas; la duración admite desde 5 minutos (la
-  Tabla 24 dice entre 10 y 240).
+- `PATCH /usuarios/{id}/` pasa por el servicio: aplica la regla del último
+  administrador, reasigna las sedes y rechaza una sede de otro centro (el
+  alta también la aceptaba). La baja va solo por su ruta.
+- Un usuario nuevo recibe una contraseña temporal y debe cambiarla al entrar.
+- El horario de la sede se escribe con la sede.
+- Nombre repetido de sede o servicio: `sede-duplicada` y `servicio-duplicado`
+  en lugar de un 500.
+- Sedes y servicios ya no tienen `DELETE` (respondía 500 si tenían citas). La
+  baja es desactivarlos, y desactivados no admiten citas nuevas.
+- Duración de un servicio entre 10 y 240 minutos, también con un `CHECK` en
+  la base.
+
+Queda abierto: la edición de pacientes (ver la sección 6).
 
 ## 6. Lo que hay que decidir
 
@@ -156,18 +172,17 @@ del servidor:
   cambiar (¿el documento?) y pasarlos por un servicio auditado; la baja ya
   existe como `esta_activo`.
 
-- **Qué entra de Atenciones el 12/11.** El monto cobrado y el registro diario
-  ya existen; faltan los insumos: el inventario existe, pero P11 no los
-  registra. Hay que dejar
-  por escrito que la primera entrega registra la atención sin insumos: lo
-  que no es defendible es presentar el CU10 como completo.
+- **Qué entra de Atenciones el 12/11.** Monto, insumos con su salida de
+  stock y registro diario sí. Servicio editable, las tres notas, el paso de
+  resumen y la anulación no: el CU10 no se puede presentar como completo.
 - **El panel del día y el registro diario pueden no cuadrar.** El «ingreso
   confirmado» del panel (P04) suma el precio de catálogo de las citas
   atendidas; el registro diario (P16) suma lo cobrado de verdad. Con un
   descuento, las dos cifras difieren. Habría que decidir si el panel pasa a
   usar el monto cobrado.
-- **El despliegue en producción** necesita una cuenta de nube real con tarjeta;
-  no se resuelve escribiendo código.
+- **El despliegue en producción** necesita una cuenta de nube real con tarjeta
+  y un dominio; no se resuelve escribiendo código. Los pasos están en
+  `docs/DESPLIEGUE.md`, que todavía no se ha seguido en un servidor.
 - **La prueba de usabilidad** necesita una hora de la dueña y una de la
   podóloga. Es el requisito más barato de los tres y el que lleva más tiempo
   parado. Además, es la que valida de verdad el RNF02.
