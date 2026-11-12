@@ -20,7 +20,7 @@ tras añadir Atenciones):
 
 | Apartado | Afirma | Estado | Cómo comprobarlo |
 |---|---|---|---|
-| 2.6.5 | 32 pruebas, 90 % de cobertura | **Fechada** | En el commit del corte (`2d4a9b8`, 28/10) hay 32 pruebas: `git grep -hE "^def test_\|^    def test_" 2d4a9b8 -- 'backend/**/test_*.py' \| wc -l`. Hoy: 196 pruebas y 94.3 %. |
+| 2.6.5 | 32 pruebas, 90 % de cobertura | **Fechada** | En el commit del corte (`2d4a9b8`, 28/10) hay 32 pruebas: `git grep -hE "^def test_\|^    def test_" 2d4a9b8 -- 'backend/**/test_*.py' \| wc -l`. Hoy: 198 pruebas y 94.3 %. |
 | 2.6.3 | 29 commits entre el 15 y el 28 de octubre, 15 y 14 por integrante | **No coincide** | `git log --since=2026-10-15 --until=2026-10-29 --format=%an \| sort \| uniq -c` da **26 commits, 13 y 13**. La diferencia es anterior a Atenciones. |
 | 2.6.3 | Nada entra a la rama de integración con el pipeline en rojo | **No coincide** | Desde el 28/10, `npm run lint` del trabajo `frontend` no podía pasar: no había `eslint.config.js` y ESLint 9 rechaza `--ext`. Se corrigió en `453ef9c`. Las ejecuciones en GitHub no se han revisado. |
 | 2.2 | Python 3.12, Django 5.2 LTS, Django REST Framework | **Cierta** | `grep -E '^(Django\|djangorestframework)' requirements.txt` → 5.2.19 y 3.18.2; `grep FROM infra/Dockerfile` → `python:3.12-slim` |
@@ -48,6 +48,7 @@ tras añadir Atenciones):
 | Tabla 1 | 29 pantallas diseñadas | **Cierta** | El documento dice «Se construye», no «construida». Construidas **25**: P01, P03, P04, P05, P08, P09, P10, P11, P12, P15, P16, P17, P18, P19, P20 y P21 en `frontend/src/views/` (los formularios P26, P27, P28 y P29 van como ventana dentro de su listado), y P06, P07, P13, P14 y P25 como ventanas en `frontend/src/components/`. P09 solo cubre el alta; P20 cubre el perfil y el cambio de contraseña, sin el segundo factor; P21 cubre 403 y 404. |
 | Tabla 1 | P04 «Se construye (3 segmentos)» | **Cierta** | `backend/apps/citas/panel.py` devuelve citas, ingresos y ocupación |
 | Tabla 1 | P05 «Se construye (con filtros)» | **Cierta** | `grep -n "estado\|profesional\|servicio" backend/apps/citas/servicios.py` |
+| Observaciones, Figura 3 | «La cuadrícula por hora y profesional ya estaba prevista y se mantiene junto a la vista de lista»; los huecos libres se pulsan para crear una cita | **Cierta** | `frontend/src/components/AgendaCuadricula.vue`: filas según el horario de la sede (`horario_de_la_jornada`, probado en `test_agenda_filtros.py`), una columna por profesional, y un hueco abre P06 con hora y profesional. Se alterna con la lista; no se ven las dos a la vez |
 | Tabla 1 | P11 «Se construye» | **Cierta** | `frontend/src/views/RegistrarAtencionView.vue`, ruta `/citas/:citaId/atencion` |
 | Tabla 10 | P11: servicio editable, monto, tabla de insumos, tres notas clínicas (diagnóstico, tratamiento, observaciones), resumen antes de confirmar | **Parcial** | Construido: el encabezado de la cita y **una** observación clínica cifrada de hasta 2000 caracteres. Construido también: el monto cobrado, obligatorio, precargado del catálogo y editable. No construido: servicio editable, insumos, las otras dos notas y el paso de resumen. |
 | 4.5, Tabla 11 | El recorrido del RNF02 usa cuatro interacciones | **Parcial** | 3 medidas con el alcance construido, aceptando el monto precargado; el recorrido diseñado prevé 4 al incorporar los insumos (ver la fila del informe). |

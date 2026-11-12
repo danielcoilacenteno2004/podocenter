@@ -17,10 +17,10 @@ Contra eso, el estado real es:
 | Usuarios y roles | Pantallas: ingreso (P01), elección de sede (P03), gestión de usuarios (P17/P27) y perfil con cambio de contraseña (P20). **Sin P02 (dos pasos) ni P23/P24 (recuperación de contraseña por correo): un usuario nuevo no puede ingresar, porque nadie conoce la contraseña que le asigna el alta, y P20 exige la actual.** La edición no cambia rol ni sedes (ver sección 5) |
 | Sedes | Pantallas P18/P28. **El horario de atención se ve pero no se edita: la API no tiene ruta para escribirlo**, así que una sede nueva nace cerrada |
 | Pacientes con consentimiento | Pantallas: búsqueda (P08), alta con consentimiento (P09), ficha con historial (P10) y detalle de atención (P25). **Sin edición: se quitaron PUT, PATCH y DELETE de `/pacientes/`** porque escribían sin auditoría; vuelve con un servicio que la audite |
-| Citas sin recordatorios | Terminado: agenda con filtros (P05), nueva cita (P06), cancelación con reemplazo (P07) y panel del día (P04) |
+| Citas sin recordatorios | Terminado: agenda (P05) en cuadrícula por hora y profesional y en lista con filtros, nueva cita (P06, también desde un hueco de la cuadrícula), cancelación con reemplazo (P07) y panel del día (P04) |
 | Servicios | Terminado: pantallas P15/P26 |
 | Inventario (adelantado de la segunda entrega) | Stock por sede (P12), movimientos de Entrada, Ajuste o Merma (P13) y disponibilidad entre sedes (P14). **Sin la salida automática por consumo en una atención: P11 no registra insumos, así que no hay de dónde calcularla.** Sin editar el mínimo en línea (CU05) ni crear productos desde la interfaz |
-| **Atenciones** | **Parcial.** Registro de la atención con su monto cobrado (P11) y registro diario por sede y fecha (P16). **Sin insumos** (depende de Inventario) |
+| **Atenciones** | **Parcial.** Registro de la atención con su monto cobrado (P11) y registro diario por sede y fecha (P16). **Sin insumos:** el inventario ya existe, pero P11 no los registra ni genera la salida |
 | Desplegado en producción | **No**: la infraestructura está escrita, nada corre en la nube |
 | Validado con la usuaria | **No**: la prueba de usabilidad está diseñada, no aplicada |
 
@@ -72,7 +72,7 @@ para el RNF02 es la que se haga con la podóloga.
 
 ## 2. Lo que está sólido
 
-- **196 pruebas** en verde, **94.3 %** de cobertura de sentencias, sobre
+- **198 pruebas** en verde, **94.3 %** de cobertura de sentencias, sobre
   PostgreSQL real y no sobre una base en memoria. La cifra varía unas
   décimas entre ejecuciones.
 - **Cero vulnerabilidades** conocidas en las dependencias tras subir a Django
@@ -84,8 +84,8 @@ para el RNF02 es la que se haga con la podóloga.
   tres en la API de usuarios y tres en atenciones. Comprueban que un centro
   no ve, no abre, no modifica y no registra atenciones sobre datos de otro. Es
   lo que sostiene el modelo de arriendo ante el jurado.
-- **94 commits** con «un commit, un cambio», contando el que actualiza este
-  documento: 49 de Sergio Daniel Coila Centeno y 45 de Andre Nicolas Huaroc
+- **98 commits** con «un commit, un cambio», contando el que actualiza este
+  documento: 51 de Sergio Daniel Coila Centeno y 47 de Andre Nicolas Huaroc
   Condori. La identidad de git está fijada en la configuración del
   repositorio para que no vuelva a entrar un autor con otro nombre.
 - Entorno de demostración reproducible con un comando y probado con nueve
@@ -157,7 +157,8 @@ del servidor:
   existe como `esta_activo`.
 
 - **Qué entra de Atenciones el 12/11.** El monto cobrado y el registro diario
-  ya existen; faltan los insumos, que dependen de Inventario. Hay que dejar
+  ya existen; faltan los insumos: el inventario existe, pero P11 no los
+  registra. Hay que dejar
   por escrito que la primera entrega registra la atención sin insumos: lo
   que no es defendible es presentar el CU10 como completo.
 - **El panel del día y el registro diario pueden no cuadrar.** El «ingreso
