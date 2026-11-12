@@ -10,6 +10,19 @@ from .base import *
 DEBUG = False
 ALLOWED_HOSTS = os.environ["DJANGO_ALLOWED_HOSTS"].split(",")
 
+# Sin valor por defecto: si falta, el servidor no arranca. Un valor de
+# respaldo en producción firmaría las sesiones con una clave conocida.
+SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
+# La clave de los datos clínicos es propia y obligatoria: derivarla de
+# SECRET_KEY haría ilegibles los antecedentes el día que esta se rote.
+CLAVE_CIFRADO_CAMPOS = os.environ["CLAVE_CIFRADO_CAMPOS"]
+
+# Nginx termina el HTTPS y llama a gunicorn por HTTP. Sin esto Django cree
+# que toda petición es insegura y SECURE_SSL_REDIRECT entra en un bucle de
+# redirecciones. Es seguro porque Nginx sobrescribe la cabecera
+# (infra/nginx/nginx.conf) y gunicorn no se expone fuera de la red interna.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 SECURE_SSL_REDIRECT = True
 SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True

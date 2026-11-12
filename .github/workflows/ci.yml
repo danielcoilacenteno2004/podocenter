@@ -65,7 +65,12 @@ jobs:
         run: pytest --cov --cov-report=term-missing --cov-report=xml --cov-fail-under=80
 
       - name: Revisión de despliegue de Django
-        run: python backend/manage.py check --deploy --fail-level WARNING
+        # Claves de un solo uso, generadas aquí: la configuración de producción
+        # no tiene valores por defecto y no arranca sin ellas.
+        run: |
+          export DJANGO_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(64))')"
+          export CLAVE_CIFRADO_CAMPOS="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+          python backend/manage.py check --deploy --fail-level WARNING
         env:
           DJANGO_SETTINGS_MODULE: config.settings.prod
           DJANGO_ALLOWED_HOSTS: podocenter.pe
