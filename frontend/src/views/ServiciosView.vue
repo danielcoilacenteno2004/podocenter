@@ -7,6 +7,9 @@
 // inactivo y las atenciones ya registradas lo conservan. Un servicio no se
 // borra: la API no tiene DELETE.
 // Los límites (precio, duración, nombre único) los valida el servidor.
+//
+// Insumos habituales (CC-14): los que P11 precarga al registrar la atención
+// de este servicio. Se envían completos al guardar.
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { api } from '../services/api'
 
@@ -23,10 +26,28 @@ const guardando = ref(false)
 const errorFormulario = ref(null)
 const camposConError = ref({})
 
+// Insumos habituales del formulario: [{ producto: { id, codigo, nombre, unidad }, cantidad }]
+const habituales = ref([])
+const productos = ref([])
+const busquedaInsumo = ref('')
+const sugerencias = computed(() => {
+  const texto = busquedaInsumo.value.trim().toLowerCase()
+  if (texto.length < 2) return []
+  return productos.value.filter((p) => !habituales.value.some((h) => h.producto.id === p.id) &&
+    (p.nombre.toLowerCase().includes(texto) || p.codigo.toLowerCase().includes(texto))).slice(0, 8)
+})
+const cantidadValida = (c) => Number.isInteger(Number(c)) && Number(c) > 0
+
+function agregarHabitual (producto) {
+  habituales.value.push({ producto, cantidad: 1 })
+  busquedaInsumo.value = ''
+}
+
 const completo = computed(() => {
   const f = formulario.value
   return Boolean(f.nombre?.trim() && f.precio !== '' && f.precio !== null &&
-    f.duracion_minutos !== '' && f.duracion_minutos !== null)
+    f.duracion_minutos !== '' && f.duracion_minutos !== null) &&
+    habituales.value.every((h) => cantidadValida(h.cantidad))
 })
 
 const soles = (valor) => `S/ ${Number(valor).toFixed(2)}`
@@ -57,6 +78,16 @@ async function abrir (servicio = null) {
         esta_activo: servicio.esta_activo
       }
     : { nombre: '', descripcion: '', precio: '', duracion_minutos: '', esta_activo: true }
+  habituales.value = (servicio?.insumos_habituales ?? []).map((h) => ({
+    producto: { id: h.producto, codigo: h.codigo, nombre: h.nombre, unidad: h.unidad },
+    cantidad: h.cantidad
+  }))
+  busquedaInsumo.value = ''
+  if (!productos.value.length) {
+    try {
+      productos.value = (await api.get('/inventario/productos/')).data.productos
+    } catch { productos.value = [] }
+  }
   dialogo.value.showModal()
   await nextTick()
   primerCampo.value?.focus()
@@ -66,12 +97,16 @@ async function guardar () {
   guardando.value = true
   errorFormulario.value = null
   camposConError.value = {}
+  const datos = {
+    ...formulario.value,
+    insumos_habituales: habituales.value.map((h) => ({ producto: h.producto.id, cantidad: Number(h.cantidad) }))
+  }
   try {
     if (editando.value) {
-      await api.patch(`/servicios/${editando.value.id}/`, formulario.value)
+      await api.patch(`/servicios/${editando.value.id}/`, datos)
       aviso.value = `${formulario.value.nombre} actualizado.`
     } else {
-      await api.post('/servicios/', formulario.value)
+      await api.post('/servicios/', datos)
       aviso.value = `${formulario.value.nombre} agregado al catálogo.`
     }
     dialogo.value.close()
@@ -192,6 +227,57 @@ onMounted(cargar)
             </p>
           </div>
         </div>
+        <fieldset class="campo insumos">
+          <legend>Insumos habituales</legend>
+          <p class="ayuda">
+            Se precargan al registrar la atención de este servicio; ahí se pueden cambiar.
+          </p>
+          <table v-if="habituales.length" class="tabla-insumos">
+            <tbody>
+              <tr v-for="(h, indice) in habituales" :key="h.producto.id">
+                <td>
+                  <strong>{{ h.producto.nombre }}</strong>
+                  <span class="secundario-celda">{{ h.producto.codigo }}</span>
+                </td>
+                <td class="numero">
+                  <input
+                    v-model="h.cantidad"
+                    class="cantidad-insumo"
+                    type="number"
+                    min="1"
+                    step="1"
+                    inputmode="numeric"
+                    :aria-label="`Cantidad habitual de ${h.producto.nombre}`"
+                    :aria-invalid="!cantidadValida(h.cantidad)"
+                  >
+                  {{ h.producto.unidad }}
+                </td>
+                <td class="accion">
+                  <button class="enlace" type="button" :aria-label="`Quitar ${h.producto.nombre}`" @click="habituales.splice(indice, 1)">
+                    ×
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <label for="sv-buscar-insumo" class="solo-lectores">Agregar insumo habitual</label>
+          <input
+            id="sv-buscar-insumo"
+            v-model="busquedaInsumo"
+            type="search"
+            autocomplete="off"
+            placeholder="+ Agregar insumo: código o nombre…"
+          >
+          <ul v-if="sugerencias.length" class="sugerencias" aria-label="Productos encontrados">
+            <li v-for="p in sugerencias" :key="p.id">
+              <button type="button" @click="agregarHabitual(p)">
+                <strong>{{ p.nombre }}</strong>
+                <span>{{ p.codigo }}</span>
+              </button>
+            </li>
+          </ul>
+        </fieldset>
+
         <label class="casilla">
           <input v-model="formulario.esta_activo" type="checkbox">
           <span><strong>Servicio activo</strong>
