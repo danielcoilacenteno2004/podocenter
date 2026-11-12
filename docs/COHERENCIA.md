@@ -54,8 +54,8 @@ tras añadir Atenciones):
 | 4.5, Tabla 11 | El recorrido del RNF02 usa cuatro interacciones | **Parcial** | 3 medidas con el alcance construido, aceptando el monto precargado; el recorrido diseñado prevé 4 al incorporar los insumos (ver la fila del informe). |
 | Tabla 42 | CC-18 verificado con **ocho** pruebas | **Cierta** | En `backend/apps/citas/tests/test_agenda_filtros.py` hay 18 pruebas: 8 de filtros (líneas 59–141) y 10 del panel |
 | Tabla 42 | CC-19 verificado con **diez** pruebas | **Cierta** | Las 10 del panel en el mismo archivo (líneas 152–252) |
-| Tabla 31 | Un centro suspendido no puede iniciar sesión | **Cierta** | `test_un_centro_suspendido_no_puede_iniciar_sesion` en `backend/apps/core/tests/test_api_centros.py`; la regla está en `IniciarSesion` (`backend/apps/usuarios/sesion.py`) |
-| Tabla 32 | El alta del centro crea su administrador inicial y le envía un enlace para definir la contraseña (P24) | **Parcial** | El administrador se crea en la misma transacción (`crear_centro` en `backend/apps/core/servicios.py`). Sin P24, recibe una contraseña temporal que solo se muestra en la respuesta del alta |
+| Tabla 31 | Un centro suspendido no puede iniciar sesión | **Cierta** | `test_un_centro_suspendido_no_puede_iniciar_sesion` en `backend/apps/core/tests/test_api_centros.py`; la regla está en `IniciarSesion` (`backend/apps/usuarios/sesion.py`) |
+| Tabla 32 | El alta del centro crea su administrador inicial y le envía un enlace para definir la contraseña (P24) | **Parcial** | El administrador se crea en la misma transacción (`crear_centro` en `backend/apps/core/servicios.py`). Sin P24, recibe una contraseña temporal que solo se muestra en la respuesta del alta |
 | Tabla 13 | Tipos de movimiento: Entrada, Ajuste, Merma; las salidas las genera el sistema | **Parcial** | Entrada, Ajuste (al alta o a la baja) y Merma se eligen en P13; ni la merma ni el ajuste dejan el stock negativo (`test_inventario.py`). Las salidas automáticas no existen: P11 no registra insumos |
 
 La Práctica 7 registra la observación de la podóloga sobre los antecedentes
