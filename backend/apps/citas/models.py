@@ -73,3 +73,35 @@ class Cita(ModeloDeCentro):
     @property
     def esta_vigente(self) -> bool:
         return self.estado == self.Estado.PROGRAMADA and self.fin > timezone.now()
+
+
+class Recordatorio(ModeloDeCentro):
+    """Recordatorio de una cita al paciente (RF07, CU15 y CU16 del informe).
+
+    Uno por cita: la restricción única es la que garantiza que un reintento
+    nunca duplica el mensaje. Se crea al intentar el primer envío, 24 horas
+    antes de la cita, y guarda lo que devolvió el proveedor.
+    """
+
+    class Estado(models.TextChoices):
+        PENDIENTE = "PENDIENTE", "Pendiente"
+        ENVIADO = "ENVIADO", "Enviado"
+        FALLIDO = "FALLIDO", "Fallido"
+        CANCELADO = "CANCELADO", "Cancelado"
+
+    cita = models.OneToOneField(Cita, on_delete=models.CASCADE, related_name="recordatorio")
+    canal = models.CharField(max_length=10, default="WHATSAPP")
+    destino = models.CharField(max_length=20)
+    estado = models.CharField(max_length=10, choices=Estado.choices, default=Estado.PENDIENTE)
+    intentos = models.PositiveSmallIntegerField(default=0)
+    id_externo = models.CharField(max_length=120, blank=True)
+    ultimo_error = models.CharField(max_length=300, blank=True)
+    enviado_en = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = "recordatorio"
+        verbose_name_plural = "recordatorios"
+        constraints = [
+            models.CheckConstraint(condition=models.Q(intentos__lte=3),
+                                   name="ck_recordatorio_maximo_tres_intentos"),
+        ]

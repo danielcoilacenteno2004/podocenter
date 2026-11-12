@@ -15,6 +15,7 @@ from .serializers import CancelacionSerializer, CitaSerializer
 from .servicios import (
     agenda_del_dia,
     cancelar_cita,
+    con_datos_de_recordatorio,
     con_marca_de_atencion,
     horario_de_la_jornada,
     programar_cita,
@@ -45,11 +46,11 @@ class CitaViewSet(ContextoDeCentro, mixins.CreateModelMixin, mixins.ListModelMix
     filterset_fields = ["estado", "sede", "profesional", "paciente"]
 
     def get_queryset(self):
-        return con_marca_de_atencion(
+        return con_datos_de_recordatorio(con_marca_de_atencion(
             Cita.objects.filter(centro_id=self.request.centro_id).select_related(
                 "paciente", "profesional", "servicio", "sede"
             )
-        )
+        ))
 
     def perform_create(self, serializer):
         datos = serializer.validated_data

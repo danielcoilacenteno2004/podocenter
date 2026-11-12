@@ -11,6 +11,10 @@ class CitaSerializer(serializers.ModelSerializer):
     servicio_precio = serializers.DecimalField(source="servicio.precio", max_digits=8,
                                                decimal_places=2, read_only=True)
     tiene_atencion = serializers.SerializerMethodField()
+    # RF07: enlace «Recordar por WhatsApp» (null si no corresponde) y estado
+    # del recordatorio automático (null si todavía no hay).
+    enlace_whatsapp = serializers.SerializerMethodField()
+    recordatorio = serializers.SerializerMethodField()
 
     class Meta:
         model = Cita
@@ -18,10 +22,22 @@ class CitaSerializer(serializers.ModelSerializer):
             "id", "sede", "paciente", "paciente_nombre", "profesional", "profesional_nombre",
             "servicio", "servicio_nombre", "servicio_precio", "inicio", "fin", "estado",
             "observaciones",
-            "motivo_cancelacion", "tiene_atencion", "creado_en",
+            "motivo_cancelacion", "tiene_atencion", "enlace_whatsapp", "recordatorio", "creado_en",
         ]
         read_only_fields = ["id", "fin", "estado", "motivo_cancelacion", "creado_en"]
 
+
+    def get_enlace_whatsapp(self, cita) -> str | None:
+        from .recordatorios import enlace_whatsapp
+
+        return enlace_whatsapp(cita)
+
+    def get_recordatorio(self, cita) -> dict | None:
+        recordatorio = getattr(cita, "recordatorio", None)
+        if recordatorio is None:
+            return None
+        return {"estado": recordatorio.estado, "enviado_en": recordatorio.enviado_en,
+                "intentos": recordatorio.intentos}
 
     def get_tiene_atencion(self, cita) -> bool:
         """Usa la anotación de la consulta; una cita recién creada o recién

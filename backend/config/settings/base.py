@@ -111,6 +111,15 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Recordatorios por WhatsApp (RF07). Sin token, el envío automático es
+# simulado: no sale nada y queda anotado. Con la cuenta aprobada por Meta se
+# completan todas (docs/DESPLIEGUE.md).
+WHATSAPP_TOKEN = os.environ.get("WHATSAPP_TOKEN", "")
+WHATSAPP_NUMERO_ID = os.environ.get("WHATSAPP_NUMERO_ID", "")
+WHATSAPP_VERSION_API = os.environ.get("WHATSAPP_VERSION_API", "")
+WHATSAPP_PLANTILLA = os.environ.get("WHATSAPP_PLANTILLA", "")
+WHATSAPP_IDIOMA = os.environ.get("WHATSAPP_IDIOMA", "es")
+
 # Solo la configuración de producción lo enciende. Lo consultan los comandos
 # que no deben correr allí por descuido, como cargar_demo.
 ES_PRODUCCION = False

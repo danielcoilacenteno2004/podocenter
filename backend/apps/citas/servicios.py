@@ -2,7 +2,7 @@
 from datetime import timedelta
 
 from django.db import IntegrityError, transaction
-from django.db.models import BooleanField, ExpressionWrapper, Q
+from django.db.models import BooleanField, ExpressionWrapper, OuterRef, Q, Subquery
 from django.utils import timezone
 
 from apps.core.auditoria import registrar
@@ -11,6 +11,20 @@ from apps.core.errores import ReglaDeNegocio
 from .models import Cita
 
 ANTICIPACION_MINIMA = timedelta(minutes=15)
+
+
+def con_datos_de_recordatorio(consulta):
+    """Lo que necesitan el enlace «Recordar por WhatsApp» y el estado del
+    recordatorio, en la misma consulta: si el consentimiento vigente acepta
+    recordatorios, el centro (para el texto) y el recordatorio."""
+    from apps.pacientes.models import Consentimiento
+
+    vigente = Consentimiento.objects.filter(
+        paciente_id=OuterRef("paciente_id"), fue_revocado=False
+    ).order_by("-otorgado_en").values("acepta_recordatorios")[:1]
+    return consulta.annotate(acepta_recordatorios_vigente=Subquery(vigente)).select_related(
+        "centro", "recordatorio"
+    )
 
 
 def con_marca_de_atencion(consulta):
@@ -133,6 +147,6 @@ def agenda_del_dia(*, centro_id: int, sede_id: int, fecha, estado=None,
         consulta = consulta.filter(profesional_id=profesional_id)
     if servicio_id:
         consulta = consulta.filter(servicio_id=servicio_id)
-    return con_marca_de_atencion(
-        consulta.select_related("paciente", "profesional", "servicio")
-    ).order_by("inicio")
+    return con_datos_de_recordatorio(con_marca_de_atencion(
+        consulta.select_related("paciente", "profesional", "servicio", "sede")
+    )).order_by("inicio")
