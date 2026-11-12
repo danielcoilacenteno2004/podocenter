@@ -242,12 +242,19 @@ def test_la_marca_de_atencion_no_suma_una_consulta_por_cita(
     with CaptureQueriesContext(connection) as con_una:
         cliente.get("/api/v1/citas/agenda/", {"fecha": fecha})
 
-    # La segunda cita se programa en un día hábil y se trae justo antes de la
-    # primera: programarla después de ella fallaba de noche, fuera del horario.
-    hacer_que_la_cita_ya_empezo(programar_cita(
+    # La segunda cita se programa en un día hábil (de noche no cabe en el
+    # horario) y se mueve junto a la primera, del lado que no cambie de día:
+    # cerca de la medianoche, antes o después de ella puede ser otra fecha.
+    segunda = programar_cita(
         centro=centro, usuario=podologa, sede=sede, paciente=paciente, profesional=podologa,
         servicio=servicio, inicio=proximo_lunes_a_las_nueve + timedelta(hours=2),
-    ), hace_minutos=15 + servicio.duracion_minutos)
+    )
+    duracion = segunda.fin - segunda.inicio
+    despues = cita.fin + timedelta(minutes=5)
+    segunda.inicio = (despues if timezone.localdate(despues + duracion) == timezone.localdate(
+        cita.inicio) else cita.inicio - duracion - timedelta(minutes=5))
+    segunda.fin = segunda.inicio + duracion
+    segunda.save(update_fields=["inicio", "fin", "periodo", "actualizado_en"])
     with CaptureQueriesContext(connection) as con_dos:
         respuesta = cliente.get("/api/v1/citas/agenda/", {"fecha": fecha})
 
