@@ -9,11 +9,18 @@
 //
 // La verificación en dos pasos (P02) no está construida: se muestra su
 // estado, sin nada que configurar.
+//
+// Con una contraseña temporal (alta o restablecimiento) el router trae aquí
+// al usuario y no lo deja salir hasta cambiarla; el servidor bloquea el
+// resto de la API por su cuenta.
 import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { api } from '../services/api'
 import { useSesion } from '../stores/sesion'
 
 const sesion = useSesion()
+const router = useRouter()
+const obligado = computed(() => Boolean(sesion.usuario?.debe_cambiar_contrasena))
 
 const formulario = ref({ contrasena_actual: '', contrasena_nueva: '', confirmacion: '' })
 const guardando = ref(false)
@@ -38,6 +45,11 @@ async function guardar () {
   try {
     await api.post('/sesion/contrasena/', formulario.value)
     formulario.value = { contrasena_actual: '', contrasena_nueva: '', confirmacion: '' }
+    if (obligado.value) {
+      sesion.usuario.debe_cambiar_contrasena = false
+      router.push({ name: sesion.necesitaElegirSede ? 'elegir-sede' : 'panel' })
+      return
+    }
     aviso.value = 'Contraseña cambiada. Se cerraron las demás sesiones abiertas con su cuenta.'
   } catch (problema) {
     error.value = problema.mensaje
@@ -55,6 +67,11 @@ async function guardar () {
     <div class="encabezado">
       <h1>Mi perfil y seguridad</h1>
     </div>
+
+    <p v-if="obligado" class="aviso-ajuste" role="alert">
+      Está usando una contraseña temporal. Elija una contraseña propia para continuar; en
+      «Contraseña actual» escriba la temporal que le entregaron.
+    </p>
 
     <section class="tarjeta perfil-datos" aria-labelledby="titulo-cuenta">
       <h2 id="titulo-cuenta">

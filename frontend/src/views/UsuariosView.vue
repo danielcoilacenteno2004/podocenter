@@ -12,8 +12,15 @@
 // propias rutas (DELETE y reactivar), que sí pasan por el servicio.
 // Del wireframe no se construyen «Usuario» (el acceso es por correo) ni
 // «Atiende citas» (no está modelado).
+//
+// Mientras no exista el enlace por correo (P24), el alta y «Restablecer
+// contraseña» devuelven una contraseña temporal que se muestra una sola vez;
+// el servidor obliga a cambiarla al entrar.
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { api } from '../services/api'
+import { useSesion } from '../stores/sesion'
+
+const sesion = useSesion()
 
 const ROLES = [['ADMIN_CENTRO', 'Administrador del centro'], ['PODOLOGA', 'Podóloga']]
 const nombreDelRol = (rol) => (ROLES.find(([v]) => v === rol) ?? [])[1] ?? rol
@@ -25,6 +32,8 @@ const cargando = ref(false)
 const error = ref(null)
 const aviso = ref(null)
 const porConfirmar = ref(null)   // id del usuario cuya baja espera confirmación
+const porRestablecer = ref(null) // id del usuario cuyo restablecimiento espera confirmación
+const credencial = ref(null)     // { correo, contrasena }: se muestra una sola vez
 
 const dialogo = ref(null)
 const primerCampo = ref(null)
@@ -80,6 +89,7 @@ async function abrir (usuario = null) {
 }
 
 async function guardar () {
+  credencial.value = null
   guardando.value = true
   errorFormulario.value = null
   camposConError.value = {}
@@ -90,8 +100,8 @@ async function guardar () {
       aviso.value = `Datos de ${nombres} ${apellidos} actualizados.`
     } else {
       const { data } = await api.post('/usuarios/', formulario.value)
-      aviso.value = `Usuario ${data.nombre_completo} creado. Todavía no puede ingresar: ` +
-        'el enlace para definir su contraseña (P24) no está construido.'
+      aviso.value = `Usuario ${data.nombre_completo} creado.`
+      credencial.value = { correo: data.correo, contrasena: data.contrasena_temporal }
     }
     dialogo.value.close()
     await cargar()
@@ -110,6 +120,19 @@ async function desactivar (usuario) {
     await api.delete(`/usuarios/${usuario.id}/`)
     aviso.value = `${usuario.nombre_completo} quedó desactivado. Conserva sus citas y atenciones.`
     await cargar()
+  } catch (problema) {
+    error.value = problema.mensaje
+  }
+}
+
+async function restablecer (usuario) {
+  porRestablecer.value = null
+  credencial.value = null
+  error.value = null
+  try {
+    const { data } = await api.post(`/usuarios/${usuario.id}/restablecer-contrasena/`)
+    aviso.value = `Contraseña de ${usuario.nombre_completo} restablecida. Sus sesiones abiertas se cerraron.`
+    credencial.value = { correo: usuario.correo, contrasena: data.contrasena_temporal }
   } catch (problema) {
     error.value = problema.mensaje
   }
@@ -173,9 +196,19 @@ onMounted(cargar)
     <p v-if="error" role="alert">
       {{ error }}
     </p>
-    <p v-if="aviso" class="aviso-ok" role="status">
-      {{ aviso }}
-    </p>
+    <div v-if="aviso" class="aviso-ok" role="status">
+      <p>{{ aviso }}</p>
+      <div v-if="credencial" class="credencial-temporal">
+        <p>
+          Usuario: <strong>{{ credencial.correo }}</strong> ·
+          Contraseña temporal: <code>{{ credencial.contrasena }}</code>
+        </p>
+        <p class="ayuda">
+          Se muestra solo esta vez. Entréguela en persona o por un canal seguro; el sistema
+          le pedirá cambiarla al entrar.
+        </p>
+      </div>
+    </div>
 
     <section class="tarjeta">
       <p v-if="cargando" role="status">
@@ -228,9 +261,27 @@ onMounted(cargar)
                   No
                 </button>
               </div>
+              <div v-else-if="porRestablecer === u.id" class="acciones-fila confirmacion">
+                <span>¿Dar una contraseña nueva?</span>
+                <button class="boton-fila" type="button" @click="restablecer(u)">
+                  Sí, restablecer
+                </button>
+                <button class="secundario boton-fila" type="button" @click="porRestablecer = null">
+                  No
+                </button>
+              </div>
               <div v-else class="acciones-fila">
                 <button class="secundario boton-fila" type="button" :aria-label="`Editar a ${u.nombre_completo}`" @click="abrir(u)">
                   Editar
+                </button>
+                <button
+                  v-if="u.esta_activo && u.id !== sesion.usuario?.id"
+                  class="secundario boton-fila"
+                  type="button"
+                  :aria-label="`Restablecer la contraseña de ${u.nombre_completo}`"
+                  @click="porRestablecer = u.id"
+                >
+                  Restablecer contraseña
                 </button>
                 <button
                   v-if="u.esta_activo"

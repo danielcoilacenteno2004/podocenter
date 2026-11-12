@@ -40,6 +40,11 @@ router.beforeEach((destino) => {
   // El inicio del administrador de plataforma es la lista de centros, no el
   // panel del día de un centro.
   if (destino.name === 'panel' && sesion.esAdministradoraDePlataforma) return { name: 'centros' }
+  // Con contraseña temporal el servidor solo deja cambiarla: se lleva al
+  // usuario a P20 antes que a cualquier otra pantalla, incluida la de sede.
+  if (sesion.usuario?.debe_cambiar_contrasena && destino.name !== 'perfil') {
+    return { name: 'perfil' }
+  }
   if (sesion.autenticado && sesion.necesitaElegirSede && destino.name !== 'elegir-sede') {
     return { name: 'elegir-sede' }
   }
