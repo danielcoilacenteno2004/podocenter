@@ -6,10 +6,9 @@
 // sin sede y «último administrador» al desactivar llegan con su código y se
 // muestran tal cual.
 //
-// La edición cambia solo nombres, apellidos y correo. Rol y sedes no se
-// editan aquí: el PATCH de la API cambia el rol sin pasar por la regla del
-// último administrador e ignora las sedes. Activar y desactivar van por sus
-// propias rutas (DELETE y reactivar), que sí pasan por el servicio.
+// La edición cambia datos, rol y sedes; el servidor aplica las mismas
+// reglas que en el alta y la del último administrador. Activar y desactivar
+// van por sus propias rutas (DELETE y reactivar).
 // Del wireframe no se construyen «Usuario» (el acceso es por correo) ni
 // «Atiende citas» (no está modelado).
 //
@@ -45,8 +44,8 @@ const camposConError = ref({})
 
 const completo = computed(() => {
   const f = formulario.value
-  const base = f.nombres?.trim() && f.apellidos?.trim() && f.correo?.trim()
-  return Boolean(editando.value ? base : base && f.rol && f.sedes_ids?.length)
+  return Boolean(f.nombres?.trim() && f.apellidos?.trim() && f.correo?.trim() &&
+    f.rol && f.sedes_ids?.length)
 })
 
 let turno = 0
@@ -72,9 +71,15 @@ async function abrir (usuario = null) {
   errorFormulario.value = null
   camposConError.value = {}
   formulario.value = usuario
-    ? { nombres: usuario.nombres, apellidos: usuario.apellidos, correo: usuario.correo }
+    ? {
+        nombres: usuario.nombres,
+        apellidos: usuario.apellidos,
+        correo: usuario.correo,
+        rol: usuario.rol,
+        sedes_ids: usuario.sedes.map((s) => s.id)
+      }
     : { nombres: '', apellidos: '', correo: '', rol: 'PODOLOGA', sedes_ids: [] }
-  if (!usuario && !sedesActivas.value.length) {
+  if (!sedesActivas.value.length) {
     try {
       const { data } = await api.get('/sedes/', { params: { esta_activa: true } })
       sedesActivas.value = data.results ?? data
@@ -95,8 +100,8 @@ async function guardar () {
   camposConError.value = {}
   try {
     if (editando.value) {
-      const { nombres, apellidos, correo } = formulario.value
-      await api.patch(`/usuarios/${editando.value.id}/`, { nombres, apellidos, correo })
+      const { nombres, apellidos } = formulario.value
+      await api.patch(`/usuarios/${editando.value.id}/`, formulario.value)
       aviso.value = `Datos de ${nombres} ${apellidos} actualizados.`
     } else {
       const { data } = await api.post('/usuarios/', formulario.value)
@@ -336,27 +341,21 @@ onMounted(cargar)
           </p>
         </div>
 
-        <template v-if="!editando">
-          <div class="campo">
-            <label for="u-rol">Rol *</label>
-            <select id="u-rol" v-model="formulario.rol" required :aria-invalid="'rol' in camposConError">
-              <option v-for="[valor, etiqueta] in ROLES" :key="valor" :value="valor">
-                {{ etiqueta }}
-              </option>
-            </select>
-          </div>
-          <fieldset class="campo opciones">
-            <legend>Sedes asignadas *</legend>
-            <label v-for="s in sedesActivas" :key="s.id">
-              <input v-model="formulario.sedes_ids" type="checkbox" :value="s.id">
-              {{ s.nombre }}
-            </label>
-          </fieldset>
-        </template>
-        <div v-else class="resumen-cita">
-          <p><strong>{{ nombreDelRol(editando.rol) }}</strong> · {{ editando.sedes.map((s) => s.nombre).join(', ') || 'sin sedes' }}</p>
-          <p>El rol y las sedes no se pueden cambiar desde aquí todavía.</p>
+        <div class="campo">
+          <label for="u-rol">Rol *</label>
+          <select id="u-rol" v-model="formulario.rol" required :aria-invalid="'rol' in camposConError">
+            <option v-for="[valor, etiqueta] in ROLES" :key="valor" :value="valor">
+              {{ etiqueta }}
+            </option>
+          </select>
         </div>
+        <fieldset class="campo opciones">
+          <legend>Sedes asignadas *</legend>
+          <label v-for="s in sedesActivas" :key="s.id">
+            <input v-model="formulario.sedes_ids" type="checkbox" :value="s.id">
+            {{ s.nombre }}
+          </label>
+        </fieldset>
 
         <p v-if="errorFormulario" role="alert">
           {{ errorFormulario }}
