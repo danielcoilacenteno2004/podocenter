@@ -180,3 +180,12 @@ def test_en_produccion_no_corre_por_descuido():
         call_command("cargar_demo", verbosity=0)
 
     assert not Usuario.objects.filter(correo="plataforma@podocenter.pe").exists()
+
+
+@pytest.mark.django_db
+def test_los_servicios_de_la_demostracion_traen_insumos_habituales(demo):
+    # Garantiza que en la exposición P11 se ve con los insumos precargados
+    # (CC-14), que es el recorrido que mide el RNF02.
+    from apps.catalogo.models import ServicioInsumo
+
+    assert ServicioInsumo.objects.values("servicio").distinct().count() >= 2

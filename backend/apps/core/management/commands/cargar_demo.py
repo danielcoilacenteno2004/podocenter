@@ -15,7 +15,7 @@ from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from apps.atenciones.models import Atencion
-from apps.catalogo.models import Servicio
+from apps.catalogo.models import Servicio, ServicioInsumo
 from apps.citas.models import Cita
 from apps.citas.servicios import cancelar_cita, programar_cita
 from apps.core.contexto import fijar_contexto, limpiar_contexto
@@ -126,6 +126,7 @@ class Command(BaseCommand):
             # Los movimientos y el stock protegen producto, sede y usuario.
             MovimientoInventario.objects.filter(centro=existente).delete()
             Stock.objects.filter(centro=existente).delete()
+            ServicioInsumo.objects.filter(centro=existente).delete()
             Producto.objects.filter(centro=existente).delete()
             # La atención protege su cita (PROTECT): va antes que las citas.
             Atencion.objects.filter(centro=existente).delete()
@@ -196,6 +197,19 @@ class Command(BaseCommand):
                                      producto_id=producto.pk, tipo="ENTRADA", cantidad=cantidad,
                                      motivo="Inventario inicial de la demostración")
             Stock.objects.filter(producto=producto).update(minimo=minimo)
+
+        # Insumos habituales (CC-14), para que P11 los precargue. Son datos de
+        # la demostración, no una indicación clínica.
+        habituales = {
+            "Quiropodia general": [("INS-001", 1), ("INS-015", 1)],
+            "Tratamiento de onicomicosis": [("INS-001", 1)],
+            "Tratamiento de onicocriptosis": [("INS-015", 1), ("INS-011", 1)],
+        }
+        productos = {p.codigo: p for p in Producto.objects.filter(centro=centro)}
+        for servicio in Servicio.objects.filter(centro=centro, nombre__in=habituales):
+            for codigo, cantidad in habituales[servicio.nombre]:
+                ServicioInsumo.objects.create(centro=centro, servicio=servicio,
+                                              producto=productos[codigo], cantidad=cantidad)
 
     def _citas_en_curso(self, centro, sedes, podologas, servicios, pacientes, usuario):
         """Siembra una cita por podóloga que empezó hace 10 minutos.
