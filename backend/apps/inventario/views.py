@@ -6,6 +6,7 @@ productos son de lectura: el stock solo cambia por un movimiento.
 """
 from django.db.models import Q
 from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -15,7 +16,14 @@ from apps.core.vistas import ContextoDeCentro
 from apps.usuarios.roles import Rol
 
 from .models import Producto
-from .servicios import disponibilidad, registrar_movimiento, stock_de_la_sede
+from .servicios import (
+    actualizar_producto,
+    crear_producto,
+    disponibilidad,
+    fijar_minimo,
+    registrar_movimiento,
+    stock_de_la_sede,
+)
 
 
 def _entero(valor):
@@ -30,7 +38,14 @@ def _entero(valor):
 
 
 def _producto(p: Producto) -> dict:
-    return {"id": p.pk, "codigo": p.codigo, "nombre": p.nombre, "unidad": p.unidad}
+    return {"id": p.pk, "codigo": p.codigo, "nombre": p.nombre, "unidad": p.unidad,
+            "esta_activo": p.esta_activo}
+
+
+def _solo_administradora(request) -> None:
+    """El catálogo y el mínimo los cambia solo la administradora (Tabla 12)."""
+    if request.user.rol != Rol.ADMIN_CENTRO:
+        raise PermissionDenied("Solo la administradora del centro puede hacer este cambio.")
 
 
 class _VistaDeInventario(ContextoDeCentro, APIView):
@@ -46,14 +61,50 @@ class _VistaDeInventario(ContextoDeCentro, APIView):
 
 
 class Productos(_VistaDeInventario):
-    """Catálogo de productos activos, para buscar en P13 (desde 2 caracteres)."""
+    """Catálogo de productos, para buscar en P13 y para darlos de alta.
+
+    Por defecto, solo los activos; `?inactivos=1` incluye los desactivados,
+    para poder volver a activarlos.
+    """
 
     def get(self, request):
-        consulta = Producto.objects.filter(centro_id=request.centro_id, esta_activo=True)
+        consulta = Producto.objects.filter(centro_id=request.centro_id)
+        if request.query_params.get("inactivos") != "1":
+            consulta = consulta.filter(esta_activo=True)
         texto = (request.query_params.get("buscar") or "").strip()
         if texto:
             consulta = consulta.filter(Q(nombre__icontains=texto) | Q(codigo__icontains=texto))
         return Response({"productos": [_producto(p) for p in consulta]})
+
+    def post(self, request):
+        _solo_administradora(request)
+        producto = crear_producto(centro=request.user.centro, datos=dict(request.data))
+        return Response(_producto(producto), status=status.HTTP_201_CREATED)
+
+
+class ProductoDetalle(_VistaDeInventario):
+    """Edición de un producto del catálogo (nombre, unidad, código, activo)."""
+
+    def patch(self, request, producto_id):
+        _solo_administradora(request)
+        producto = Producto.objects.filter(pk=producto_id, centro_id=request.centro_id).first()
+        if producto is None:
+            raise ReglaDeNegocio(
+                "producto-fuera-del-centro", "El producto no existe en este centro."
+            )
+        return Response(_producto(actualizar_producto(producto, datos=dict(request.data))))
+
+
+class MinimoDeStock(_VistaDeInventario):
+    """PATCH del umbral mínimo de un producto en la sede activa (CU05)."""
+
+    def patch(self, request, producto_id):
+        _solo_administradora(request)
+        stock = fijar_minimo(centro=request.user.centro, sede_id=request.sede_id,
+                             producto_id=producto_id,
+                             minimo=_entero(request.data.get("minimo")))
+        return Response({"producto": stock.producto_id, "minimo": stock.minimo,
+                         "cantidad": stock.cantidad, "bajo_minimo": stock.bajo_minimo})
 
 
 class StockDeLaSede(_VistaDeInventario):

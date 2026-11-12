@@ -156,6 +156,88 @@ def descontar_insumos(*, centro, usuario, sede, atencion, insumos) -> list:
     return movimientos
 
 
+def _datos_de_producto(datos: dict) -> dict:
+    limpios = {}
+    for campo, limite in (("codigo", 20), ("nombre", 120), ("unidad", 20)):
+        if campo in datos:
+            valor = (datos[campo] or "").strip()
+            if not valor:
+                raise ReglaDeNegocio(f"{campo}-requerido", f"Indique el {campo} del producto.")
+            if len(valor) > limite:
+                raise ReglaDeNegocio(f"{campo}-muy-largo",
+                                     f"El {campo} admite hasta {limite} caracteres.")
+            limpios[campo] = valor
+    if "esta_activo" in datos:
+        limpios["esta_activo"] = bool(datos["esta_activo"])
+    return limpios
+
+
+def _codigo_libre(centro_id: int, codigo: str, excepto=None) -> None:
+    repetido = Producto.objects.filter(centro_id=centro_id, codigo__iexact=codigo)
+    if excepto is not None:
+        repetido = repetido.exclude(pk=excepto)
+    if repetido.exists():
+        raise ReglaDeNegocio("producto-duplicado", "Ya existe un producto con ese código.")
+
+
+@transaction.atomic
+def crear_producto(*, centro, datos: dict) -> Producto:
+    """Alta de un producto en el catálogo del centro, común a todas sus sedes.
+
+    No figura entre las 29 pantallas de la Práctica N.° 7, pero sin él un
+    centro nuevo no tiene con qué llenar su inventario. Nace sin stock: la
+    existencia entra después por un movimiento de entrada (P13).
+    """
+    limpios = _datos_de_producto({"unidad": "unidad", **datos})
+    for campo in ("codigo", "nombre"):
+        if campo not in limpios:
+            raise ReglaDeNegocio(f"{campo}-requerido", f"Indique el {campo} del producto.")
+    _codigo_libre(centro.pk, limpios["codigo"])
+    producto = Producto.objects.create(centro=centro, **limpios)
+    registrar("ALTA", "producto", producto.pk, {"codigo": producto.codigo})
+    return producto
+
+
+@transaction.atomic
+def actualizar_producto(producto: Producto, *, datos: dict) -> Producto:
+    """Edición del producto. Desactivarlo lo saca de P12, P13 y P11 sin
+    borrar sus movimientos."""
+    limpios = _datos_de_producto(datos)
+    if "codigo" in limpios:
+        _codigo_libre(producto.centro_id, limpios["codigo"], excepto=producto.pk)
+    for campo, valor in limpios.items():
+        setattr(producto, campo, valor)
+    producto.save()
+    registrar("EDICION", "producto", producto.pk, {k: str(v) for k, v in limpios.items()})
+    return producto
+
+
+@transaction.atomic
+def fijar_minimo(*, centro, sede_id, producto_id, minimo) -> Stock:
+    """Umbral de stock mínimo de un producto en una sede (CU05, Tabla 12).
+
+    Es lo que decide «Bajo mín.» en P12. No mueve existencias, así que no es
+    un movimiento; queda en la bitácora.
+    """
+    if sede_id is None:
+        raise ReglaDeNegocio("sin-sede-activa", "Elija la sede del mínimo.")
+    if not isinstance(minimo, int) or isinstance(minimo, bool) or minimo < 0:
+        raise ReglaDeNegocio("minimo-invalido", "El mínimo debe ser un entero mayor o igual a 0.")
+    sede = Sede.objects.filter(pk=sede_id, centro=centro).first()
+    if sede is None:
+        raise ReglaDeNegocio("sede-fuera-del-centro", "La sede no existe en este centro.")
+    producto = Producto.objects.filter(pk=producto_id, centro=centro).first()
+    if producto is None:
+        raise ReglaDeNegocio("producto-fuera-del-centro", "El producto no existe en este centro.")
+    stock = _stock_bloqueado(centro=centro, sede=sede, producto=producto)
+    anterior = stock.minimo
+    stock.minimo = minimo
+    stock.save(update_fields=["minimo", "actualizado_en"])
+    registrar("EDICION", "stock", stock.pk, {"minimo": minimo, "anterior": anterior,
+                                             "sede": sede.pk, "producto": producto.pk})
+    return stock
+
+
 def stock_de_la_sede(*, centro_id: int, sede_id: int) -> list[dict]:
     """Todos los productos activos con su existencia en la sede (P12).
 
