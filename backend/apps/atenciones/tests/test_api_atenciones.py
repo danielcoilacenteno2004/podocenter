@@ -4,6 +4,7 @@ from datetime import timedelta
 import pytest
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
+from django.utils import timezone
 from rest_framework.test import APIClient
 
 from apps.atenciones.models import Atencion
@@ -215,7 +216,9 @@ def test_sin_sesion_no_se_registra_ninguna_atencion(cita):
 def test_la_agenda_marca_la_cita_que_ya_tiene_atencion(cliente, cita):
     # Garantiza lo que P05 necesita para no ofrecer «Registrar atención» dos
     # veces: la marca la calcula el servidor a partir de la atención misma.
-    fecha = cita.inicio.date().isoformat()
+    # Fecha local, la misma que usa la agenda: `inicio.date()` daba el día
+    # en UTC, que desde las 19:00 de Lima ya es el siguiente.
+    fecha = timezone.localdate(cita.inicio).isoformat()
     antes = cliente.get("/api/v1/citas/agenda/", {"fecha": fecha}).data["citas"][0]
 
     cliente.post("/api/v1/atenciones/", {"cita": cita.pk, **MONTO}, format="json")
@@ -233,7 +236,9 @@ def test_la_marca_de_atencion_no_suma_una_consulta_por_cita(
 ):
     # Garantiza que la marca sale de la misma consulta de la agenda y no de
     # una consulta por fila: una jornada llena no puede volver lenta la P05.
-    fecha = cita.inicio.date().isoformat()
+    # Fecha local, la misma que usa la agenda: `inicio.date()` daba el día
+    # en UTC, que desde las 19:00 de Lima ya es el siguiente.
+    fecha = timezone.localdate(cita.inicio).isoformat()
     with CaptureQueriesContext(connection) as con_una:
         cliente.get("/api/v1/citas/agenda/", {"fecha": fecha})
 
