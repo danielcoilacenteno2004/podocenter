@@ -3,6 +3,7 @@ import importlib
 import sys
 
 import pytest
+from django.core.exceptions import ImproperlyConfigured
 
 ENTORNO = {
     "DJANGO_ALLOWED_HOSTS": "podocenter.pe",
@@ -12,8 +13,8 @@ ENTORNO = {
 }
 
 
-def _cargar(monkeypatch, sin=()):
-    for nombre, valor in ENTORNO.items():
+def _cargar(monkeypatch, sin=(), **otros):
+    for nombre, valor in {**ENTORNO, **otros}.items():
         if nombre in sin:
             monkeypatch.delenv(nombre, raising=False)
         else:
@@ -29,6 +30,15 @@ def test_sin_secretos_produccion_no_arranca(monkeypatch, falta):
     # clínicos con una clave derivada de otra.
     with pytest.raises(KeyError):
         _cargar(monkeypatch, sin={falta})
+
+
+@pytest.mark.parametrize("valor", ["", "  ", "generar-con-Fernet.generate_key"])
+def test_una_clave_vacia_o_de_plantilla_tampoco_arranca(monkeypatch, valor):
+    # Garantiza que copiar .env.ejemplo sin completarlo no deja el sistema en
+    # marcha con una clave vacía (que caería en SECRET_KEY) o publicada en el
+    # repositorio.
+    with pytest.raises(ImproperlyConfigured):
+        _cargar(monkeypatch, CLAVE_CIFRADO_CAMPOS=valor)
 
 
 def test_detras_de_nginx_reconoce_el_https(monkeypatch):

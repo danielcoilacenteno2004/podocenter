@@ -5,6 +5,8 @@ contiene ninguna credencial.
 """
 import os
 
+from django.core.exceptions import ImproperlyConfigured
+
 from .base import *
 
 DEBUG = False
@@ -16,6 +18,12 @@ SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 # La clave de los datos clínicos es propia y obligatoria: derivarla de
 # SECRET_KEY haría ilegibles los antecedentes el día que esta se rote.
 CLAVE_CIFRADO_CAMPOS = os.environ["CLAVE_CIFRADO_CAMPOS"]
+# Vacías o con el texto de la plantilla (.env.ejemplo) es lo mismo que no
+# tenerlas: campos.py caería en SECRET_KEY y las sesiones, en un valor público.
+for _nombre in ("DJANGO_SECRET_KEY", "CLAVE_CIFRADO_CAMPOS"):
+    _valor = os.environ[_nombre].strip()
+    if not _valor or _valor.startswith("generar-con"):
+        raise ImproperlyConfigured(f"{_nombre} no está configurada (ver docs/DESPLIEGUE.md).")
 
 # Nginx termina el HTTPS y llama a gunicorn por HTTP. Sin esto Django cree
 # que toda petición es insegura y SECURE_SSL_REDIRECT entra en un bucle de
