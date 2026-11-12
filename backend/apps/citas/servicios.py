@@ -89,6 +89,23 @@ def cancelar_cita(*, cita: Cita, motivo: str) -> Cita:
     return cita
 
 
+def horario_de_la_jornada(*, centro_id: int, sede_id, fecha):
+    """Apertura y cierre de la sede ese día, o None si no abre.
+
+    Es el mismo horario que `programar_cita` exige (`Sede.horario_de`). La
+    cuadrícula de P05 lo usa para trazar sus filas: así no se dibujan horas
+    en las que el servidor no aceptaría una cita.
+    """
+    from apps.sedes.models import Sede
+
+    sede = Sede.objects.filter(centro_id=centro_id, pk=sede_id).first() if sede_id else None
+    horario = sede.horario_de(fecha.weekday()) if sede else None
+    if horario is None:
+        return None
+    return {"apertura": horario.hora_apertura.strftime("%H:%M"),
+            "cierre": horario.hora_cierre.strftime("%H:%M")}
+
+
 def agenda_del_dia(*, centro_id: int, sede_id: int, fecha, estado=None,
                    profesional_id=None, servicio_id=None):
     """Citas de una sede en un día, para la pantalla P05.

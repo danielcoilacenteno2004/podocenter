@@ -12,7 +12,13 @@ from apps.usuarios.roles import Rol
 
 from .models import Cita
 from .serializers import CancelacionSerializer, CitaSerializer
-from .servicios import agenda_del_dia, cancelar_cita, con_marca_de_atencion, programar_cita
+from .servicios import (
+    agenda_del_dia,
+    cancelar_cita,
+    con_marca_de_atencion,
+    horario_de_la_jornada,
+    programar_cita,
+)
 
 
 def _entero(valor):
@@ -103,6 +109,9 @@ class CitaViewSet(ContextoDeCentro, mixins.CreateModelMixin, mixins.ListModelMix
         datos = self.get_serializer(citas, many=True).data
         return Response({
             "fecha": fecha,
+            "horario": horario_de_la_jornada(
+                centro_id=request.centro_id, sede_id=_entero(sede_id), fecha=fecha
+            ),
             "total": len(datos),
             "filtros_aplicados": {
                 clave: parametros[clave]

@@ -258,3 +258,25 @@ def test_un_dia_vacio_no_rompe_el_panel(cliente, sede):
     assert respuesta.data["citas"]["total"] == 0
     assert respuesta.data["ingresos"]["esperado"] == "0.00"
     assert respuesta.data["ingresos"]["ticket_promedio"] == "0.00"
+
+
+# ------------------------------------------------------------- cuadrícula
+@pytest.mark.django_db
+def test_la_agenda_trae_el_horario_de_la_sede_ese_dia(cliente, sede):
+    # La cuadrícula de P05 traza sus filas con este horario. Debe ser el mismo
+    # que exige `programar_cita`: si no, la pantalla ofrecería huecos que el
+    # servidor rechaza por fuera-de-horario. 2027-01-04 es lunes.
+    respuesta = cliente.get(AGENDA, {"fecha": "2027-01-04"})
+
+    assert respuesta.data["horario"] == {"apertura": "08:00", "cierre": "20:00"}
+
+
+@pytest.mark.django_db
+def test_un_dia_en_que_la_sede_no_abre_trae_horario_nulo(cliente, sede):
+    # El domingo la sede del ejemplo no tiene horario: la pantalla debe saber
+    # que está cerrada en vez de dibujar una cuadrícula vacía con horas
+    # inventadas. 2027-01-03 es domingo.
+    respuesta = cliente.get(AGENDA, {"fecha": "2027-01-03"})
+
+    assert respuesta.status_code == 200
+    assert respuesta.data["horario"] is None
