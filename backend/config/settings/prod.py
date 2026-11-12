@@ -44,5 +44,10 @@ CSRF_COOKIE_SECURE = True
 CSRF_TRUSTED_ORIGINS = os.environ["DJANGO_CSRF_ORIGINS"].split(",")
 X_FRAME_OPTIONS = "DENY"
 
-DATABASES["default"]["OPTIONS"] = {"sslmode": "require"}
-DATABASES["default"]["CONN_MAX_AGE"] = 60
+# Copia, no modificación: `DATABASES` es el mismo diccionario que el de
+# base.py, y cambiarlo en su sitio alteraba también la configuración de
+# desarrollo y de pruebas cargada en el mismo proceso.
+DATABASES = {
+    **DATABASES,
+    "default": {**DATABASES["default"], "OPTIONS": {"sslmode": "require"}, "CONN_MAX_AGE": 60},
+}

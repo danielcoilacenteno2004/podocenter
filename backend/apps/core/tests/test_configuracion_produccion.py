@@ -51,3 +51,16 @@ def test_detras_de_nginx_reconoce_el_https(monkeypatch):
     assert prod.CLAVE_CIFRADO_CAMPOS == ENTORNO["CLAVE_CIFRADO_CAMPOS"]
     assert prod.DEBUG is False
     assert prod.ES_PRODUCCION is True  # cargar_demo se niega a correr
+    assert prod.DATABASES["default"]["OPTIONS"] == {"sslmode": "require"}
+
+
+def test_cargar_produccion_no_altera_la_configuracion_en_uso(monkeypatch):
+    # Garantiza que importar la configuración de producción no cambia la base
+    # de datos de la que ya está en uso: antes la modificaba en su sitio y el
+    # resto de la batería pasaba a exigir SSL.
+    from django.conf import settings
+
+    antes = dict(settings.DATABASES["default"].get("OPTIONS", {}))
+    _cargar(monkeypatch)
+
+    assert settings.DATABASES["default"].get("OPTIONS", {}) == antes
