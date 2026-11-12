@@ -10,6 +10,7 @@ from django.core.exceptions import ImproperlyConfigured
 from .base import *
 
 DEBUG = False
+ES_PRODUCCION = True
 ALLOWED_HOSTS = os.environ["DJANGO_ALLOWED_HOSTS"].split(",")
 
 # Sin valor por defecto: si falta, el servidor no arranca. Un valor de

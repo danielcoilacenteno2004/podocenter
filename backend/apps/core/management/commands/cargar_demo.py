@@ -9,7 +9,8 @@ No se usa en producción: borra y rehace el centro de demostración.
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 
-from django.core.management.base import BaseCommand
+from django.conf import settings
+from django.core.management.base import BaseCommand, CommandError
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
@@ -95,9 +96,23 @@ class Command(BaseCommand):
             action="store_true",
             help="No borra el centro de demostración si ya existe; solo informa y termina.",
         )
+        parser.add_argument(
+            "--en-produccion",
+            action="store_true",
+            help="Permite correrlo con la configuración de producción (p. ej. un servidor "
+                 "solo para la exposición).",
+        )
 
     @transaction.atomic
     def handle(self, *args, **opciones):
+        # Crea un administrador de plataforma con una contraseña publicada en
+        # CLAUDE.md: en un servidor con centros reales sería una puerta abierta.
+        if settings.ES_PRODUCCION and not opciones["en_produccion"]:
+            raise CommandError(
+                "cargar_demo no se ejecuta con la configuración de producción: crea cuentas "
+                "con una contraseña pública. Si el servidor es solo para la exposición, "
+                "use --en-produccion."
+            )
         existente = Centro.objects.filter(subdominio=SUBDOMINIO).first()
         if existente and opciones["conservar"]:
             self.stdout.write(self.style.WARNING(

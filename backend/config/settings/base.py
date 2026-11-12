@@ -111,6 +111,10 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Solo la configuración de producción lo enciende. Lo consultan los comandos
+# que no deben correr allí por descuido, como cargar_demo.
+ES_PRODUCCION = False
+
 # Clave de cifrado de campo (Fernet) para los datos clínicos sensibles.
 CLAVE_CIFRADO_CAMPOS = os.environ.get("CLAVE_CIFRADO_CAMPOS", "")
 

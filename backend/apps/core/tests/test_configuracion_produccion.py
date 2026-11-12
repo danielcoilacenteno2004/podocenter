@@ -50,3 +50,4 @@ def test_detras_de_nginx_reconoce_el_https(monkeypatch):
     assert prod.SECRET_KEY == ENTORNO["DJANGO_SECRET_KEY"]
     assert prod.CLAVE_CIFRADO_CAMPOS == ENTORNO["CLAVE_CIFRADO_CAMPOS"]
     assert prod.DEBUG is False
+    assert prod.ES_PRODUCCION is True  # cargar_demo se niega a correr

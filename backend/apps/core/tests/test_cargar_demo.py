@@ -7,7 +7,8 @@ mismas reglas que la agenda real.
 """
 import pytest
 from django.contrib.auth import authenticate
-from django.core.management import call_command
+from django.core.management import CommandError, call_command
+from django.test import override_settings
 from django.utils import timezone
 
 from apps.atenciones.models import Atencion
@@ -166,3 +167,16 @@ def test_con_conservar_no_toca_la_demostracion_existente(demo):
     call_command("cargar_demo", "--conservar", verbosity=0)
 
     assert Sede.objects.filter(pk=sede_id).exists()
+
+
+@pytest.mark.django_db
+def test_en_produccion_no_corre_por_descuido():
+    # Garantiza que nadie crea en un servidor real las cuentas de la
+    # demostración, cuya contraseña está publicada en el repositorio: hace
+    # falta pedirlo de forma explícita.
+    from apps.usuarios.models import Usuario
+
+    with override_settings(ES_PRODUCCION=True), pytest.raises(CommandError):
+        call_command("cargar_demo", verbosity=0)
+
+    assert not Usuario.objects.filter(correo="plataforma@podocenter.pe").exists()
