@@ -11,8 +11,9 @@
 // resalta si la cantidad lo supera; entonces se puede ver la otra sede (P14)
 // y no se deja confirmar. El servidor descuenta el stock en la misma
 // transacción que la atención y vuelve a comprobarlo con la fila bloqueada.
-// No se precargan los insumos habituales del servicio: CC-14 no está
-// construido, así que cada insumo suma una interacción al RNF02.
+// Los insumos habituales del servicio (CC-14) llegan precargados: es lo que
+// mantiene el RNF02, porque cada insumo agregado a mano suma dos
+// interacciones (buscarlo y elegirlo).
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import DisponibilidadDialogo from '../components/DisponibilidadDialogo.vue'
@@ -98,7 +99,15 @@ async function cargar () {
     paciente.value = (await api.get(`/pacientes/${data.paciente}/`)).data
     // Sin el stock se puede registrar igual la atención, sin insumos.
     try {
-      stock.value = (await api.get('/inventario/stock/')).data.stock
+      const [respStock, respServicio] = await Promise.all([
+        api.get('/inventario/stock/'),
+        api.get(`/servicios/${data.servicio}/`)
+      ])
+      stock.value = respStock.data.stock
+      insumos.value = respServicio.data.insumos_habituales.flatMap((h) => {
+        const producto = stock.value.find((p) => p.id === h.producto)
+        return producto ? [{ producto, cantidad: h.cantidad }] : []
+      })
     } catch (problema) {
       errorDeStock.value = problema.mensaje
     }
@@ -290,7 +299,8 @@ onMounted(cargar)
               </li>
             </ul>
             <p class="ayuda">
-              Opcional. Se descuentan del stock de la sede al confirmar.
+              Vienen precargados los habituales del servicio; cambie la cantidad o quítelos si no
+              se usaron. Se descuentan del stock de la sede al confirmar.
             </p>
           </template>
         </fieldset>
