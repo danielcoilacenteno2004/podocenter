@@ -5,6 +5,10 @@
 // salen de la propia jornada, de modo que nunca se ofrece un valor que no
 // tenga ninguna cita detrás.
 //
+// «WhatsApp» abre WhatsApp con el recordatorio ya escrito para el celular del
+// paciente (RF07, camino manual); solo aparece si el paciente aceptó
+// recordatorios. El servidor compone el enlace.
+//
 // Dos vistas de la misma jornada (Práctica N.° 7): la cuadrícula por hora y
 // profesional (Figura 3), para ver la forma del día, y la lista (Figura 4),
 // para responder preguntas con los filtros. Las dos usan la misma respuesta.
@@ -135,6 +139,14 @@ const columnas = computed(() => {
   return filtros.value.profesional ? lista.filter((c) => c.id === filtros.value.profesional) : lista
 })
 const ETIQUETAS = Object.fromEntries(ESTADOS)
+
+// RF07: estado del recordatorio automático, si la cita ya tiene uno.
+const RECORDATORIO = {
+  PENDIENTE: 'Recordatorio pendiente de reintento',
+  ENVIADO: 'Recordatorio enviado',
+  FALLIDO: 'Recordatorio fallido',
+  CANCELADO: 'Recordatorio anulado'
+}
 
 async function cargarPlantel () {
   try {
@@ -288,6 +300,7 @@ onMounted(() => { cargar(); cargarPlantel() })
             <strong>{{ hora(citaElegida.inicio) }} – {{ hora(citaElegida.fin) }} · {{ citaElegida.paciente_nombre }}</strong>
             <span>{{ citaElegida.servicio_nombre }} · {{ citaElegida.profesional_nombre }}</span>
             <span class="etiqueta" :class="citaElegida.estado">{{ ETIQUETAS[citaElegida.estado] ?? citaElegida.estado }}</span>
+            <span v-if="citaElegida.recordatorio" class="ayuda">{{ RECORDATORIO[citaElegida.recordatorio.estado] }}</span>
           </div>
           <div class="acciones-fila">
             <router-link
@@ -295,6 +308,13 @@ onMounted(() => { cargar(); cargarPlantel() })
               :to="{ name: 'ficha-paciente', params: { pacienteId: citaElegida.paciente } }"
             >Ficha del paciente</router-link>
             <template v-if="citaElegida.estado === 'PROGRAMADA'">
+              <a
+                v-if="citaElegida.enlace_whatsapp"
+                class="boton-secundario"
+                :href="citaElegida.enlace_whatsapp"
+                target="_blank"
+                rel="noopener"
+              >Recordar por WhatsApp</a>
               <router-link
                 v-if="atendible(citaElegida)"
                 class="boton"
@@ -352,9 +372,18 @@ onMounted(() => { cargar(); cargarPlantel() })
             <td class="detalle">{{ cita.profesional_nombre }}</td>
             <td class="estado"><span class="etiqueta" :class="cita.estado">
               {{ (ESTADOS.find(([v]) => v === cita.estado) ?? [])[1] ?? cita.estado }}
-            </span></td>
+            </span>
+              <span v-if="cita.recordatorio" class="ayuda recordatorio-estado">{{ RECORDATORIO[cita.recordatorio.estado] }}</span></td>
             <td class="accion">
               <div v-if="cita.estado === 'PROGRAMADA'" class="acciones-fila">
+                <a
+                  v-if="cita.enlace_whatsapp"
+                  class="boton-secundario"
+                  :href="cita.enlace_whatsapp"
+                  target="_blank"
+                  rel="noopener"
+                  :aria-label="`Recordar la cita por WhatsApp a ${cita.paciente_nombre}`"
+                >WhatsApp</a>
                 <router-link
                   v-if="atendible(cita)"
                   class="boton"
