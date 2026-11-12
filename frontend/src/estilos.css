@@ -385,6 +385,7 @@ textarea:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
 .tabla-insumos .secundario-celda { display: block; }
 .aviso-stock { display: block; font-size: .85rem; }
 input.cantidad-insumo { width: 5rem; text-align: right; }
+input.minimo-en-linea { width: 4.5rem; padding: .25rem .4rem; text-align: right; }
 
 /* --- editor del horario de la sede (P28) ------------------------------ */
 .editor-horario { border: 1px solid var(--borde); border-radius: var(--radio); padding: .6rem .8rem; }
