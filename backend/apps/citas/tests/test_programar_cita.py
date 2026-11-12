@@ -110,3 +110,33 @@ def test_no_deja_cancelar_dos_veces_la_misma_cita(
         cancelar_cita(cita=cita, motivo="Otra vez")
 
     assert error.value.codigo == "cita-no-cancelable"
+
+
+@pytest.mark.django_db
+def test_una_sede_desactivada_no_admite_citas_nuevas(
+    centro, podologa, sede, servicio, paciente, proximo_lunes_a_las_nueve
+):
+    # Garantiza que desactivar una sede la retira de verdad: antes seguía
+    # aceptando citas aunque ya no apareciera para elegir.
+    sede.esta_activa = False
+    sede.save(update_fields=["esta_activa"])
+
+    with pytest.raises(ReglaDeNegocio) as error:
+        _programar(centro, podologa, sede, paciente, servicio, proximo_lunes_a_las_nueve)
+
+    assert error.value.codigo == "sede-inactiva"
+
+
+@pytest.mark.django_db
+def test_un_servicio_desactivado_no_admite_citas_nuevas(
+    centro, podologa, sede, servicio, paciente, proximo_lunes_a_las_nueve
+):
+    # Garantiza que un servicio retirado del catálogo no se sigue agendando
+    # por una llamada directa a la API, aunque P06 ya no lo ofrezca.
+    servicio.esta_activo = False
+    servicio.save(update_fields=["esta_activo"])
+
+    with pytest.raises(ReglaDeNegocio) as error:
+        _programar(centro, podologa, sede, paciente, servicio, proximo_lunes_a_las_nueve)
+
+    assert error.value.codigo == "servicio-inactivo"

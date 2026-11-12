@@ -46,6 +46,14 @@ def programar_cita(*, centro, usuario, sede, paciente, profesional, servicio, in
         raise ReglaDeNegocio(
             "cita-en-el-pasado", "La cita debe programarse con al menos 15 minutos de anticipación."
         )
+    # Desactivar una sede o un servicio es la forma de retirarlos sin borrar
+    # su historia (Práctica N.° 7, Tablas 23 y 29): dejan de aceptar citas nuevas.
+    if not sede.esta_activa:
+        raise ReglaDeNegocio("sede-inactiva", "La sede está desactivada y no admite citas.")
+    if not servicio.esta_activo:
+        raise ReglaDeNegocio(
+            "servicio-inactivo", "El servicio está desactivado y no admite citas."
+        )
     if not profesional.puede_usar_sede(sede.pk):
         raise ReglaDeNegocio(
             "profesional-sin-sede", "La profesional no está asignada a esa sede."
