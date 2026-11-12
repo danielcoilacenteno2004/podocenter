@@ -36,3 +36,30 @@ class Servicio(ModeloDeCentro):
 
     def __str__(self) -> str:
         return self.nombre
+
+
+class ServicioInsumo(ModeloDeCentro):
+    """Insumo que un servicio consume habitualmente (CC-14, Práctica N.° 7).
+
+    Se precarga en P11 al registrar la atención de ese servicio: es lo que
+    deja el registro en cuatro interacciones o menos (RNF02, sección 4.5),
+    porque sin él cada insumo suma dos (buscarlo y elegirlo). La podóloga
+    puede cambiar la cantidad o quitarlo antes de confirmar.
+    """
+
+    servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE,
+                                 related_name="insumos_habituales")
+    producto = models.ForeignKey("inventario.Producto", on_delete=models.PROTECT,
+                                 related_name="en_servicios")
+    cantidad = models.PositiveSmallIntegerField()
+
+    class Meta:
+        db_table = "servicio_insumo"
+        verbose_name = "insumo habitual"
+        verbose_name_plural = "insumos habituales"
+        constraints = [
+            models.UniqueConstraint(fields=["servicio", "producto"],
+                                    name="uq_servicio_insumo_producto"),
+            models.CheckConstraint(condition=models.Q(cantidad__gt=0),
+                                   name="ck_servicio_insumo_cantidad_positiva"),
+        ]

@@ -25,7 +25,9 @@ class ServicioViewSet(ContextoDeCentro, mixins.CreateModelMixin, mixins.ListMode
     filterset_fields = ["esta_activo"]
 
     def get_queryset(self):
-        return Servicio.objects.filter(centro_id=self.request.centro_id)
+        return Servicio.objects.filter(centro_id=self.request.centro_id).prefetch_related(
+            "insumos_habituales__producto"
+        )
 
     def get_permissions(self):
         """La podóloga consulta el catálogo, pero no lo modifica."""
@@ -34,9 +36,13 @@ class ServicioViewSet(ContextoDeCentro, mixins.CreateModelMixin, mixins.ListMode
         return super().get_permissions()
 
     def perform_create(self, serializer):
-        serializer.instance = crear_servicio(centro=self.request.user.centro,
-                                             datos=dict(serializer.validated_data))
+        datos = dict(serializer.validated_data)
+        insumos = datos.pop("insumos_habituales", None)
+        serializer.instance = crear_servicio(centro=self.request.user.centro, datos=datos,
+                                             insumos=insumos)
 
     def perform_update(self, serializer):
-        serializer.instance = actualizar_servicio(serializer.instance,
-                                                  datos=dict(serializer.validated_data))
+        datos = dict(serializer.validated_data)
+        insumos = datos.pop("insumos_habituales", None)
+        serializer.instance = actualizar_servicio(serializer.instance, datos=datos,
+                                                  insumos=insumos)
