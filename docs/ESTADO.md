@@ -93,13 +93,13 @@ válida para el RNF02 es la que se haga con la podóloga.
   Comprueban que un centro no ve, no abre y no modifica datos de otro, ni
   usa sus sedes o productos. Es lo que sostiene el modelo de arriendo ante
   el jurado.
-- **132 commits** con «un commit, un cambio», contando el que actualiza este
-  documento: 67 de Sergio Daniel Coila Centeno y 65 de Andre Nicolas Huaroc
+- **141 commits** con «un commit, un cambio», contando el que actualiza este
+  documento: 67 de Sergio Daniel Coila Centeno y 74 de Andre Nicolas Huaroc
   Condori. La identidad de git está fijada en la configuración del
   repositorio para que no vuelva a entrar un autor con otro nombre.
 - Entorno de demostración reproducible con un comando y probado con nueve
   pruebas, incluida una que verifica que las credenciales publicadas funcionan.
-- Frontend: **25 pantallas de las 29 diseñadas en la Práctica N.° 7 (P01, P03, P04, P05, P06, P07, P08, P09, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20, P21, P25, P26, P27, P28, P29)**, más la ventana de producto sobre P12, que no está en el diseño. El frontend no tiene pruebas automáticas; cada pantalla se comprobó con un recorrido en Playwright.
+- Frontend: **25 pantallas de las 29 diseñadas en la Práctica N.° 7 (P01, P03, P04, P05, P06, P07, P08, P09, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20, P21, P25, P26, P27, P28, P29)**, más la ventana de producto sobre P12, que no está en el diseño. El frontend no tiene pruebas automáticas; cada pantalla se comprobó con un recorrido en Playwright. La interfaz usa la paleta oficial de Artemisa (#3C5154, #57696D, #A1B5AC y blanco) declarada una sola vez como variables, y piezas comunes: tarjeta (`TarjetaSeccion`), iconos (`IconoTrazo`), marca (`MarcaArtemisa`) y barra superior con las secciones tomadas de las rutas. P01 y P04 se rediseñaron sobre esa base.
 - **Configuración de producción endurecida**: no arranca sin `DJANGO_SECRET_KEY`
   y `CLAVE_CIFRADO_CAMPOS` propias (ni vacías ni con el texto de la
   plantilla), reconoce el HTTPS que termina Nginx y `check --deploy` pasa sin
