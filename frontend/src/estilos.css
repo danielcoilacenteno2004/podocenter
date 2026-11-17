@@ -198,13 +198,14 @@ td.numero { font-variant-numeric: tabular-nums; }
 }
 .etiqueta::before { content: ""; width: .4rem; height: .4rem; border-radius: 50%; background: currentColor; }
 
-/* --- indicadores del panel -------------------------------------------- */
-.indicadores { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
-.indicador { background: var(--superficie); border: 1px solid var(--borde);
-  border-radius: var(--radio); padding: 1rem 1.15rem; box-shadow: var(--sombra); }
-.indicador dt { font-size: .8rem; color: var(--tinta-suave); font-weight: 600; }
-.indicador dd { margin: .2rem 0 0; font-size: 2rem; font-weight: 700;
-  font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+/* Esqueleto de carga: ocupa el sitio del contenido y evita que la página salte. */
+.esqueleto { position: relative; overflow: hidden; display: block; border-radius: 6px; background: var(--fondo); }
+.esqueleto::after {
+  content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--blanco) 75%, transparent), transparent);
+  animation: brillo 1.3s ease-in-out infinite;
+}
+@keyframes brillo { to { transform: translateX(100%); } }
 
 /* --- acceso (P01) ------------------------------------------------------ */
 .acceso { min-height: 100vh; display: grid; place-items: center; padding: 1.25rem; }
