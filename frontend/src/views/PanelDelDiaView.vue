@@ -8,7 +8,9 @@ import { useSesion } from '../stores/sesion'
 
 const sesion = useSesion()
 const panel = ref(null)
-const fecha = ref(new Date().toISOString().slice(0, 10))
+// Fecha local (AAAA-MM-DD): toISOString() da la de UTC, que en Perú ya es
+// el día siguiente desde las 19:00.
+const fecha = ref(new Date().toLocaleDateString('en-CA'))
 const cargando = ref(false)
 const error = ref(null)
 
