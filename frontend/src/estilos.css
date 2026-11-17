@@ -1,22 +1,38 @@
 /* Hoja única de la aplicación. Los colores se declaran como variables para
    que una marca distinta (otro centro cliente) se cambie en un solo lugar. */
 :root {
-  --tinta: #16222e;
-  --tinta-suave: #5a6b7a;
-  --marca: #0f6f6a;
-  --marca-oscura: #0a514d;
-  --marca-tenue: #e6f2f1;
-  --fondo: #f5f7f8;
-  --superficie: #ffffff;
-  --borde: #dde4e8;
+  /* Paleta oficial de la marca, en dos combinaciones:
+     - sobre fondo oscuro (#3C5154), el logo va en blanco;
+     - sobre fondo claro (#A1B5AC), el logo va en #57696D.
+     El resto de los tonos de la interfaz se deriva de estos cuatro. */
+  --oficial-oscuro: #3c5154;
+  --oficial-medio: #57696d;
+  --oficial-claro: #a1b5ac;
+  --blanco: #ffffff;
+
+  --marca: var(--oficial-oscuro);
+  --marca-oscura: color-mix(in srgb, var(--oficial-oscuro) 82%, #000);
+  --marca-profunda: color-mix(in srgb, var(--oficial-oscuro) 62%, #000);
+  --marca-tenue: color-mix(in srgb, var(--oficial-claro) 22%, var(--blanco));
+  --tinta: color-mix(in srgb, var(--oficial-oscuro) 55%, #000);
+  --tinta-suave: var(--oficial-medio);
+  --fondo: color-mix(in srgb, var(--oficial-claro) 10%, var(--blanco));
+  --superficie: var(--blanco);
+  --borde: color-mix(in srgb, var(--oficial-claro) 32%, var(--blanco));
+
+  /* Colores de estado: no son de marca, comunican significado. */
   --alerta: #a3281f;
   --alerta-tenue: #fdecea;
   --aviso: #8a5a00;
   --aviso-tenue: #fdf3e2;
   --ok: #1d6b3e;
   --ok-tenue: #e7f4ec;
+  --alerta-borde: color-mix(in srgb, var(--alerta) 22%, var(--alerta-tenue));
+  --aviso-borde: color-mix(in srgb, var(--aviso) 22%, var(--aviso-tenue));
+  --ok-borde: color-mix(in srgb, var(--ok) 22%, var(--ok-tenue));
+
   --radio: 10px;
-  --sombra: 0 1px 2px rgba(22, 34, 46, .06), 0 4px 16px rgba(22, 34, 46, .06);
+  --sombra: 0 1px 2px color-mix(in srgb, var(--tinta) 6%, transparent), 0 4px 16px color-mix(in srgb, var(--tinta) 6%, transparent);
 }
 
 * { box-sizing: border-box; }
@@ -84,7 +100,7 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
 button {
   font: inherit; font-weight: 600; cursor: pointer;
   padding: .55rem 1.1rem; border-radius: 8px;
-  border: 1px solid var(--marca); background: var(--marca); color: #fff;
+  border: 1px solid var(--marca); background: var(--marca); color: var(--blanco);
 }
 button:hover:not(:disabled) { background: var(--marca-oscura); border-color: var(--marca-oscura); }
 button:disabled { opacity: .55; cursor: progress; }
@@ -109,7 +125,7 @@ td.numero { font-variant-numeric: tabular-nums; }
 
 /* --- avisos y etiquetas ----------------------------------------------- */
 [role="alert"] {
-  background: var(--alerta-tenue); border: 1px solid #f3c9c4; color: var(--alerta);
+  background: var(--alerta-tenue); border: 1px solid var(--alerta-borde); color: var(--alerta);
   padding: .65rem .85rem; border-radius: 8px; margin: 0 0 1rem;
 }
 [role="status"] { color: var(--tinta-suave); }
@@ -157,7 +173,7 @@ td.numero { font-variant-numeric: tabular-nums; }
   border: 1px solid var(--borde); border-radius: var(--radio); box-shadow: var(--sombra);
   color: var(--tinta); background: var(--superficie);
 }
-.dialogo::backdrop { background: rgba(22, 34, 46, .45); }
+.dialogo::backdrop { background: color-mix(in srgb, var(--marca-profunda) 55%, transparent); }
 .dialogo-cabecera {
   display: flex; justify-content: space-between; align-items: center;
   padding: .9rem 1.25rem; border-bottom: 1px solid var(--borde); background: var(--fondo);
@@ -205,7 +221,7 @@ table.inventario tr.bajo-minimo td strong { color: var(--aviso); }
 .nota-pendiente { margin-top: 1rem; }
 .texto-alerta { color: var(--alerta); }
 .aviso-ajuste {
-  background: var(--aviso-tenue); color: var(--aviso); border: 1px solid #f0d9a8;
+  background: var(--aviso-tenue); color: var(--aviso); border: 1px solid var(--aviso-borde);
   padding: .6rem .8rem; border-radius: 8px;
 }
 table.disponibilidad tr.activa td { font-weight: 700; }
@@ -220,9 +236,9 @@ table.registro-diario tfoot .total { font-size: 1.15rem; }
 
 /* --- centros clientes (P19) -------------------------------------------- */
 .aviso-ok p { margin: 0; }
-.credencial-temporal { margin-top: .6rem; padding-top: .6rem; border-top: 1px dashed #bfe0cb; }
+.credencial-temporal { margin-top: .6rem; padding-top: .6rem; border-top: 1px dashed var(--ok-borde); }
 .credencial-temporal code {
-  background: var(--superficie); border: 1px solid #bfe0cb; border-radius: 4px;
+  background: var(--superficie); border: 1px solid var(--ok-borde); border-radius: 4px;
   padding: .1rem .4rem; font-size: .95rem; user-select: all;
 }
 input.campo-motivo { width: 14rem; padding: .35rem .55rem; font-size: .88rem; }
@@ -263,7 +279,7 @@ dl.horario dd { margin: 0; font-variant-numeric: tabular-nums; }
 /* --- registrar atención (P11) ------------------------------------------ */
 a.boton {
   display: inline-block; padding: .4rem .85rem; border-radius: 8px;
-  background: var(--marca); color: #fff; font-weight: 600; font-size: .88rem;
+  background: var(--marca); color: var(--blanco); font-weight: 600; font-size: .88rem;
   text-decoration: none; white-space: nowrap;
 }
 a.boton:hover { background: var(--marca-oscura); }
@@ -273,7 +289,7 @@ td.accion { text-align: right; }
   clip: rect(0 0 0 0); white-space: nowrap;
 }
 .aviso-ok {
-  background: var(--ok-tenue); color: var(--ok); border: 1px solid #bfe0cb;
+  background: var(--ok-tenue); color: var(--ok); border: 1px solid var(--ok-borde);
   padding: .65rem .85rem; border-radius: 8px; margin: 0 0 1rem;
 }
 

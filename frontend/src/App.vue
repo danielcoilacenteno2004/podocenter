@@ -5,6 +5,7 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSesion } from './stores/sesion'
+import MarcaArtemisa from './components/MarcaArtemisa.vue'
 
 const sesion = useSesion()
 const router = useRouter()
@@ -25,10 +26,7 @@ function cambiarSede () {
 <template>
   <div class="app">
     <header v-if="conBarra" class="barra">
-      <span class="marca">
-        <img src="/logo-artemisa.png" width="22" height="22" alt="">
-        Artemisa
-      </span>
+      <MarcaArtemisa />
 
       <nav aria-label="Secciones">
         <router-link v-if="sesion.esAdministradoraDePlataforma" :to="{ name: 'centros' }">Centros clientes</router-link>
