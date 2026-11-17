@@ -16,6 +16,7 @@ import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import DetalleAtencionDialogo from '../components/DetalleAtencionDialogo.vue'
 import { api } from '../services/api'
+import TarjetaSeccion from '../components/TarjetaSeccion.vue'
 
 const props = defineProps({ pacienteId: { type: String, required: true } })
 
@@ -121,19 +122,19 @@ onMounted(cargar)
         {{ aviso }}
       </p>
       <div class="bloques-ficha">
-        <section class="antecedentes" :class="{ vacios: !paciente.antecedentes }" aria-labelledby="titulo-antecedentes">
+        <section class="recuadro" :class="{ 'tono-aviso': paciente.antecedentes }" aria-labelledby="titulo-antecedentes">
           <h2 id="titulo-antecedentes">
             Antecedentes clínicos
           </h2>
           <p v-if="paciente.antecedentes">
-            {{ paciente.antecedentes }}
+            <strong>{{ paciente.antecedentes }}</strong>
           </p>
           <p v-else>
             Sin antecedentes registrados en la ficha.
           </p>
         </section>
 
-        <section class="consentimiento" aria-labelledby="titulo-consentimiento">
+        <section class="recuadro" :class="paciente.consentimiento_vigente ? 'tono-ok' : 'tono-aviso'" aria-labelledby="titulo-consentimiento">
           <template v-if="paciente.consentimiento_vigente">
             <h2 id="titulo-consentimiento">
               Consentimiento {{ paciente.consentimiento_vigente.version_texto }}
@@ -159,10 +160,7 @@ onMounted(cargar)
         {{ error }}
       </p>
 
-      <section class="tarjeta" aria-labelledby="titulo-historial">
-        <h2 id="titulo-historial">
-          Historial de atenciones · todas las sedes del centro
-        </h2>
+      <TarjetaSeccion icono="historial" titulo="Historial de atenciones" descripcion="Todas las sedes del centro">
         <p v-if="!atenciones.length" class="vacio">
           Este paciente todavía no tiene atenciones registradas.
         </p>
@@ -208,10 +206,12 @@ onMounted(cargar)
             </tr>
           </tbody>
         </table>
-        <button v-if="siguiente" class="secundario ver-mas" type="button" :disabled="cargandoMas" @click="verMas">
-          {{ cargandoMas ? 'Cargando…' : 'Ver más' }}
-        </button>
-      </section>
+        <template v-if="siguiente" #pie>
+          <button class="secundario" type="button" :disabled="cargandoMas" @click="verMas">
+            {{ cargandoMas ? 'Cargando…' : 'Ver más' }}
+          </button>
+        </template>
+      </TarjetaSeccion>
     </template>
     <DetalleAtencionDialogo :atencion-id="atencionAbierta" @cerrar="atencionAbierta = null" />
   </main>

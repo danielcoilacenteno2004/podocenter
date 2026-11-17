@@ -32,6 +32,7 @@
   --ok-borde: color-mix(in srgb, var(--ok) 22%, var(--ok-tenue));
 
   --radio: 10px;
+  --radio-tarjeta: 14px;
   --sombra: 0 1px 2px color-mix(in srgb, var(--tinta) 6%, transparent), 0 4px 16px color-mix(in srgb, var(--tinta) 6%, transparent);
   --sombra-alta: 0 2px 6px color-mix(in srgb, var(--tinta) 6%, transparent), 0 24px 48px -12px color-mix(in srgb, var(--tinta) 18%, transparent);
   /* Anillo de foco: se ve sobre cualquier fondo sin tapar el borde del campo. */
@@ -76,10 +77,42 @@ main { flex: 1; width: 100%; max-width: 1080px; margin: 0 auto; padding: 1.5rem 
 .encabezado { margin-bottom: 1.25rem; }
 .encabezado p { margin: 0; color: var(--tinta-suave); }
 
+/* Superficie de toda tarjeta (componente TarjetaSeccion y esqueletos). Entra
+   con un leve ascenso al aparecer; dos tarjetas seguidas guardan la misma
+   distancia en cualquier pantalla. */
 .tarjeta {
   background: var(--superficie); border: 1px solid var(--borde);
-  border-radius: var(--radio); box-shadow: var(--sombra); padding: 1.25rem;
+  border-radius: var(--radio-tarjeta); box-shadow: var(--sombra);
+  padding: 1.35rem 1.4rem;
+  animation: subir .35s var(--transicion) both;
 }
+main > .tarjeta + .tarjeta { margin-top: 1.25rem; }
+
+/* Recuadro informativo dentro de una tarjeta o ventana (antecedentes,
+   consentimiento, cita elegida…). El tono lo pone una clase tono-* o de
+   estado; sin ella es neutro. */
+.recuadro {
+  padding: .85rem 1rem; border-radius: var(--radio);
+  background: var(--tono-tenue, var(--fondo));
+  border: 1px solid color-mix(in srgb, var(--tono, var(--tinta-suave)) 18%, transparent);
+  border-left: 4px solid var(--tono, var(--borde));
+}
+.recuadro > :is(h2, h3):first-child {
+  margin: 0 0 .3rem; font-size: .76rem; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--tono, var(--tinta-suave));
+}
+.recuadro p { margin: 0; }
+.recuadro-con-icono { display: flex; align-items: center; gap: .6rem; color: var(--tono, var(--tinta-suave)); }
+.recuadro-con-icono svg { flex: none; }
+
+/* Enlace de acción con flecha (cabeceras de tarjeta, «ver todo»). */
+.enlace-flecha {
+  display: inline-flex; align-items: center; gap: .3rem;
+  font-size: .85rem; font-weight: 600; color: var(--marca); text-decoration: none;
+}
+.enlace-flecha:hover { text-decoration: underline; }
+.enlace-flecha svg { transition: transform var(--transicion); }
+.enlace-flecha:hover svg { transform: translateX(2px); }
 
 /* --- formularios ------------------------------------------------------ */
 label { display: block; font-weight: 600; font-size: .88rem; margin-bottom: .3rem; }
@@ -149,14 +182,21 @@ td.numero { font-variant-numeric: tabular-nums; }
 [role="status"] { color: var(--tinta-suave); }
 .vacio { color: var(--tinta-suave); text-align: center; padding: 2rem 1rem; }
 
+/* Tonos: cada uno se declara una sola vez y lo leen etiquetas, recuadros y
+   gráficos desde --tono y --tono-tenue. Los estados de una cita son tonos
+   con nombre propio, para poder usar el estado como clase directamente. */
+.tono-marca, .PROGRAMADA { --tono: var(--marca); --tono-tenue: var(--marca-tenue); }
+.tono-ok, .ATENDIDA      { --tono: var(--ok); --tono-tenue: var(--ok-tenue); }
+.tono-alerta, .CANCELADA { --tono: var(--alerta); --tono-tenue: var(--alerta-tenue); }
+.tono-aviso, .NO_ASISTIO { --tono: var(--aviso); --tono-tenue: var(--aviso-tenue); }
+
 .etiqueta {
-  display: inline-block; padding: .15rem .55rem; border-radius: 999px;
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .15rem .6rem; border-radius: 999px;
   font-size: .76rem; font-weight: 700; letter-spacing: .02em;
+  background: var(--tono-tenue, var(--fondo)); color: var(--tono, var(--tinta-suave));
 }
-.etiqueta.PROGRAMADA { background: var(--marca-tenue); color: var(--marca-oscura); }
-.etiqueta.ATENDIDA   { background: var(--ok-tenue); color: var(--ok); }
-.etiqueta.CANCELADA  { background: var(--alerta-tenue); color: var(--alerta); }
-.etiqueta.NO_ASISTIO { background: var(--aviso-tenue); color: var(--aviso); }
+.etiqueta::before { content: ""; width: .4rem; height: .4rem; border-radius: 50%; background: currentColor; }
 
 /* --- indicadores del panel -------------------------------------------- */
 .indicadores { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
@@ -255,7 +295,7 @@ td.numero { font-variant-numeric: tabular-nums; }
 }
 .sedes button:hover { border-color: var(--marca); background: var(--marca-tenue); }
 .sedes strong { display: block; }
-.sedes span { font-size: .85rem; color: var(--tinta-suave); }
+.sedes span { font-size: .85rem; font-weight: 400; color: var(--tinta-suave); }
 
 /* --- ventanas modales (P06, P07) -------------------------------------- */
 .encabezado-con-accion { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; }
@@ -310,7 +350,6 @@ table.administracion td.accion { width: 1%; }
 table.inventario tr.bajo-minimo { background: var(--aviso-tenue); }
 table.inventario tr.bajo-minimo td strong { color: var(--aviso); }
 .filtros .filtro-casilla { margin: 0 0 .1rem; border: 0; padding: .55rem 0; }
-.nota-pendiente { margin-top: 1rem; }
 .texto-alerta { color: var(--alerta); }
 .aviso-ajuste {
   background: var(--aviso-tenue); color: var(--aviso); border: 1px solid var(--aviso-borde);
@@ -334,13 +373,6 @@ table.registro-diario tfoot .total { font-size: 1.15rem; }
   padding: .1rem .4rem; font-size: .95rem; user-select: all;
 }
 input.campo-motivo { width: 14rem; padding: .35rem .55rem; font-size: .88rem; }
-
-/* --- mi perfil (P20) --------------------------------------------------- */
-.perfil-datos, form.tarjeta + .perfil-segundo-factor, .perfil-datos + form.tarjeta { margin-bottom: 1rem; }
-.perfil-datos h2 { margin: 0 0 .2rem; }
-.perfil-datos p { margin: .15rem 0; color: var(--tinta-suave); }
-.perfil-segundo-factor p { margin: 0; color: var(--tinta-suave); }
-.perfil-segundo-factor .etiqueta { margin-right: .4rem; }
 
 /* --- sin permiso o error (P21) ----------------------------------------- */
 .error-tarjeta { max-width: 520px; text-align: center; padding: 2rem 1.5rem; }
@@ -383,39 +415,23 @@ td.accion { text-align: right; }
   padding: .65rem .85rem; border-radius: 8px; margin: 0 0 1rem;
 }
 
-.cabecera-atencion {
-  display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
-  margin-bottom: 1rem;
-}
+.cabecera-atencion { display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); }
 .cabecera-datos h2 { margin: 0; font-size: 1.25rem; }
 .cabecera-datos > p { margin: .1rem 0 .75rem; color: var(--tinta-suave); }
-.datos-cita { margin: 0; display: grid; gap: .35rem; }
-.datos-cita div { display: flex; gap: .5rem; }
-.datos-cita dt { min-width: 6.5rem; color: var(--tinta-suave); font-size: .88rem; }
-.datos-cita dd { margin: 0; font-weight: 600; }
-
-/* Los antecedentes se destacan: es lo primero que hay que leer antes de atender. */
-.antecedentes {
-  background: var(--aviso-tenue); border: 1px solid #f0d9a8; border-left: 4px solid var(--aviso);
-  border-radius: 8px; padding: .8rem 1rem;
-}
-.antecedentes h2, .antecedentes h3 {
-  margin: 0 0 .3rem; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em;
-  color: var(--aviso);
-}
-.antecedentes p { margin: 0; font-weight: 600; }
-.antecedentes.vacios { background: var(--fondo); border-color: var(--borde); }
-.antecedentes.vacios h2, .antecedentes.vacios h3 { color: var(--tinta-suave); }
+/* Pares dato–valor en filas (datos de la cita, datos de la cuenta). */
+.lista-datos { margin: 0; display: grid; gap: .35rem; }
+.lista-datos div { display: flex; gap: .5rem; }
+.lista-datos dt { min-width: 6.5rem; color: var(--tinta-suave); font-size: .88rem; }
+.lista-datos dd { margin: 0; font-weight: 600; }
 
 /* --- ficha del paciente (P10) ------------------------------------------ */
 .bloques-ficha { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); margin-bottom: 1.25rem; }
-.consentimiento { border: 1px dashed var(--borde); border-radius: 8px; padding: .8rem 1rem; background: var(--superficie); }
-.consentimiento h2 { margin: 0 0 .3rem; font-size: .95rem; }
-.consentimiento p { margin: 0; color: var(--tinta-suave); font-size: .92rem; }
-.ver-mas { margin-top: .9rem; }
 .resumen-atencion { margin: 0 0 .9rem; color: var(--tinta-suave); }
-.dialogo .antecedentes { margin-bottom: .6rem; }
-.antecedentes.vacios p { font-weight: 400; color: var(--tinta-suave); }
+.dialogo .recuadro { margin-bottom: .6rem; }
+
+details > summary { cursor: pointer; font-weight: 600; color: var(--tinta); }
+details > summary:hover { color: var(--marca); }
+details[open] > summary { margin-bottom: .4rem; }
 
 .ayuda { margin: .3rem 0 0; font-size: .82rem; color: var(--tinta-suave); }
 
@@ -424,6 +440,7 @@ td.accion { text-align: right; }
 
 @media (max-width: 640px) {
   main { padding: 1rem .9rem 2.5rem; }
+  .tarjeta { padding: 1.1rem 1rem; }
   table { font-size: .88rem; }
   .cabecera-atencion { grid-template-columns: 1fr; }
   .fila-campos { grid-template-columns: 1fr; }
@@ -459,17 +476,8 @@ td.accion { text-align: right; }
 .filtros .campo-fecha { min-width: 0; }
 .selector-vista { display: flex; gap: .5rem; margin: 0 0 .75rem; }
 .cita-elegida {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: .75rem;
-  padding: .6rem .8rem;
-  margin: 0 0 .75rem;
-  border: 1px solid var(--borde);
-  border-left: 4px solid var(--marca);
-  border-radius: var(--radio);
-  background: var(--fondo);
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+  gap: .75rem; margin: 0 0 .75rem;
 }
 .cita-elegida > div:first-child { display: flex; flex-direction: column; gap: .15rem; }
 .cita-elegida .etiqueta { align-self: flex-start; }

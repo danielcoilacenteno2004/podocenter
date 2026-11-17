@@ -15,6 +15,7 @@ import MovimientoDialogo from '../components/MovimientoDialogo.vue'
 import ProductoDialogo from '../components/ProductoDialogo.vue'
 import { api } from '../services/api'
 import { useSesion } from '../stores/sesion'
+import TarjetaSeccion from '../components/TarjetaSeccion.vue'
 
 const sesion = useSesion()
 const esAdministradora = computed(() => sesion.esAdministradoraDelCentro)
@@ -154,7 +155,7 @@ onMounted(cargar)
       {{ aviso }}
     </p>
 
-    <section class="tarjeta">
+    <TarjetaSeccion>
       <p v-if="cargando && !stock.length" role="status">
         Cargando el inventario…
       </p>
@@ -236,22 +237,24 @@ onMounted(cargar)
           </tr>
         </tbody>
       </table>
-      <details v-if="desactivados.length" class="desactivados">
-        <summary>Productos desactivados ({{ desactivados.length }})</summary>
-        <ul>
-          <li v-for="p in desactivados" :key="p.id">
-            {{ p.nombre }} · {{ p.codigo }}
-            <button class="enlace" type="button" @click="reactivar(p)">
-              Reactivar
-            </button>
-          </li>
-        </ul>
-      </details>
-      <p class="ayuda nota-pendiente">
-        Además de las entradas, ajustes y mermas, el stock baja solo con los insumos que se
-        registran en cada atención.
-      </p>
-    </section>
+      <template #pie>
+        <details v-if="desactivados.length" class="desactivados">
+          <summary>Productos desactivados ({{ desactivados.length }})</summary>
+          <ul>
+            <li v-for="p in desactivados" :key="p.id">
+              {{ p.nombre }} · {{ p.codigo }}
+              <button class="enlace" type="button" @click="reactivar(p)">
+                Reactivar
+              </button>
+            </li>
+          </ul>
+        </details>
+        <p>
+          Además de las entradas, ajustes y mermas, el stock baja solo con los insumos que se
+          registran en cada atención.
+        </p>
+      </template>
+    </TarjetaSeccion>
 
     <MovimientoDialogo
       :abierto="movimientoAbierto"

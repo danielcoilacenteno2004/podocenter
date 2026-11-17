@@ -10,6 +10,7 @@
 // mostrar el mensaje.
 import { computed } from 'vue'
 import { useSesion } from '../stores/sesion'
+import TarjetaSeccion from '../components/TarjetaSeccion.vue'
 
 const props = defineProps({ codigo: { type: Number, default: 404 } })
 const sesion = useSesion()
@@ -41,7 +42,7 @@ const salida = computed(() => sesion.autenticado
 
 <template>
   <div class="acceso">
-    <section class="tarjeta error-tarjeta" aria-labelledby="titulo-error">
+    <TarjetaSeccion class="error-tarjeta" aria-labelledby="titulo-error">
       <p class="error-icono" aria-hidden="true">
         {{ caso.icono }}
       </p>
@@ -58,6 +59,6 @@ const salida = computed(() => sesion.autenticado
       <p class="error-codigo">
         Código de error: {{ codigo }} · {{ momento }}
       </p>
-    </section>
+    </TarjetaSeccion>
   </div>
 </template>

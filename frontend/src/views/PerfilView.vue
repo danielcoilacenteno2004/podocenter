@@ -17,6 +17,7 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from '../services/api'
 import { useSesion } from '../stores/sesion'
+import TarjetaSeccion from '../components/TarjetaSeccion.vue'
 
 const sesion = useSesion()
 const router = useRouter()
@@ -73,18 +74,19 @@ async function guardar () {
       «Contraseña actual» escriba la temporal que le entregaron.
     </p>
 
-    <section class="tarjeta perfil-datos" aria-labelledby="titulo-cuenta">
-      <h2 id="titulo-cuenta">
-        {{ sesion.usuario?.nombre_completo }}
-      </h2>
-      <p>{{ sesion.usuario?.correo }} · {{ sesion.usuario?.rol_descripcion }} · Sedes: {{ sedes }}</p>
-      <p>Último acceso: {{ ultimoAcceso }}</p>
-    </section>
+    <TarjetaSeccion
+      icono="usuario"
+      :titulo="sesion.usuario?.nombre_completo ?? ''"
+      :descripcion="sesion.usuario?.rol_descripcion ?? ''"
+    >
+      <dl class="lista-datos">
+        <div><dt>Correo</dt><dd>{{ sesion.usuario?.correo }}</dd></div>
+        <div><dt>Sedes</dt><dd>{{ sedes }}</dd></div>
+        <div><dt>Último acceso</dt><dd>{{ ultimoAcceso }}</dd></div>
+      </dl>
+    </TarjetaSeccion>
 
-    <form class="tarjeta" aria-labelledby="titulo-contrasena" @submit.prevent="guardar">
-      <h2 id="titulo-contrasena">
-        Cambiar contraseña
-      </h2>
+    <TarjetaSeccion etiqueta="form" icono="candado" titulo="Cambiar contraseña" @submit.prevent="guardar">
       <div class="campo">
         <label for="c-actual">Contraseña actual *</label>
         <input
@@ -137,18 +139,17 @@ async function guardar () {
           {{ guardando ? 'Guardando…' : 'Guardar cambios' }}
         </button>
       </div>
-    </form>
+    </TarjetaSeccion>
 
-    <section class="tarjeta perfil-segundo-factor" aria-labelledby="titulo-dos-pasos">
-      <h2 id="titulo-dos-pasos">
-        Verificación en dos pasos
-      </h2>
-      <p>
-        <span class="etiqueta" :class="sesion.usuario?.segundo_factor_activo ? 'ATENDIDA' : 'NO_ASISTIO'">
+    <TarjetaSeccion icono="escudo" titulo="Verificación en dos pasos">
+      <template #acciones>
+        <span class="etiqueta" :class="sesion.usuario?.segundo_factor_activo ? 'tono-ok' : 'tono-aviso'">
           {{ sesion.usuario?.segundo_factor_activo ? 'Activada' : 'Desactivada' }}
         </span>
+      </template>
+      <p class="ayuda">
         Todavía no se puede configurar desde el sistema (P02 pendiente).
       </p>
-    </section>
+    </TarjetaSeccion>
   </main>
 </template>

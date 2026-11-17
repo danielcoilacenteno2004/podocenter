@@ -18,6 +18,7 @@ import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import DisponibilidadDialogo from '../components/DisponibilidadDialogo.vue'
 import { api } from '../services/api'
+import TarjetaSeccion from '../components/TarjetaSeccion.vue'
 
 const props = defineProps({ citaId: { type: String, required: true } })
 const router = useRouter()
@@ -176,7 +177,8 @@ onMounted(cargar)
     </div>
 
     <template v-else>
-      <section class="tarjeta cabecera-atencion" aria-labelledby="titulo-paciente">
+      <TarjetaSeccion aria-labelledby="titulo-paciente">
+        <div class="cabecera-atencion">
         <div class="cabecera-datos">
           <h2 id="titulo-paciente">{{ paciente.nombres }} {{ paciente.apellidos }}</h2>
           <p>
@@ -185,19 +187,20 @@ onMounted(cargar)
               · {{ edad(paciente.fecha_nacimiento) }} años
             </template>
           </p>
-          <dl class="datos-cita">
+          <dl class="lista-datos">
             <div><dt>Cita</dt><dd>{{ fechaLarga(cita.inicio) }}, {{ hora(cita.inicio) }} – {{ hora(cita.fin) }}</dd></div>
             <div><dt>Servicio</dt><dd>{{ cita.servicio_nombre }}</dd></div>
             <div><dt>Profesional</dt><dd>{{ cita.profesional_nombre }}</dd></div>
           </dl>
         </div>
 
-        <div id="antecedentes" class="antecedentes" :class="{ vacios: !paciente.antecedentes }">
+        <div id="antecedentes" class="recuadro" :class="{ 'tono-aviso': paciente.antecedentes }">
           <h3>Antecedentes</h3>
-          <p v-if="paciente.antecedentes">{{ paciente.antecedentes }}</p>
+          <p v-if="paciente.antecedentes"><strong>{{ paciente.antecedentes }}</strong></p>
           <p v-else>Sin antecedentes registrados en la ficha.</p>
         </div>
-      </section>
+        </div>
+      </TarjetaSeccion>
 
       <p v-if="!atendible" role="alert">
         {{ cita.tiene_atencion
@@ -207,7 +210,7 @@ onMounted(cargar)
             : 'La cita todavía no llega: la atención se registra cuando llega la hora.' }}
       </p>
 
-      <form v-else class="tarjeta" aria-label="Atención" @submit.prevent="confirmar">
+      <TarjetaSeccion v-else etiqueta="form" aria-label="Atención" @submit.prevent="confirmar">
         <div class="campo campo-monto">
           <label for="monto">Monto cobrado (S/) *</label>
           <input
@@ -326,7 +329,7 @@ onMounted(cargar)
         <button type="submit" :disabled="guardando || monto === '' || monto === null || !insumosListos">
           {{ guardando ? 'Guardando…' : 'Confirmar atención' }}
         </button>
-      </form>
+      </TarjetaSeccion>
     </template>
     <DisponibilidadDialogo :producto-id="productoConsultado" @cerrar="productoConsultado = null" />
   </main>

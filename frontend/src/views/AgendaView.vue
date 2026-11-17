@@ -19,6 +19,7 @@ import CancelarCitaDialogo from '../components/CancelarCitaDialogo.vue'
 import NuevaCitaDialogo from '../components/NuevaCitaDialogo.vue'
 import { api } from '../services/api'
 import { useSesion } from '../stores/sesion'
+import TarjetaSeccion from '../components/TarjetaSeccion.vue'
 
 const sesion = useSesion()
 const ruta = useRoute()
@@ -288,14 +289,14 @@ onMounted(() => { cargar(); cargarPlantel() })
       </button>
     </div>
 
-    <section v-if="vista === 'cuadricula'" class="tarjeta">
+    <TarjetaSeccion v-if="vista === 'cuadricula'">
       <p v-if="fechaCargada !== fecha" role="status">Cargando la agenda…</p>
       <template v-else>
         <p class="ayuda">
           {{ citas.length }} de {{ jornada.length }} cita(s) del día<template v-if="hayFiltros"> · filtro aplicado</template>
           <template v-if="horario"> · la sede atiende de {{ horario.apertura }} a {{ horario.cierre }}</template>
         </p>
-        <div v-if="citaElegida" class="cita-elegida" role="region" aria-label="Cita elegida">
+        <div v-if="citaElegida" class="cita-elegida recuadro tono-marca" role="region" aria-label="Cita elegida">
           <div>
             <strong>{{ hora(citaElegida.inicio) }} – {{ hora(citaElegida.fin) }} · {{ citaElegida.paciente_nombre }}</strong>
             <span>{{ citaElegida.servicio_nombre }} · {{ citaElegida.profesional_nombre }}</span>
@@ -340,9 +341,9 @@ onMounted(() => { cargar(); cargarPlantel() })
           @hueco="huecoElegido"
         />
       </template>
-    </section>
+    </TarjetaSeccion>
 
-    <section v-else class="tarjeta">
+    <TarjetaSeccion v-else>
       <p v-if="cargando" role="status">Cargando la agenda…</p>
       <p v-else-if="!citas.length" class="vacio">
         {{ hayFiltros
@@ -403,7 +404,7 @@ onMounted(() => { cargar(); cargarPlantel() })
           </tr>
         </tbody>
       </table>
-    </section>
+    </TarjetaSeccion>
     <NuevaCitaDialogo
       :abierto="nuevaCitaAbierta"
       :fecha="fecha"

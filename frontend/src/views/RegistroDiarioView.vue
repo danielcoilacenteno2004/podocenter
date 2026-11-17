@@ -9,6 +9,7 @@
 import { onMounted, ref, watch } from 'vue'
 import { api } from '../services/api'
 import { useSesion } from '../stores/sesion'
+import TarjetaSeccion from '../components/TarjetaSeccion.vue'
 
 const sesion = useSesion()
 
@@ -61,7 +62,7 @@ onMounted(cargar)
       {{ error }}
     </p>
 
-    <section class="tarjeta">
+    <TarjetaSeccion>
       <p v-if="cargando && !registro" role="status">
         Cargando el registro…
       </p>
@@ -114,11 +115,11 @@ onMounted(cargar)
             </tr>
           </tfoot>
         </table>
-        <p v-if="registro.sin_monto" class="ayuda">
-          {{ registro.sin_monto }} atención(es) se registraron antes de que existiera el monto
-          cobrado: aparecen con «—» y no suman al total.
-        </p>
       </template>
-    </section>
+      <template v-if="registro?.sin_monto" #pie>
+        {{ registro.sin_monto }} atención(es) se registraron antes de que existiera el monto
+        cobrado: aparecen con «—» y no suman al total.
+      </template>
+    </TarjetaSeccion>
   </main>
 </template>

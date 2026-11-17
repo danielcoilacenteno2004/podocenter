@@ -3,6 +3,7 @@
 // asignada; con una sola, el sistema la fija sin preguntar (CC-04).
 import { useRouter } from 'vue-router'
 import { useSesion } from '../stores/sesion'
+import TarjetaSeccion from '../components/TarjetaSeccion.vue'
 
 const sesion = useSesion()
 const router = useRouter()
@@ -15,9 +16,9 @@ function elegir (sedeId) {
 
 <template>
   <div class="acceso">
-    <section class="tarjeta" aria-labelledby="titulo-sede">
+    <TarjetaSeccion aria-labelledby="titulo-sede">
       <h1 id="titulo-sede">¿En qué sede trabajará hoy?</h1>
-      <p style="color:var(--tinta-suave);margin:.25rem 0 1.25rem">
+      <p class="subtitulo">
         Todo lo que registre quedará asociado a esta sede. Puede cambiarla
         cuando quiera desde la barra superior.
       </p>
@@ -30,6 +31,6 @@ function elegir (sedeId) {
           </button>
         </li>
       </ul>
-    </section>
+    </TarjetaSeccion>
   </div>
 </template>

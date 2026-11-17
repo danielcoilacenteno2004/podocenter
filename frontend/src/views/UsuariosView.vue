@@ -18,6 +18,7 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { api } from '../services/api'
 import { useSesion } from '../stores/sesion'
+import TarjetaSeccion from '../components/TarjetaSeccion.vue'
 
 const sesion = useSesion()
 
@@ -215,7 +216,7 @@ onMounted(cargar)
       </div>
     </div>
 
-    <section class="tarjeta">
+    <TarjetaSeccion>
       <p v-if="cargando" role="status">
         Cargando usuarios…
       </p>
@@ -311,7 +312,7 @@ onMounted(cargar)
           </tr>
         </tbody>
       </table>
-    </section>
+    </TarjetaSeccion>
 
     <dialog ref="dialogo" class="dialogo" aria-labelledby="titulo-usuario">
       <form method="dialog" class="dialogo-cabecera">

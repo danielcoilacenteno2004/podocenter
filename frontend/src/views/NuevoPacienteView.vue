@@ -16,6 +16,7 @@
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from '../services/api'
+import TarjetaSeccion from '../components/TarjetaSeccion.vue'
 
 const router = useRouter()
 
@@ -88,7 +89,7 @@ onMounted(async () => {
       <h1>Registrar paciente</h1>
     </div>
 
-    <form class="tarjeta" aria-label="Datos del paciente" @submit.prevent="guardar">
+    <TarjetaSeccion etiqueta="form" aria-label="Datos del paciente" @submit.prevent="guardar">
       <div class="fila-campos fila-documento">
         <div class="campo">
           <label for="p-tipo">Tipo de documento *</label>
@@ -187,6 +188,6 @@ onMounted(async () => {
           {{ guardando ? 'Guardando…' : 'Guardar paciente' }}
         </button>
       </div>
-    </form>
+    </TarjetaSeccion>
   </main>
 </template>

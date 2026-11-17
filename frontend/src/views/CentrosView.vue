@@ -11,6 +11,7 @@
 // centro; reactivar lo devuelve. Un centro no se borra.
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { api } from '../services/api'
+import TarjetaSeccion from '../components/TarjetaSeccion.vue'
 
 const ESTADOS = { ACTIVO: ['Activo', 'ATENDIDA'], SUSPENDIDO: ['Suspendido', 'CANCELADA'], DEMO: ['Demostración', 'PROGRAMADA'] }
 
@@ -157,7 +158,7 @@ onMounted(cargar)
       </div>
     </div>
 
-    <section class="tarjeta">
+    <TarjetaSeccion>
       <p v-if="cargando" role="status">
         Cargando centros…
       </p>
@@ -247,7 +248,7 @@ onMounted(cargar)
           </tr>
         </tbody>
       </table>
-    </section>
+    </TarjetaSeccion>
 
     <dialog ref="dialogo" class="dialogo" aria-labelledby="titulo-centro">
       <form method="dialog" class="dialogo-cabecera">

@@ -9,6 +9,7 @@
 // Desactivar es desmarcar «Sede activa»; una sede no se borra.
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { api } from '../services/api'
+import TarjetaSeccion from '../components/TarjetaSeccion.vue'
 
 const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
 const CORTOS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
@@ -159,7 +160,7 @@ onMounted(cargar)
       {{ aviso }}
     </p>
 
-    <section class="tarjeta">
+    <TarjetaSeccion>
       <p v-if="cargando" role="status">
         Cargando sedes…
       </p>
@@ -213,7 +214,7 @@ onMounted(cargar)
           </tr>
         </tbody>
       </table>
-    </section>
+    </TarjetaSeccion>
 
     <dialog ref="dialogo" class="dialogo" aria-labelledby="titulo-sede">
       <form method="dialog" class="dialogo-cabecera">

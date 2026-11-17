@@ -12,6 +12,7 @@
 // de este servicio. Se envían completos al guardar.
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { api } from '../services/api'
+import TarjetaSeccion from '../components/TarjetaSeccion.vue'
 
 const servicios = ref([])
 const cargando = ref(false)
@@ -141,7 +142,7 @@ onMounted(cargar)
       {{ aviso }}
     </p>
 
-    <section class="tarjeta">
+    <TarjetaSeccion>
       <p v-if="cargando" role="status">
         Cargando el catálogo…
       </p>
@@ -194,7 +195,7 @@ onMounted(cargar)
           </tr>
         </tbody>
       </table>
-    </section>
+    </TarjetaSeccion>
 
     <dialog ref="dialogo" class="dialogo" aria-labelledby="titulo-servicio">
       <form method="dialog" class="dialogo-cabecera">

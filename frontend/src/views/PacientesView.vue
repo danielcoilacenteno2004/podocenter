@@ -3,6 +3,7 @@
 // navegador no recibe el padrón completo, solo las coincidencias.
 import { onMounted, ref } from 'vue'
 import { api } from '../services/api'
+import TarjetaSeccion from '../components/TarjetaSeccion.vue'
 
 const pacientes = ref([])
 const buscar = ref('')
@@ -63,7 +64,7 @@ onMounted(cargar)
 
     <p v-if="error" role="alert">{{ error }}</p>
 
-    <section class="tarjeta">
+    <TarjetaSeccion>
       <p v-if="cargando" role="status">Buscando pacientes…</p>
       <p v-else-if="!pacientes.length" class="vacio">
         {{ buscar ? 'Ningún paciente coincide con esa búsqueda.' : 'Todavía no hay pacientes registrados.' }}
@@ -98,6 +99,6 @@ onMounted(cargar)
           </tr>
         </tbody>
       </table>
-    </section>
+    </TarjetaSeccion>
   </main>
 </template>

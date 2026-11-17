@@ -80,12 +80,12 @@ watch(() => props.atencionId, async (id) => {
             · S/ {{ Number(atencion.monto_cobrado).toFixed(2) }}
           </template>
         </p>
-        <section class="antecedentes" :class="{ vacios: !atencion.observaciones_clinicas }" aria-labelledby="titulo-observacion">
+        <section class="recuadro" :class="{ 'tono-aviso': atencion.observaciones_clinicas }" aria-labelledby="titulo-observacion">
           <h3 id="titulo-observacion">
             Observación clínica (dato sensible, cifrado)
           </h3>
           <p v-if="atencion.observaciones_clinicas">
-            {{ atencion.observaciones_clinicas }}
+            <strong>{{ atencion.observaciones_clinicas }}</strong>
           </p>
           <p v-else>
             No se registró observación en esta atención.
