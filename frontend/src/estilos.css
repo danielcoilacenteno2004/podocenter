@@ -33,6 +33,10 @@
 
   --radio: 10px;
   --sombra: 0 1px 2px color-mix(in srgb, var(--tinta) 6%, transparent), 0 4px 16px color-mix(in srgb, var(--tinta) 6%, transparent);
+  /* Anillo de foco: se ve sobre cualquier fondo sin tapar el borde del campo. */
+  --anillo: 0 0 0 3px color-mix(in srgb, var(--marca) 25%, transparent);
+  --anillo-alerta: 0 0 0 3px color-mix(in srgb, var(--alerta) 22%, transparent);
+  --transicion: 160ms cubic-bezier(.2, .7, .3, 1);
 }
 
 * { box-sizing: border-box; }
@@ -61,8 +65,6 @@ a { color: var(--marca-oscura); }
   gap: 1rem;
   flex-wrap: wrap;
 }
-.marca { display: flex; align-items: center; gap: .55rem; font-weight: 700; letter-spacing: -.02em; }
-.marca img { display: block; object-fit: contain; }
 .barra nav { display: flex; gap: .25rem; margin-left: .5rem; flex-wrap: wrap; }
 .barra nav a {
   padding: .4rem .75rem; border-radius: 999px; text-decoration: none;
@@ -87,12 +89,21 @@ main { flex: 1; width: 100%; max-width: 1080px; margin: 0 auto; padding: 1.5rem 
 
 /* --- formularios ------------------------------------------------------ */
 label { display: block; font-weight: 600; font-size: .88rem; margin-bottom: .3rem; }
-input, select {
+input, select, textarea {
   width: 100%; padding: .55rem .7rem; font: inherit; color: inherit;
   background: var(--superficie); border: 1px solid var(--borde);
-  border-radius: 8px;
+  border-radius: 8px; accent-color: var(--marca);
+  transition: border-color var(--transicion), box-shadow var(--transicion);
 }
-input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible {
+textarea { resize: vertical; }
+::placeholder { color: var(--tinta-suave); opacity: .7; }
+:is(input, select, textarea):hover:not(:disabled) { border-color: color-mix(in srgb, var(--marca) 35%, var(--borde)); }
+/* El contorno transparente se conserva para el modo de alto contraste de
+   Windows, que no pinta sombras. */
+:is(input, select, textarea):focus-visible {
+  outline: 2px solid transparent; border-color: var(--marca); box-shadow: var(--anillo);
+}
+button:focus-visible, a:focus-visible, summary:focus-visible {
   outline: 2px solid var(--marca); outline-offset: 2px;
 }
 .campo { margin-bottom: .9rem; }
@@ -101,9 +112,22 @@ button {
   font: inherit; font-weight: 600; cursor: pointer;
   padding: .55rem 1.1rem; border-radius: 8px;
   border: 1px solid var(--marca); background: var(--marca); color: var(--blanco);
+  transition: background-color var(--transicion), border-color var(--transicion),
+    color var(--transicion), box-shadow var(--transicion), transform var(--transicion);
 }
 button:hover:not(:disabled) { background: var(--marca-oscura); border-color: var(--marca-oscura); }
-button:disabled { opacity: .55; cursor: progress; }
+button:active:not(:disabled) { transform: translateY(1px); }
+button:disabled { opacity: .55; cursor: not-allowed; }
+button[aria-busy="true"] { cursor: progress; }
+button.bloque-completo { width: 100%; display: inline-flex; justify-content: center; align-items: center; gap: .55rem; padding-block: .7rem; }
+
+/* Indicador de carga reutilizable: hereda el color del texto que lo rodea. */
+.rueda-carga {
+  width: 1em; height: 1em; flex: none; border-radius: 50%;
+  border: 2px solid currentColor; border-right-color: transparent;
+  animation: girar .7s linear infinite;
+}
+@keyframes girar { to { transform: rotate(360deg); } }
 button.secundario { background: transparent; color: var(--marca-oscura); }
 button.secundario:hover:not(:disabled) { background: var(--marca-tenue); }
 button.enlace {
@@ -151,10 +175,83 @@ td.numero { font-variant-numeric: tabular-nums; }
 /* --- acceso (P01) ------------------------------------------------------ */
 .acceso { min-height: 100vh; display: grid; place-items: center; padding: 1.25rem; }
 .acceso .tarjeta { width: 100%; max-width: 400px; }
-.acceso .marca { justify-content: center; margin-bottom: 1.25rem; font-size: 1.15rem; }
-.credenciales { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px dashed var(--borde);
-  font-size: .82rem; color: var(--tinta-suave); }
-.credenciales code { background: var(--fondo); padding: .1rem .35rem; border-radius: 4px; }
+
+/* El ingreso es la primera impresión del sistema: panel de marca a la
+   izquierda, en la combinación oscura de la paleta (fondo #3C5154 con logo
+   y texto blancos), y formulario a la derecha. En el celular el panel se
+   reduce a una franja con el logo para que el formulario quede a la vista
+   sin desplazarse. */
+.ingreso {
+  min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  background: var(--superficie);
+}
+
+/* Tres filas: el logo arriba, la frase en el centro exacto del panel y una
+   fila vacía del mismo alto que la primera para que el centro sea real. */
+.ingreso-marca {
+  position: relative; overflow: hidden; color: var(--blanco);
+  display: grid; grid-template-rows: 1fr auto 1fr; justify-items: center;
+  padding: clamp(2rem, 5vw, 3.5rem);
+  background:
+    radial-gradient(circle at 15% 10%, color-mix(in srgb, var(--blanco) 10%, transparent), transparent 55%),
+    linear-gradient(160deg, var(--marca), var(--marca-profunda));
+}
+.ingreso-marca .marca { align-self: start; justify-self: start; font-size: 1.3rem; }
+.ingreso-marca > div { position: relative; z-index: 1; text-align: center; }
+
+/* Hoja del logo en grande, como marca de agua. */
+.ingreso-marca::after {
+  content: ""; position: absolute; right: -8%; bottom: -10%; width: 70%; aspect-ratio: 1;
+  background: var(--blanco); mask: url("/logo-artemisa.png") center / contain no-repeat;
+  opacity: .06; pointer-events: none;
+}
+.ingreso-lema {
+  margin: 0 auto; max-width: 18ch;
+  font-size: clamp(1.6rem, 3vw, 2.3rem); line-height: 1.2; font-weight: 700; letter-spacing: -.02em;
+}
+
+.ingreso-panel { display: grid; place-items: center; padding: clamp(1.5rem, 5vw, 3rem) 1.25rem; }
+.ingreso-formulario { width: 100%; max-width: 380px; animation: subir .4s var(--transicion) both; }
+.ingreso-formulario h1 { font-size: 1.75rem; letter-spacing: -.02em; }
+.subtitulo { margin: .25rem 0 1.5rem; color: var(--tinta-suave); }
+
+/* Campo con un botón dentro (mostrar contraseña). */
+.campo-con-boton { position: relative; }
+.campo-con-boton input { padding-right: 2.75rem; }
+.campo-con-boton button {
+  position: absolute; top: 50%; right: .3rem; transform: translateY(-50%);
+  display: grid; place-items: center; width: 2.2rem; height: 2.2rem; padding: 0;
+  background: none; border: 0; border-radius: 6px; color: var(--tinta-suave);
+}
+.campo-con-boton button:hover:not(:disabled) { background: var(--fondo); color: var(--tinta); }
+.campo-con-boton button:active:not(:disabled) { transform: translateY(-50%); }
+.aviso-mayusculas { display: flex; align-items: center; gap: .35rem; color: var(--aviso); font-weight: 600; }
+
+.credenciales { margin-top: 2rem; padding: 1rem; border-radius: var(--radio); background: var(--marca-tenue); font-size: .85rem; }
+.credenciales h2 { font-size: .74rem; text-transform: uppercase; letter-spacing: .06em; color: var(--tinta-suave); margin: 0 0 .6rem; }
+.credenciales ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .4rem; }
+.credenciales li button {
+  width: 100%; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .1rem .75rem;
+  padding: .55rem .75rem; text-align: left; font-weight: 400;
+  background: var(--superficie); color: var(--tinta); border-color: var(--borde);
+}
+.credenciales li button:hover:not(:disabled) { background: var(--marca-tenue); border-color: var(--marca); }
+.credenciales li button span { color: var(--tinta-suave); font-size: .8rem; }
+.credenciales p { margin: .7rem 0 0; color: var(--tinta-suave); }
+.credenciales code { background: var(--superficie); border: 1px solid var(--borde); padding: .05rem .35rem; border-radius: 4px; }
+
+@media (max-width: 860px) {
+  .ingreso { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .ingreso-marca { grid-template-rows: auto; padding: 1rem 1.25rem; }
+  .ingreso-marca::after, .ingreso-marca > :not(.marca) { display: none; }
+  .ingreso-marca .marca { font-size: 1.1rem; }
+  .ingreso-panel { place-items: start center; }
+}
+
+/* Entrada suave de lo que aparece (avisos, formularios). */
+@keyframes subir { from { opacity: 0; transform: translateY(6px); } }
+.aparecer-enter-active, .aparecer-leave-active { transition: opacity var(--transicion), transform var(--transicion); }
+.aparecer-enter-from, .aparecer-leave-to { opacity: 0; transform: translateY(-4px); }
 
 /* --- lista de sedes (P03) --------------------------------------------- */
 .sedes { list-style: none; padding: 0; margin: 0; display: grid; gap: .75rem; }
@@ -196,6 +293,7 @@ label.casilla .ayuda { display: block; }
 .dialogo-acciones { display: flex; justify-content: flex-end; gap: .75rem; margin-top: .5rem; }
 .fila-campos { display: grid; gap: .75rem; grid-template-columns: 1fr 1fr; }
 [aria-invalid="true"] { border-color: var(--alerta); background: var(--alerta-tenue); }
+[aria-invalid="true"]:focus-visible { border-color: var(--alerta); box-shadow: var(--anillo-alerta); }
 .elegido {
   display: flex; justify-content: space-between; align-items: center; gap: .5rem;
   padding: .5rem .7rem; border: 1px solid var(--borde); border-radius: 8px; background: var(--marca-tenue);
@@ -327,11 +425,6 @@ td.accion { text-align: right; }
 .dialogo .antecedentes { margin-bottom: .6rem; }
 .antecedentes.vacios p { font-weight: 400; color: var(--tinta-suave); }
 
-textarea {
-  width: 100%; padding: .55rem .7rem; font: inherit; color: inherit; resize: vertical;
-  background: var(--superficie); border: 1px solid var(--borde); border-radius: 8px;
-}
-textarea:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
 .ayuda { margin: .3rem 0 0; font-size: .82rem; color: var(--tinta-suave); }
 
 .filtros { display: flex; gap: .75rem; align-items: flex-end; flex-wrap: wrap; margin-bottom: 1rem; }
@@ -411,3 +504,11 @@ input.minimo-en-linea { width: 4.5rem; padding: .25rem .4rem; text-align: right;
 .dia-horario input[type=time] { width: auto; padding: .35rem .5rem; }
 
 .recordatorio-estado { display: block; font-size: .78rem; }
+
+/* Quien pide menos movimiento al sistema operativo no ve animaciones. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important; animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
