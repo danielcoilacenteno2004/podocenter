@@ -1,0 +1,3 @@
+# Une las identidades con que firma cada integrante, para que el historial
+# los cuente como una sola persona (git shortlog, git log --format=%aN).
+Andre Nicolas Huaroc Condori <andre.huaroc@ucsm.edu.pe> Warlocck <anick7005@gmail.com>
