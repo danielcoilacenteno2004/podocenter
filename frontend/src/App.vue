@@ -26,12 +26,8 @@ function cambiarSede () {
   <div class="app">
     <header v-if="conBarra" class="barra">
       <span class="marca">
-        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M7 3.5c1.7 0 2.8 1.6 2.8 3.6S8.7 10.7 7 10.7 4.2 9.1 4.2 7.1 5.3 3.5 7 3.5Z" fill="#0f6f6a"/>
-          <path d="M12.6 4.6c1.3 0 2.1 1.2 2.1 2.7s-.8 2.7-2.1 2.7-2.1-1.2-2.1-2.7.8-2.7 2.1-2.7ZM16.9 7c1 0 1.7 1 1.7 2.2s-.7 2.2-1.7 2.2-1.7-1-1.7-2.2.7-2.2 1.7-2.2Z" fill="#0f6f6a" opacity=".75"/>
-          <path d="M6.5 12.4c2.7 0 4.6 1 6.9 2.3 2 1.1 3.2 2.2 3.2 3.8 0 1.6-1.4 2.6-3.3 2.6-1.6 0-2.5-.5-4.2-.5-1.5 0-2.4.4-3.6.4-1.7 0-3-1-3-2.9 0-2 1.3-3.4 2.1-4.6.5-.7 1-1.1 1.9-1.1Z" fill="#0f6f6a"/>
-        </svg>
-        PodoCenter
+        <img src="/logo-artemisa.png" width="22" height="22" alt="">
+        Artemisa
       </span>
 
       <nav aria-label="Secciones">
