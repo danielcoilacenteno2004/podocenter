@@ -57,10 +57,18 @@ Construido:
   misma transacción y con la fila de stock bloqueada. Si falta stock de uno
   solo, no se registra nada y la cita sigue programada. La base exige que
   toda salida tenga su atención.
-- RNF02 (cinco interacciones o menos): **3 interacciones medidas con los
-  insumos habituales precargados** (pulsar la cita, escribir la observación y
-  confirmar), aceptando el monto y los insumos sugeridos. Medidas con
-  Playwright el 12/11/2026, en escritorio y a 390 px.
+- RNF02 (cinco interacciones o menos), con los insumos habituales
+  precargados y aceptando el monto y los insumos sugeridos: **4 interacciones
+  desde la cuadrícula**, la vista con que abre la agenda (pulsar la cita,
+  «Registrar atención», escribir la observación y confirmar), medidas con
+  Playwright el 18/11/2026 en Chromium, WebKit y a 390 px
+  (`docs/pruebas/07_recorridos.txt`). **Desde la lista son 3**, porque el botón
+  está en la fila (medidas el 12/11/2026).
+- **En móvil (390 px), el inventario no se puede usar**: los botones
+  «Movimiento» y «Ver disponibilidad» de P12 quedan fuera de la pantalla y
+  tapados por otra celda; `/inventario`, `/pacientes` y `/registro-diario`
+  desbordan en horizontal. En escritorio los recorridos pasan completos. Ver
+  `docs/pruebas/defectos.md` (DEF-P9-07).
 
 No construido, y lo pide el CU10 o la P11 de la Práctica N.° 7:
 
@@ -74,14 +82,18 @@ El recorrido diseñado tiene 4 interacciones porque incluye el paso de
 resumen, que no está construido. **Cada cambio sobre lo precargado suma
 interacciones**: editar el monto o la cantidad de un insumo, o agregar un
 insumo que no es habitual (buscarlo y elegirlo, dos más): con uno agregado y
-la observación escrita, el recorrido queda en 5, en el límite. La medición
+la observación escrita, el recorrido queda en 5 desde la lista, en el límite,
+y en 6 desde la cuadrícula, por encima (cuenta hecha sobre lo medido, no
+medida). La medición
 válida para el RNF02 es la que se haga con la podóloga.
 
 ## 2. Lo que está sólido
 
-- **302 pruebas** en verde, **95.9 %** de cobertura de sentencias, sobre
-  PostgreSQL real y no sobre una base en memoria, con Python 3.12. La cifra
-  varía unas décimas entre ejecuciones.
+- **308 pruebas** en verde, **95.7 %** de cobertura de sentencias y
+  **87.2 %** de ramas, sobre PostgreSQL real y no sobre una base en memoria,
+  con Python 3.12. La cifra varía unas décimas entre ejecuciones. Corrida del
+  18/11/2026 para la Práctica N.° 9: `docs/pruebas/02_cobertura.txt` y, por
+  módulo, `docs/pruebas/02_cobertura_por_modulo.txt`.
 - **Panel del día (P04) con cifras que cuadran.** Lo cobrado sale del mismo
   cálculo que el registro diario (P16), así que las dos pantallas dan la
   misma cifra; la ocupación se mide contra la capacidad real de la sede
@@ -96,8 +108,11 @@ válida para el RNF02 es la que se haga con la podóloga.
   ocupación se apartan de la Tabla 7 de la Práctica N.° 7, que hay que
   actualizar (ver `docs/COHERENCIA.md`).
   Antes, con dos profesionales, la ocupación salía el doble de la real.
-- **Cero vulnerabilidades** conocidas en las dependencias tras subir a Django
-  5.2 LTS, DRF 3.18.2, django-filter 25.2 y cryptography 50.0.2.
+- **Cero vulnerabilidades** conocidas en las dependencias de Python tras
+  subir a Django 5.2 LTS, DRF 3.18.2, django-filter 25.2 y cryptography
+  50.0.2 (`pip-audit`, 18/11/2026). **El frontend no está igual**: `npm audit`
+  da 11, y 3 altas llegan a producción (`axios` 1.7.9 y `vue` 3.5.13); ver
+  `docs/pruebas/defectos.md`.
 - `ruff`, `bandit` 1.9.4 y `npm run lint` limpios. `bandit` se comprobó
   además contra un archivo deliberadamente inseguro, en Python 3.12 y 3.14,
   para asegurar que **sí falla** cuando debe.
@@ -107,8 +122,8 @@ válida para el RNF02 es la que se haga con la podóloga.
   Comprueban que un centro no ve, no abre y no modifica datos de otro, ni
   usa sus sedes o productos. Es lo que sostiene el modelo de arriendo ante
   el jurado.
-- **143 commits** con «un commit, un cambio», contando el que actualiza este
-  documento: 67 de Sergio Daniel Coila Centeno y 76 de Andre Nicolas Huaroc
+- **147 commits** con «un commit, un cambio», contando el que actualiza este
+  documento: 70 de Sergio Daniel Coila Centeno y 77 de Andre Nicolas Huaroc
   Condori. Andre firma ahora como «Warlocck»; `.mailmap` une esa identidad
   con la anterior, así que el recuento sale de `git shortlog -sn` (o de
   `--format=%aN`), no de `--format=%an`, que no aplica `.mailmap`.
