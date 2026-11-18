@@ -79,9 +79,23 @@ válida para el RNF02 es la que se haga con la podóloga.
 
 ## 2. Lo que está sólido
 
-- **294 pruebas** en verde, **95.6 %** de cobertura de sentencias, sobre
+- **302 pruebas** en verde, **95.9 %** de cobertura de sentencias, sobre
   PostgreSQL real y no sobre una base en memoria, con Python 3.12. La cifra
   varía unas décimas entre ejecuciones.
+- **Panel del día (P04) con cifras que cuadran.** Lo cobrado sale del mismo
+  cálculo que el registro diario (P16), así que las dos pantallas dan la
+  misma cifra; la ocupación se mide contra la capacidad real de la sede
+  (cada profesional asignada por el horario de la sede, suponiendo que
+  cubre la jornada completa) y se desglosa por profesional; las citas cuya
+  hora ya pasó sin registrar la atención se listan aparte, con su enlace
+  para registrarla, y las que vienen se muestran en orden, con la que está
+  en curso y la próxima marcadas. Cada segmento se compara con el promedio
+  de los cuatro mismos días de la semana anteriores, la ocupación anticipa
+  los siete días siguientes, y una cancelación con cita de reemplazo ya no
+  cuenta como ingreso no concretado (`Cita.reemplaza`). La confirmación y la
+  ocupación se apartan de la Tabla 7 de la Práctica N.° 7, que hay que
+  actualizar (ver `docs/COHERENCIA.md`).
+  Antes, con dos profesionales, la ocupación salía el doble de la real.
 - **Cero vulnerabilidades** conocidas en las dependencias tras subir a Django
   5.2 LTS, DRF 3.18.2, django-filter 25.2 y cryptography 50.0.2.
 - `ruff`, `bandit` 1.9.4 y `npm run lint` limpios. `bandit` se comprobó
@@ -176,11 +190,6 @@ Queda abierto: la edición de pacientes (ver la sección 6).
 - **Qué entra de Atenciones el 12/11.** Monto, insumos con su salida de
   stock y registro diario sí. Servicio editable, las tres notas, el paso de
   resumen y la anulación no: el CU10 no se puede presentar como completo.
-- **El panel del día y el registro diario pueden no cuadrar.** El «ingreso
-  confirmado» del panel (P04) suma el precio de catálogo de las citas
-  atendidas; el registro diario (P16) suma lo cobrado de verdad. Con un
-  descuento, las dos cifras difieren. Habría que decidir si el panel pasa a
-  usar el monto cobrado.
 - **El despliegue en producción** necesita una cuenta de nube real con tarjeta
   y un dominio; no se resuelve escribiendo código. Los pasos están en
   `docs/DESPLIEGUE.md`, que todavía no se ha seguido en un servidor.

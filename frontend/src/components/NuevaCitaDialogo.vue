@@ -14,7 +14,9 @@ import { useSesion } from '../stores/sesion'
 const props = defineProps({
   abierto: { type: Boolean, default: false },
   fecha: { type: String, default: '' },
-  // Cita de reemplazo (CC-16): paciente y servicio llegan precargados.
+  // Cita de reemplazo (CC-16): paciente y servicio llegan precargados, y
+  // `reemplaza` vincula la cita nueva con la cancelada para que el panel no
+  // cuente como perdido lo que solo cambió de día.
   // Desde un hueco de la cuadrícula de P05 llegan la hora y la profesional.
   plantilla: { type: Object, default: null }
 })
@@ -143,7 +145,8 @@ async function guardar () {
       paciente: paciente.value.id,
       profesional: formulario.value.profesional,
       servicio: formulario.value.servicio,
-      inicio: new Date(`${formulario.value.fecha}T${formulario.value.hora}:00`).toISOString()
+      inicio: new Date(`${formulario.value.fecha}T${formulario.value.hora}:00`).toISOString(),
+      reemplaza: props.plantilla?.reemplaza ?? null
     })
     emit('creada', data)
   } catch (problema) {

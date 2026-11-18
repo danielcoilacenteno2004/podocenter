@@ -63,6 +63,7 @@ class CitaViewSet(ContextoDeCentro, mixins.CreateModelMixin, mixins.ListModelMix
             servicio=datos["servicio"],
             inicio=datos["inicio"],
             observaciones=datos.get("observaciones", ""),
+            reemplaza=datos.get("reemplaza"),
         )
 
     @action(detail=True, methods=["post"])
@@ -75,6 +76,7 @@ class CitaViewSet(ContextoDeCentro, mixins.CreateModelMixin, mixins.ListModelMix
             # CC-16: la pantalla P07 ofrece crear la cita de reemplazo con los
             # mismos datos; el servidor devuelve la plantilla ya preparada.
             respuesta["plantilla_reemplazo"] = {
+                "reemplaza": cita.pk,
                 "paciente": cita.paciente_id,
                 "profesional": cita.profesional_id,
                 "servicio": cita.servicio_id,

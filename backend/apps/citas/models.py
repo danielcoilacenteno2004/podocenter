@@ -39,6 +39,11 @@ class Cita(ModeloDeCentro):
     cancelada_en = models.DateTimeField(null=True, blank=True)
     creada_por = models.ForeignKey("usuarios.Usuario", on_delete=models.PROTECT,
                                    related_name="citas_creadas")
+    # Cita cancelada a la que esta reemplaza (P07, CC-16). Distingue una
+    # cancelación reprogramada de un ingreso perdido: sin el vínculo, el panel
+    # contaba como no concretado lo que solo cambió de día.
+    reemplaza = models.OneToOneField("self", on_delete=models.PROTECT, null=True, blank=True,
+                                     related_name="reemplazo")
 
     class Meta:
         db_table = "cita"

@@ -11,6 +11,11 @@ class CitaSerializer(serializers.ModelSerializer):
     servicio_precio = serializers.DecimalField(source="servicio.precio", max_digits=8,
                                                decimal_places=2, read_only=True)
     tiene_atencion = serializers.SerializerMethodField()
+    # Declarado a mano para que la regla la aplique programar_cita con su
+    # código estable, y no el validador de unicidad genérico del OneToOne.
+    reemplaza = serializers.PrimaryKeyRelatedField(
+        queryset=Cita.objects.all(), required=False, allow_null=True
+    )
     # RF07: enlace «Recordar por WhatsApp» (null si no corresponde) y estado
     # del recordatorio automático (null si todavía no hay).
     enlace_whatsapp = serializers.SerializerMethodField()
@@ -23,6 +28,7 @@ class CitaSerializer(serializers.ModelSerializer):
             "servicio", "servicio_nombre", "servicio_precio", "inicio", "fin", "estado",
             "observaciones",
             "motivo_cancelacion", "tiene_atencion", "enlace_whatsapp", "recordatorio", "creado_en",
+            "reemplaza",
         ]
         read_only_fields = ["id", "fin", "estado", "motivo_cancelacion", "creado_en"]
 

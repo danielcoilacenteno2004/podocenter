@@ -1,13 +1,16 @@
 """Filtros de la agenda y segmentos del panel (observaciones de la P7)."""
 from datetime import timedelta
+from decimal import Decimal
 
 import pytest
+from django.utils import timezone
 from rest_framework.test import APIClient
 
+from apps.atenciones.servicios import registrar_atencion
 from apps.catalogo.models import Servicio
 from apps.citas.models import Cita
 from apps.citas.servicios import programar_cita
-from apps.core.soporte_pruebas import activar_centro
+from apps.core.soporte_pruebas import activar_centro, hacer_que_la_cita_ya_empezo
 
 AGENDA = "/api/v1/citas/agenda/"
 PANEL = "/api/v1/panel/"
@@ -194,15 +197,25 @@ def test_el_ingreso_esperado_excluye_las_citas_canceladas(cliente, jornada):
 
 
 @pytest.mark.django_db
-def test_el_ingreso_confirmado_solo_cuenta_lo_atendido(cliente, jornada):
-    # Separar lo esperado de lo confirmado evita el error de leer una previsión
-    # como si fuera caja.
-    jornada["primera"].estado = Cita.Estado.ATENDIDA
-    jornada["primera"].save(update_fields=["estado", "periodo", "actualizado_en"])
+def test_el_ingreso_confirmado_es_lo_cobrado_y_cuadra_con_el_registro_diario(
+        cliente, centro, sede, podologa, servicio, paciente, proximo_lunes_a_las_nueve):
+    # Lo confirmado es caja: lo que se cobró en la atención, no el precio de
+    # catálogo. Con un descuento (50 sobre un servicio de 60) el panel tiene
+    # que dar la misma cifra que el registro diario (P16); si no, la dueña
+    # vería dos ingresos distintos para el mismo día.
+    cita = hacer_que_la_cita_ya_empezo(programar_cita(
+        centro=centro, usuario=podologa, sede=sede, paciente=paciente,
+        profesional=podologa, servicio=servicio, inicio=proximo_lunes_a_las_nueve,
+    ))
+    registrar_atencion(centro=centro, usuario=podologa, sede_id=sede.pk,
+                       cita_id=cita.pk, monto_cobrado=Decimal("50.00"))
+    fecha = timezone.localtime(cita.inicio).date().isoformat()
 
-    datos = cliente.get(PANEL, {"fecha": jornada["fecha"]}).data["ingresos"]
+    ingresos = cliente.get(PANEL, {"fecha": fecha}).data["ingresos"]
+    registro = cliente.get("/api/v1/reportes/registro-diario/", {"fecha": fecha}).data
 
-    assert datos["confirmado"] == "60.00"
+    assert ingresos["confirmado"] == "50.00"
+    assert Decimal(ingresos["confirmado"]) == Decimal(str(registro["total"]))
 
 
 @pytest.mark.django_db
@@ -230,6 +243,48 @@ def test_la_ocupacion_se_mide_contra_el_horario_de_la_sede(cliente, jornada):
 
 
 @pytest.mark.django_db
+def test_la_ocupacion_cuenta_la_capacidad_de_cada_profesional(cliente, jornada, administradora):
+    # Con dos profesionales asignadas, la sede vende el doble de minutos. Medir
+    # contra el horario una sola vez daba la mitad de capacidad y porcentajes
+    # que podían pasar de 100 %; la decisión de abrir cupos se tomaría sobre
+    # una cifra falsa.
+    datos = cliente.get(PANEL, {"fecha": jornada["fecha"]}).data["ocupacion"]
+    por_profesional = {p["nombre"]: p for p in datos["profesionales"]}
+
+    assert datos["minutos_jornada"] == 720
+    assert datos["minutos_disponibles"] == 1440
+    assert datos["porcentaje"] == pytest.approx(5.2, abs=0.1)
+    assert por_profesional["Rosa Quispe"]["minutos_agendados"] == 75
+    assert por_profesional["Lucía Ramos"]["libres"] == 720
+
+
+@pytest.mark.django_db
+def test_una_cita_terminada_queda_sin_registrar_y_una_empezada_sigue_en_curso(
+        cliente, centro, sede, podologa, servicio, paciente, proximo_lunes_a_las_nueve):
+    # Una cita programada que ya terminó no está «por atender»: falta registrar
+    # su atención, y la pantalla la ofrece para registrarla, porque cada una
+    # que falta deja mal el ingreso y el stock del día. La que empezó y no ha
+    # terminado sí está por atender, marcada como en curso.
+    def cita_que_empezo_hace(minutos, desfase_en_horas):
+        return hacer_que_la_cita_ya_empezo(programar_cita(
+            centro=centro, usuario=podologa, sede=sede, paciente=paciente,
+            profesional=podologa, servicio=servicio,
+            inicio=proximo_lunes_a_las_nueve + timedelta(hours=desfase_en_horas),
+        ), hace_minutos=minutos)
+
+    terminada = cita_que_empezo_hace(60, 0)       # 45 minutos de duración
+    en_curso = cita_que_empezo_hace(10, 2)
+    fecha = timezone.localtime(en_curso.inicio).date().isoformat()
+
+    datos = cliente.get(PANEL, {"fecha": fecha}).data["citas"]
+
+    assert [fila["cita_id"] for fila in datos["sin_registrar"]] == [terminada.pk]
+    assert datos["por_atender"] == 1
+    assert datos["siguientes"][0]["cita_id"] == en_curso.pk
+    assert datos["siguientes"][0]["momento"] == "en-curso"
+
+
+@pytest.mark.django_db
 def test_el_desglose_trae_el_identificador_del_servicio(cliente, jornada, otro_servicio):
     # Cada fila del desglose enlaza a la agenda filtrada por ese servicio, así
     # que el nombre no basta: hace falta el identificador con el que se arma el
@@ -241,11 +296,71 @@ def test_el_desglose_trae_el_identificador_del_servicio(cliente, jornada, otro_s
 
 
 @pytest.mark.django_db
-def test_la_proxima_cita_trae_su_identificador(cliente, jornada):
-    # La tarjeta de «próxima cita» es un enlace; necesita saber a qué cita apunta.
+def test_las_siguientes_citas_vienen_en_orden_y_la_primera_es_la_proxima(cliente, jornada):
+    # La lista de lo que viene es lo que se mira para saber a quién toca: va
+    # por hora y sin las canceladas, y la primera que falta empezar es la
+    # «próxima cita» que la Tabla 7 pide destacar. Cada fila enlaza a su cita
+    # y a la ficha del paciente, así que trae los dos identificadores.
     datos = cliente.get(PANEL, {"fecha": jornada["fecha"]}).data["citas"]
+    filas = datos["siguientes"]
 
-    assert datos["proxima"] is None or "cita_id" in datos["proxima"]
+    assert [fila["cita_id"] for fila in filas] == [jornada["primera"].pk, jornada["segunda"].pk]
+    assert [fila["momento"] for fila in filas] == ["proxima", "despues"]
+    assert filas[0]["paciente_id"] == jornada["primera"].paciente_id
+
+
+@pytest.mark.django_db
+def test_una_cancelacion_reprogramada_no_cuenta_como_no_concretada(
+        cliente, jornada, centro, sede, podologa, servicio, paciente):
+    # Una cita cancelada que tiene reemplazo no es ingreso perdido: cambió de
+    # hora. Contarla inflaba el «no concretado» con dinero que sí llegará.
+    programar_cita(
+        centro=centro, usuario=podologa, sede=sede, paciente=paciente,
+        profesional=podologa, servicio=servicio,
+        inicio=jornada["tercera"].inicio + timedelta(hours=2), reemplaza=jornada["tercera"],
+    )
+
+    datos = cliente.get(PANEL, {"fecha": jornada["fecha"]}).data["ingresos"]
+
+    assert datos["perdido"] == "0.00"
+
+
+@pytest.mark.django_db
+def test_la_referencia_promedia_los_mismos_dias_de_las_semanas_anteriores(
+        cliente, centro, sede, podologa, servicio, paciente, proximo_lunes_a_las_nueve):
+    # Sin referencia una cifra no dice si el día va bien o mal. Se compara con
+    # los cuatro lunes anteriores en que la sede abrió: dos con una cita de
+    # 60.00 y dos vacíos dan 0.5 citas y 30.00 de ingreso esperado.
+    lunes = proximo_lunes_a_las_nueve + timedelta(weeks=3)
+    for semanas in (1, 2):
+        programar_cita(
+            centro=centro, usuario=podologa, sede=sede, paciente=paciente,
+            profesional=podologa, servicio=servicio, inicio=lunes - timedelta(weeks=semanas),
+        )
+
+    datos = cliente.get(PANEL, {"fecha": lunes.date().isoformat()}).data
+
+    assert datos["citas"]["referencia"] == {"dias": 4, "total": 0.5}
+    assert datos["ingresos"]["referencia"] == {"dias": 4, "esperado": "30.00", "confirmado": "0.00"}
+
+
+@pytest.mark.django_db
+def test_la_ocupacion_anticipa_los_siete_dias_siguientes(
+        cliente, jornada, centro, sede, podologa, servicio, paciente):
+    # Lo que se puede llenar todavía son los días que vienen. Un martes con
+    # una cita de 45 minutos sobre 720 de capacidad da 6.2 %; el domingo la
+    # sede no abre y se dice, en lugar de dar un cero que parezca un día vacío.
+    lunes = jornada["primera"].inicio
+    programar_cita(
+        centro=centro, usuario=podologa, sede=sede, paciente=paciente,
+        profesional=podologa, servicio=servicio, inicio=lunes + timedelta(days=1),
+    )
+
+    proximos = cliente.get(PANEL, {"fecha": jornada["fecha"]}).data["ocupacion"]["proximos"]
+
+    assert len(proximos) == 7
+    assert proximos[0]["porcentaje"] == pytest.approx(6.2, abs=0.1)
+    assert proximos[5]["abierta"] is False and proximos[5]["porcentaje"] is None
 
 
 @pytest.mark.django_db

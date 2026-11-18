@@ -54,8 +54,12 @@ def _validar_horario_de_sede(sede, inicio, fin) -> None:
 
 @transaction.atomic
 def programar_cita(*, centro, usuario, sede, paciente, profesional, servicio, inicio,
-                   observaciones="") -> Cita:
-    """Crea una cita comprobando horario, anticipación y solapamiento (CU08)."""
+                   observaciones="", reemplaza=None) -> Cita:
+    """Crea una cita comprobando horario, anticipación y solapamiento (CU08).
+
+    `reemplaza` es la cita cancelada que esta repone (P07, CC-16): tiene que
+    estar cancelada, ser del mismo paciente y no tener ya otro reemplazo.
+    """
     if inicio < timezone.now() + ANTICIPACION_MINIMA:
         raise ReglaDeNegocio(
             "cita-en-el-pasado", "La cita debe programarse con al menos 15 minutos de anticipación."
@@ -72,6 +76,8 @@ def programar_cita(*, centro, usuario, sede, paciente, profesional, servicio, in
         raise ReglaDeNegocio(
             "profesional-sin-sede", "La profesional no está asignada a esa sede."
         )
+    if reemplaza is not None:
+        _validar_reemplazo(reemplaza, paciente)
     fin = inicio + timedelta(minutes=servicio.duracion_minutos)
     _validar_horario_de_sede(sede, inicio, fin)
 
@@ -80,7 +86,7 @@ def programar_cita(*, centro, usuario, sede, paciente, profesional, servicio, in
             cita = Cita.objects.create(
                 centro=centro, sede=sede, paciente=paciente, profesional=profesional,
                 servicio=servicio, inicio=inicio, fin=fin, observaciones=observaciones,
-                creada_por=usuario,
+                creada_por=usuario, reemplaza=reemplaza,
             )
     except IntegrityError as error:
         if "ex_cita_sin_solape_por_profesional" in str(error):
@@ -88,9 +94,26 @@ def programar_cita(*, centro, usuario, sede, paciente, profesional, servicio, in
                 "cita-solapada",
                 "La profesional ya tiene otra cita en ese horario.",
             ) from error
+        # Dos reposiciones simultáneas de la misma cita: la base deja pasar una.
+        if "reemplaza_id" in str(error):
+            raise ReglaDeNegocio(
+                "reemplazo-repetido", "Esa cita cancelada ya tiene una cita de reemplazo."
+            ) from error
         raise
     registrar("ALTA", "cita", cita.pk, {"inicio": inicio.isoformat(), "sede": sede.pk})
     return cita
+
+
+def _validar_reemplazo(original: Cita, paciente) -> None:
+    if original.estado != Cita.Estado.CANCELADA or original.paciente_id != paciente.pk:
+        raise ReglaDeNegocio(
+            "reemplazo-invalido",
+            "Solo se puede reponer una cita cancelada del mismo paciente.",
+        )
+    if Cita.objects.filter(reemplaza=original).exists():
+        raise ReglaDeNegocio(
+            "reemplazo-repetido", "Esa cita cancelada ya tiene una cita de reemplazo."
+        )
 
 
 @transaction.atomic

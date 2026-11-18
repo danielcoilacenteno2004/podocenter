@@ -57,7 +57,7 @@ async function ingresar () {
 
 <template>
   <div class="ingreso">
-    <aside class="ingreso-marca">
+    <aside class="ingreso-marca fondo-marca">
       <MarcaArtemisa fondo="oscuro" />
       <div>
         <p class="ingreso-lema">Gestión del centro de podología</p>

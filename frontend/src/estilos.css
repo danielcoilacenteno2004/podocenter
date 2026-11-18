@@ -3,7 +3,8 @@
 :root {
   /* Paleta oficial de la marca, en dos combinaciones:
      - sobre fondo oscuro (#3C5154), el logo va en blanco;
-     - sobre fondo claro (#A1B5AC), el logo va en #57696D.
+     - sobre fondo claro (#A1B5AC), el logo va en #57696D;
+     - sobre blanco (la barra superior), logo y nombre en #3C5154.
      El resto de los tonos de la interfaz se deriva de estos cuatro. */
   --oficial-oscuro: #3c5154;
   --oficial-medio: #57696d;
@@ -113,6 +114,40 @@ main > .tarjeta + .tarjeta { margin-top: 1.25rem; }
 .enlace-flecha:hover { text-decoration: underline; }
 .enlace-flecha svg { transition: transform var(--transicion); }
 .enlace-flecha:hover svg { transform: translateX(2px); }
+
+/* Fondo de marca: la combinación oscura de la paleta (#3C5154 con blanco) y
+   la hoja del logo como marca de agua. Lo comparten el panel del ingreso y
+   el resumen del panel del día. */
+.fondo-marca {
+  position: relative; overflow: hidden; color: var(--blanco);
+  background:
+    radial-gradient(circle at 15% 10%, color-mix(in srgb, var(--blanco) 10%, transparent), transparent 55%),
+    linear-gradient(160deg, var(--marca), var(--marca-profunda));
+}
+.fondo-marca::after {
+  content: ""; position: absolute; right: -8%; bottom: -10%; width: 70%; aspect-ratio: 1;
+  background: var(--blanco); mask: url("/logo-artemisa.png") center / contain no-repeat;
+  opacity: .06; pointer-events: none;
+}
+.fondo-marca > * { position: relative; z-index: 1; }
+
+/* Barra de progreso: el tramo lleno crece al aparecer y se desliza al
+   cambiar de valor. El ancho lo pone la pantalla (style con width). */
+.progreso { height: .55rem; border-radius: 999px; background: var(--fondo); overflow: hidden; }
+.progreso > span {
+  display: block; height: 100%; border-radius: inherit; background: var(--marca);
+  transform-origin: left; animation: crecer .7s var(--transicion) both;
+  transition: width .5s var(--transicion);
+}
+@keyframes crecer { from { transform: scaleX(0); } }
+
+/* Título de un grupo dentro de una tarjeta («Por servicio», «Por profesional»). */
+.titulo-grupo { margin: 0 0 .6rem; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--tinta-suave); }
+
+/* Cifras breves en fila (etiqueta pequeña encima, valor debajo). */
+.datos-breves { display: flex; flex-wrap: wrap; gap: .75rem 2.25rem; margin: 0; }
+.datos-breves dt { display: flex; align-items: center; gap: .35rem; font-size: .76rem; font-weight: 600; color: var(--tinta-suave); }
+.datos-breves dd { margin: .15rem 0 0; font-size: 1.1rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 
 /* --- formularios ------------------------------------------------------ */
 label { display: block; font-weight: 600; font-size: .88rem; margin-bottom: .3rem; }
@@ -224,22 +259,11 @@ td.numero { font-variant-numeric: tabular-nums; }
 /* Tres filas: el logo arriba, la frase en el centro exacto del panel y una
    fila vacía del mismo alto que la primera para que el centro sea real. */
 .ingreso-marca {
-  position: relative; overflow: hidden; color: var(--blanco);
   display: grid; grid-template-rows: 1fr auto 1fr; justify-items: center;
   padding: clamp(2rem, 5vw, 3.5rem);
-  background:
-    radial-gradient(circle at 15% 10%, color-mix(in srgb, var(--blanco) 10%, transparent), transparent 55%),
-    linear-gradient(160deg, var(--marca), var(--marca-profunda));
 }
 .ingreso-marca .marca { align-self: start; justify-self: start; font-size: 1.3rem; }
-.ingreso-marca > div { position: relative; z-index: 1; text-align: center; }
-
-/* Hoja del logo en grande, como marca de agua. */
-.ingreso-marca::after {
-  content: ""; position: absolute; right: -8%; bottom: -10%; width: 70%; aspect-ratio: 1;
-  background: var(--blanco); mask: url("/logo-artemisa.png") center / contain no-repeat;
-  opacity: .06; pointer-events: none;
-}
+.ingreso-marca > div { text-align: center; }
 .ingreso-lema {
   margin: 0 auto; max-width: 18ch;
   font-size: clamp(1.6rem, 3vw, 2.3rem); line-height: 1.2; font-weight: 700; letter-spacing: -.02em;

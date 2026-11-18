@@ -84,6 +84,8 @@ function cambiarSede () {
 /* Nunca parte en dos filas: si no caben las secciones, se desplazan de lado. */
 nav {
   flex: 1; min-width: 0;
+  /* Separador fino entre la marca y las secciones. */
+  padding-left: 1.25rem; border-left: 1px solid var(--borde);
   display: flex; gap: .15rem;
   overflow-x: auto; scrollbar-width: none;
 }
@@ -116,6 +118,6 @@ button.sede:hover:not(:disabled) { background: var(--marca-tenue); border-color:
   .derecha { grid-row: 1; grid-column: 2; justify-self: end; min-width: 0; }
   .sede { min-width: 0; }
   .sede-nombre { min-width: 0; max-width: none; }
-  nav { grid-row: 2; grid-column: 1 / -1; margin: 0 -.9rem; padding: 0 .9rem .5rem; }
+  nav { grid-row: 2; grid-column: 1 / -1; margin: 0 -.9rem; padding: 0 .9rem .5rem; border-left: 0; }
 }
 </style>

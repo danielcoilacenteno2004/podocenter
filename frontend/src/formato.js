@@ -19,6 +19,10 @@ export function moverDias (fecha, dias) {
   return dia.toLocaleDateString('en-CA')
 }
 
+// «lunes», «martes»…; con formato 'short', «lun.», «mar.»…
+export const diaDeLaSemana = (fecha, formato = 'long') =>
+  new Date(`${fecha}T12:00`).toLocaleDateString('es-PE', { weekday: formato })
+
 export const diaLargo = (fecha) =>
   new Date(`${fecha}T12:00`).toLocaleDateString('es-PE', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
