@@ -1,0 +1,13 @@
+Módulo          Sent.  Cubier.  % sent.  Ramas  Cubier.  % ramas
+(apps, raíz)       48       48   100.00      2        2   100.00
+atenciones        157      153    97.45     20       20   100.00
+catalogo          147      140    95.24     32       28    87.50
+citas             481      458    95.22     86       72    83.72
+core              517      494    95.55     78       68    87.18
+inventario        375      356    94.93    120      104    86.67
+pacientes         153      138    90.20     10        6    60.00
+sedes             147      141    95.92     22       19    86.36
+usuarios          352      347    98.58     60       56    93.33
+TOTAL            2377     2275    95.71    430      375    87.21
+
+Cobertura combinada (sentencias + ramas, la columna Cover): 94.41 %

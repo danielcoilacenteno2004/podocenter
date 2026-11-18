@@ -1,0 +1,200 @@
+Resumen del escaneo OWASP ZAP (baseline: araña + escaneo pasivo, sin ataques)
+Fecha: 2026-11-18T14:41:07
+ZAP: 2.17.0 · Objetivo: http://localhost:5173
+Sesión: CON la sesión de la administradora (gerencia@piessanos.pe), inyectada en cada
+petición por una regla replacer; además, cabecera X-Sede con la Sede Cercado.
+Entorno: servidor de Vite (desarrollo) como proxy de Django con config.settings.dev
+(DEBUG=True). Las cabeceras de producción las pone Nginx y no se midieron aquí.
+
+Alertas por nivel de riesgo:
+  Alto         0
+  Medio        3
+  Bajo         3
+  Informativo  3
+
+[Medio] Content Security Policy (CSP) Header Not Set (pluginid 10038, CWE-693, confianza 3) — 5 instancia(s)
+      http://localhost:5173/ingresar
+      http://localhost:5173/inventario
+      http://localhost:5173/pacientes
+      http://localhost:5173/panel
+      http://localhost:5173/usuarios
+[Medio] Cross-Domain Misconfiguration (pluginid 10098, CWE-264, confianza 2) — 5 instancia(s)
+      http://localhost:5173/agenda
+      http://localhost:5173/api/v1/sedes/
+      http://localhost:5173/api/v1/sesion/profesionales/
+      http://localhost:5173/pacientes
+      http://localhost:5173/panel
+[Medio] Missing Anti-clickjacking Header (pluginid 10020, CWE-1021, confianza 2) — 5 instancia(s)
+      http://localhost:5173/agenda
+      http://localhost:5173/inventario
+      http://localhost:5173/pacientes
+      http://localhost:5173/sedes
+      http://localhost:5173/usuarios
+[Bajo] Cookie No HttpOnly Flag (pluginid 10010, CWE-1004, confianza 2) — 4 instancia(s)
+      http://localhost:5173/admin/
+      http://localhost:5173/admin/password_change/
+      http://localhost:5173/api/v1/sesion/actual/
+[Bajo] Server Leaks Version Information via "Server" HTTP Response Header Field (pluginid 10036, CWE-497, confianza 3) — 5 instancia(s)
+      http://localhost:5173/api/v1/sedes/
+      http://localhost:5173/api/v1/sesion/actual/
+      http://localhost:5173/api/v1/sesion/profesionales/
+      http://localhost:5173/api/v1/sesion/sedes/
+      http://localhost:5173/api/v1/usuarios/
+[Bajo] X-Content-Type-Options Header Missing (pluginid 10021, CWE-693, confianza 2) — 5 instancia(s)
+      http://localhost:5173/ingresar
+      http://localhost:5173/pacientes
+      http://localhost:5173/perfil
+      http://localhost:5173/registro-diario
+      http://localhost:5173/servicios
+[Informativo] Information Disclosure - Suspicious Comments (pluginid 10027, CWE-615, confianza 1) — 6 instancia(s)
+      http://localhost:5173/node_modules/.vite/deps/axios.js?v=f42bd493
+      http://localhost:5173/node_modules/.vite/deps/chunk-U3LI7FBV.js?v=f42bd493
+      http://localhost:5173/node_modules/.vite/deps/pinia.js?v=f42bd493
+      http://localhost:5173/node_modules/.vite/deps/vue-router.js?v=f42bd493
+      http://localhost:5173/src/components/MarcaArtemisa.vue?t=1795030562053
+      … y 1 URL más (ver 04_zap.html)
+[Informativo] Modern Web Application (pluginid 10109, CWE--1, confianza 2) — 5 instancia(s)
+      http://localhost:5173/
+      http://localhost:5173/agenda
+      http://localhost:5173/inventario
+      http://localhost:5173/pacientes
+      http://localhost:5173/perfil
+[Informativo] Session Management Response Identified (pluginid 10112, CWE--1, confianza 2) — 4 instancia(s)
+      http://localhost:5173/admin/
+      http://localhost:5173/admin/password_change/
+      http://localhost:5173/api/v1/sesion/actual/
+
+Salida de ZAP (consola):
+Job replacer set deleteAllRules = true
+Job replacer set description = Sesi�n de la administradora del centro
+Job replacer set matchType = req_header
+Job replacer set matchString = Cookie
+Job replacer set matchRegex = false
+Job replacer set replacementString = [cookie de sesión omitida]
+Job replacer set description = Sede activa
+Job replacer set matchType = req_header
+Job replacer set matchString = X-Sede
+Job replacer set matchRegex = false
+Job replacer set replacementString = 51
+Job requestor set url = http://localhost:5173/
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/ingresar
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/panel
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/agenda
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/pacientes
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/inventario
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/registro-diario
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/usuarios
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/sedes
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/servicios
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/perfil
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/api/v1/sesion/actual/
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/api/v1/sesion/sedes/
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/api/v1/sesion/profesionales/
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/api/v1/usuarios/
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/api/v1/sedes/
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/api/v1/servicios/
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/api/v1/pacientes/
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/api/v1/citas/
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/api/v1/citas/agenda/
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/api/v1/panel/
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/api/v1/atenciones/
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/api/v1/reportes/registro-diario/
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/api/v1/inventario/productos/
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/api/v1/inventario/stock/
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/api/v1/estado/
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/api/v1/inventario/disponibilidad/?producto=87
+Job requestor set method = GET
+Job requestor set url = http://localhost:5173/admin/
+Job requestor set method = GET
+Job spider set context = podocenter
+Job spider set url = http://localhost:5173
+Job spider set maxDuration = 2
+Job spiderAjax set context = podocenter
+Job spiderAjax set url = http://localhost:5173
+Job spiderAjax set maxDuration = 3
+Job spiderAjax set browserId = edge-headless
+Job passiveScan-wait set maxDuration = 5
+Job report set template = traditional-html
+Job report set reportDir = C:/Users/danie/Documents/UNIVERSIDAD/SEMESTRE 10/PROYECTO DE FIN DE CARRERA/podologia/podocenter/docs/pruebas
+Job report set reportFile = 04_zap
+Job report set reportTitle = PodoCenter � ZAP baseline (sesi�n de la administradora)
+Job report set template = traditional-json
+Job report set reportDir = C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/aff9a092-f9bd-4e67-bc0f-84f4b576f946/scratchpad/zap_informes
+Job report set reportFile = 04_zap
+Job replacer set deleteAllRules = true
+Job replacer started
+Existing Replace rules deleted
+Job replacer finished, time taken: 00:00:00
+Job requestor started
+Job requestor requesting URL http://localhost:5173/
+Job requestor requesting URL http://localhost:5173/ingresar
+Job requestor requesting URL http://localhost:5173/panel
+Job requestor requesting URL http://localhost:5173/agenda
+Job requestor requesting URL http://localhost:5173/pacientes
+Job requestor requesting URL http://localhost:5173/inventario
+Job requestor requesting URL http://localhost:5173/registro-diario
+Job requestor requesting URL http://localhost:5173/usuarios
+Job requestor requesting URL http://localhost:5173/sedes
+Job requestor requesting URL http://localhost:5173/servicios
+Job requestor requesting URL http://localhost:5173/perfil
+Job requestor requesting URL http://localhost:5173/api/v1/sesion/actual/
+Job requestor requesting URL http://localhost:5173/api/v1/sesion/sedes/
+Job requestor requesting URL http://localhost:5173/api/v1/sesion/profesionales/
+Job requestor requesting URL http://localhost:5173/api/v1/usuarios/
+Job requestor requesting URL http://localhost:5173/api/v1/sedes/
+Job requestor requesting URL http://localhost:5173/api/v1/servicios/
+Job requestor requesting URL http://localhost:5173/api/v1/pacientes/
+Job requestor requesting URL http://localhost:5173/api/v1/citas/
+Job requestor requesting URL http://localhost:5173/api/v1/citas/agenda/
+Job requestor requesting URL http://localhost:5173/api/v1/panel/
+Job requestor requesting URL http://localhost:5173/api/v1/atenciones/
+Job requestor requesting URL http://localhost:5173/api/v1/reportes/registro-diario/
+Job requestor requesting URL http://localhost:5173/api/v1/inventario/productos/
+Job requestor requesting URL http://localhost:5173/api/v1/inventario/stock/
+Job requestor requesting URL http://localhost:5173/api/v1/estado/
+Job requestor requesting URL http://localhost:5173/api/v1/inventario/disponibilidad/?producto=87
+Job requestor requesting URL http://localhost:5173/admin/
+Job requestor finished, time taken: 00:00:02
+Job spider started
+Job spider requesting URL http://localhost:5173
+Job spider found 98 URLs
+Job spider finished, time taken: 00:00:02
+Job spiderAjax started
+Job spiderAjax found 780 URLs
+Job spiderAjax finished, time taken: 00:00:55
+Job passiveScan-wait started
+Job passiveScan-wait finished, time taken: 00:00:00
+Job report started
+Job report generated report C:\Users\danie\Documents\UNIVERSIDAD\SEMESTRE 10\PROYECTO DE FIN DE CARRERA\podologia\podocenter\docs\pruebas\04_zap.html
+Job report finished, time taken: 00:00:00
+Job report started
+Job report generated report C:\Users\danie\AppData\Local\Temp\claude\2b75186625f2af13\aff9a092-f9bd-4e67-bc0f-84f4b576f946\scratchpad\zap_informes\04_zap.json
+Job report finished, time taken: 00:00:00
+Automation plan succeeded!
+[código de salida: 0]

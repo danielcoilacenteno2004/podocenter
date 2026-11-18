@@ -1,0 +1,13 @@
+Fecha: 2026-11-18T16:25:48-05:00
+Sistema: MINGW64_NT-10.0-26200 3.6.5-22c95533.x86_64
+Python: Python 3.12.13
+Django: 5.2.19
+Django REST Framework: 3.18.2
+PostgreSQL: PostgreSQL 18.1 on x86_64-windows, compiled by msvc-19.44.35219, 64-bit
+Node: v22.21.0 · npm: 10.9.4
+k6: k6.exe v2.4.0 (commit/dd9395906d, go1.26.11, windows/amd64)
+Commit evaluado (HEAD antes del commit de la evidencia): 7071027391d02b4c84fcec760057b0f7b28b21b4
+Commits en la rama hasta ese HEAD: 144
+Por integrante (git shortlog -sn, aplica .mailmap):
+    77	Andre Nicolas Huaroc Condori
+    67	Sergio Daniel Coila Centeno

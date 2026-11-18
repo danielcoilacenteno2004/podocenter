@@ -1,0 +1,346 @@
+Ejecución: 2026-11-18T14:36:44-05:00  Base: http://127.0.0.1:8000/api/v1
+
+[gerencia] POST /api/v1/sesion/ingresar/
+  cuerpo enviado: {"correo": "gerencia@piessanos.pe", "contrasena": "Podocenter2026"}
+  -> HTTP 200
+  {"autenticado":true,"usuario":{"id":97,"correo":"gerencia@piessanos.pe","nombres":"Elsa","apellidos":"Rodríguez Paredes","nombre_completo":"Elsa Rodríguez Paredes","rol":"ADMIN_CENTRO","rol_descripcion":"Administrador del centro","centro":24,"centro_nombre":"Centro de Podología Pies Sanos E.I.R.L.","segundo_factor_activo":true,"ultimo_acceso_en":"2026-11-18T19:36:45.022498Z","debe_cambiar_contrasena":false}}
+
+==============================================================================
+CP-02 — Contraseña errónea y correo inexistente: misma respuesta 401
+==============================================================================
+
+[anónimo] POST /api/v1/sesion/ingresar/
+  cuerpo enviado: {"correo": "gerencia@piessanos.pe", "contrasena": "ClaveEquivocada1"}
+  -> HTTP 401
+  {"type":"about:blank","title":"Credenciales inválidas","status":401,"detail":"El correo o la contraseña no son correctos.","codigo":"credenciales-invalidas"}
+
+[anónimo] POST /api/v1/sesion/ingresar/
+  cuerpo enviado: {"correo": "no.existe@piessanos.pe", "contrasena": "ClaveEquivocada1"}
+  -> HTTP 401
+  {"type":"about:blank","title":"Credenciales inválidas","status":401,"detail":"El correo o la contraseña no son correctos.","codigo":"credenciales-invalidas"}
+  >>> CP-02: COINCIDE — obtenido: 401 y 401; cuerpos idénticos
+
+==============================================================================
+CP-03 — Cinco intentos fallidos seguidos: ¿bloqueo temporal?
+==============================================================================
+
+  intento fallido 1
+
+[intentos] POST /api/v1/sesion/ingresar/
+  cuerpo enviado: {"correo": "podologa@piessanos.pe", "contrasena": "Equivocada1"}
+  -> HTTP 401
+  {"type":"about:blank","title":"Credenciales inválidas","status":401,"detail":"El correo o la contraseña no son correctos.","codigo":"credenciales-invalidas"}
+
+  intento fallido 2
+
+[intentos] POST /api/v1/sesion/ingresar/
+  cuerpo enviado: {"correo": "podologa@piessanos.pe", "contrasena": "Equivocada2"}
+  -> HTTP 401
+  {"type":"about:blank","title":"Credenciales inválidas","status":401,"detail":"El correo o la contraseña no son correctos.","codigo":"credenciales-invalidas"}
+
+  intento fallido 3
+
+[intentos] POST /api/v1/sesion/ingresar/
+  cuerpo enviado: {"correo": "podologa@piessanos.pe", "contrasena": "Equivocada3"}
+  -> HTTP 401
+  {"type":"about:blank","title":"Credenciales inválidas","status":401,"detail":"El correo o la contraseña no son correctos.","codigo":"credenciales-invalidas"}
+
+  intento fallido 4
+
+[intentos] POST /api/v1/sesion/ingresar/
+  cuerpo enviado: {"correo": "podologa@piessanos.pe", "contrasena": "Equivocada4"}
+  -> HTTP 401
+  {"type":"about:blank","title":"Credenciales inválidas","status":401,"detail":"El correo o la contraseña no son correctos.","codigo":"credenciales-invalidas"}
+
+  intento fallido 5
+
+[intentos] POST /api/v1/sesion/ingresar/
+  cuerpo enviado: {"correo": "podologa@piessanos.pe", "contrasena": "Equivocada5"}
+  -> HTTP 401
+  {"type":"about:blank","title":"Credenciales inválidas","status":401,"detail":"El correo o la contraseña no son correctos.","codigo":"credenciales-invalidas"}
+
+  sexto intento, con la contraseña correcta, inmediatamente después
+
+[intentos] POST /api/v1/sesion/ingresar/
+  cuerpo enviado: {"correo": "podologa@piessanos.pe", "contrasena": "Podocenter2026"}
+  -> HTTP 200
+  {"autenticado":true,"usuario":{"id":98,"correo":"podologa@piessanos.pe","nombres":"Lucía","apellidos":"Fernández Alarcón","nombre_completo":"Lucía Fernández Alarcón","rol":"PODOLOGA","rol_descripcion":"Podóloga","centro":24,"centro_nombre":"Centro de Podología Pies Sanos E.I.R.L.","segundo_factor_activo":false,"ultimo_acceso_en":"2026-11-18T19:36:47.908871Z","debe_cambiar_contrasena":false}}
+  >>> CP-03: NO COINCIDE — obtenido: HTTP 200 (entró: no hay bloqueo)
+
+==============================================================================
+CP-20 — PATCH /pacientes/{id}/ debe responder 405
+==============================================================================
+
+[gerencia] PATCH /api/v1/pacientes/274/  (X-Sede: 51)
+  cuerpo enviado: {"telefono": "900000000"}
+  -> HTTP 405
+  {"type":"https://podocenter.pe/errores/generico","title":"Method Not Allowed","status":405,"detail":{"detail":"Método \"PATCH\" no permitido."}}
+  >>> CP-20: COINCIDE — obtenido: HTTP 405
+
+==============================================================================
+CP-32 — Atención con insumos: stock, monto y cita atendida; sin stock, nada
+==============================================================================
+
+[podóloga] POST /api/v1/sesion/ingresar/
+  cuerpo enviado: {"correo": "podologa@piessanos.pe", "contrasena": "Podocenter2026"}
+  -> HTTP 200
+  {"autenticado":true,"usuario":{"id":98,"correo":"podologa@piessanos.pe","nombres":"Lucía","apellidos":"Fernández Alarcón","nombre_completo":"Lucía Fernández Alarcón","rol":"PODOLOGA","rol_descripcion":"Podóloga","centro":24,"centro_nombre":"Centro de Podología Pies Sanos E.I.R.L.","segundo_factor_activo":false,"ultimo_acceso_en":"2026-11-18T19:36:48.663902Z","debe_cambiar_contrasena":false}}
+
+  cita en curso elegida: {"id": 550, "sede": 51, "paciente": 266, "paciente_nombre": "María Elena Quispe Mamani", "profesional": 98, "profesional_nombre": "Lucía Fernández Alarcón", "servicio": 139, "servicio_nombre": "Tratamiento de onicomicosis", "servicio_precio": "70.00", "inicio": "2026-11-18T14:26:00-05:00", "fin": "2026-11-18T14:56:00-05:00", "estado": "PROGRAMADA", "observaciones": "", "motivo_cancelacion": "", "tiene_atencion": false, "enlace_whatsapp": "https://wa.me/51959874123?text=Hola%2C%20Mar%C3%ADa%20Elena.%20Le%20recordamos%20su%20cita%20de%20Tratamiento%20de%20onicomicosis%20el%2018/11/2026%20a%20las%2014%3A26%20en%20Pies%20Sanos%20%28Sede%20Cercado%2C%20Calle%20Santa%20Marta%20215%2C%20Cercado%2C%20Arequipa%29.%20Si%20no%20podr%C3%A1%20asistir%2C%20por%20favor%20av%C3%ADsenos%20respondiendo%20este%20mensaje.", "recordatorio": null, "creado_en": "2026-11-18T14:36:44.011947-05:00", "reemplaza": null}
+
+[gerencia] GET /api/v1/servicios/139/  (X-Sede: 51)
+  -> HTTP 200
+  {"id":139,"nombre":"Tratamiento de onicomicosis","descripcion":"Hongos en la uña: fresado y aplicación del tratamiento tópico.","duracion_minutos":30,"precio":"70.00","esta_activo":true,"creado_en":"2026-11-18T14:36:43.891796-05:00","insumos_habituales":[{"producto":88,"codigo":"INS-001","nombre":"Fresa de pulido desechable","unidad":"unidad","esta_activo":true,"cantidad":1}]}
+
+[podóloga] GET /api/v1/inventario/stock/  (X-Sede: 51)
+  -> HTTP 200
+  {"stock":[{"id":87,"codigo":"INS-011","nombre":"Apósito hidrocoloide","unidad":"caja","esta_activo":true,"cantidad":3,"minimo":5,"bajo_minimo":true},{"id":86,"codigo":"INS-004","nombre":"Crema urea 10 %","unidad":"unidad","esta_activo":true,"cantidad":1,"minimo":4,"bajo_minimo":true},{"id":88,"codigo":"INS-001","nombre":"Fresa de pulido desechable","unidad":"unidad","esta_activo":true,"cantidad":12,"minimo":10,"bajo_minimo":false},{"id":90,"codigo":"INS-015","nombre":"Gasa estéril","unidad":"paquete","esta_activo":true,"cantidad":20,"minimo":8,"bajo_minimo":false},{"id":91,"codigo":"INS-020","nombre":"Guantes de nitrilo","unidad":"caja","esta_activo":true,"cantidad":4,"minimo":3,"bajo_minimo":false},{"id":89,"codigo":"INS-007","nombre":"Solución antiséptica","unidad":"unidad","esta_activo":true,"cantidad":9,"minimo":6,"bajo_minimo":false}]}
+
+  (a) con stock insuficiente
+
+[podóloga] POST /api/v1/atenciones/  (X-Sede: 51)
+  cuerpo enviado: {"cita": 550, "monto_cobrado": "65.00", "observaciones_clinicas": "Prueba CP-32a", "insumos": [{"producto": 88, "cantidad": 112}]}
+  -> HTTP 422
+  {"type":"https://podocenter.pe/errores/stock-insuficiente","title":"La operación no cumple una regla del negocio","status":422,"detail":"No hay stock suficiente en Sede Cercado. Fresa de pulido desechable: hay 12 unidad, se piden 112.","codigo":"stock-insuficiente"}
+
+[podóloga] GET /api/v1/citas/550/  (X-Sede: 51)
+  -> HTTP 200
+  {"id":550,"sede":51,"paciente":266,"paciente_nombre":"María Elena Quispe Mamani","profesional":98,"profesional_nombre":"Lucía Fernández Alarcón","servicio":139,"servicio_nombre":"Tratamiento de onicomicosis","servicio_precio":"70.00","inicio":"2026-11-18T14:26:00-05:00","fin":"2026-11-18T14:56:00-05:00","estado":"PROGRAMADA","observaciones":"","motivo_cancelacion":"","tiene_atencion":false,"enlace_whatsapp":"https://wa.me/51959874123?text=Hola%2C%20Mar%C3%ADa%20Elena.%20Le%20recordamos%20su%20cita%20de%20Tratamiento%20de%20onicomicosis%20el%2018/11/2026%20a%20las%2014%3A26%20en%20Pies%20Sanos%20%28Sede%20Cercado%2C%20Calle%20Santa%20Marta%20215%2C%20Cercado%2C%20Arequipa%29.%20Si%20no%20podr%C3%A1%20asistir%2C%20por%20favor%20av%C3%ADsenos%20respondiendo%20este%20mensaje.","recordatorio":null,"creado_en":"2026-11-18T14:36:44.011947-05:00","reemplaza":null}
+  stock antes 12, después 12; atenciones de la cita: 0
+  >>> CP-32 sin stock: COINCIDE — obtenido: HTTP 422 stock-insuficiente; atenciones=0; stock 12->12; cita PROGRAMADA
+
+  (b) con stock suficiente
+
+[podóloga] POST /api/v1/atenciones/  (X-Sede: 51)
+  cuerpo enviado: {"cita": 550, "monto_cobrado": "65.00", "observaciones_clinicas": "Prueba CP-32b", "insumos": [{"producto": 88, "cantidad": 1}]}
+  -> HTTP 201
+  {"id":119,"cita":550,"sede":51,"sede_nombre":"Sede Cercado","paciente":266,"paciente_nombre":"María Elena Quispe Mamani","profesional":98,"profesional_nombre":"Lucía Fernández Alarcón","servicio":139,"servicio_nombre":"Tratamiento de onicomicosis","monto_cobrado":"65.00","registrada_por":98,"registrada_en":"2026-11-18T14:36:49.364010-05:00","observaciones_clinicas":"Prueba CP-32b","insumos_consumidos":[{"producto":88,"codigo":"INS-001","nombre":"Fresa de pulido desechable","unidad":"unidad","cantidad":1}]}
+
+[podóloga] GET /api/v1/citas/550/  (X-Sede: 51)
+  -> HTTP 200
+  {"id":550,"sede":51,"paciente":266,"paciente_nombre":"María Elena Quispe Mamani","profesional":98,"profesional_nombre":"Lucía Fernández Alarcón","servicio":139,"servicio_nombre":"Tratamiento de onicomicosis","servicio_precio":"70.00","inicio":"2026-11-18T14:26:00-05:00","fin":"2026-11-18T14:56:00-05:00","estado":"ATENDIDA","observaciones":"","motivo_cancelacion":"","tiene_atencion":true,"enlace_whatsapp":null,"recordatorio":null,"creado_en":"2026-11-18T14:36:44.011947-05:00","reemplaza":null}
+  stock antes 12, después 11
+  >>> CP-32 con stock: COINCIDE — obtenido: HTTP 201; stock 12->11; monto 65.00; cita ATENDIDA
+
+==============================================================================
+CP-29 — Cancelar una cita ya atendida
+==============================================================================
+
+[podóloga] POST /api/v1/citas/550/cancelar/  (X-Sede: 51)
+  cuerpo enviado: {"motivo": "Prueba CP-29: no debería poder cancelarse"}
+  -> HTTP 422
+  {"type":"https://podocenter.pe/errores/cita-no-cancelable","title":"La operación no cumple una regla del negocio","status":422,"detail":"La cita ya está en estado Atendida.","codigo":"cita-no-cancelable"}
+  >>> CP-29: COINCIDE — obtenido: HTTP 422 cita-no-cancelable; cita ATENDIDA
+
+==============================================================================
+CP-42 — Registro diario: día con atenciones y día sin atenciones
+==============================================================================
+
+[podóloga] GET /api/v1/reportes/registro-diario/?fecha=2026-11-18  (X-Sede: 51)
+  -> HTTP 200
+  {"fecha":"2026-11-18","atenciones":[{"id":119,"cita":550,"sede":51,"sede_nombre":"Sede Cercado","paciente":266,"paciente_nombre":"María Elena Quispe Mamani","profesional":98,"profesional_nombre":"Lucía Fernández Alarcón","servicio":139,"servicio_nombre":"Tratamiento de onicomicosis","monto_cobrado":"65.00","registrada_por":98,"registrada_en":"2026-11-18T14:36:49.364010-05:00"}],"cantidad":1,"total":"65.00","sin_monto":0}
+  >>> CP-42 con atenciones: COINCIDE — obtenido: HTTP 200; 1 atención(es); total 65.00; suma 65.00
+
+[podóloga] GET /api/v1/reportes/registro-diario/?fecha=2026-01-04  (X-Sede: 51)
+  -> HTTP 200
+  {"fecha":"2026-01-04","atenciones":[],"cantidad":0,"total":"0.00","sin_monto":0}
+  >>> CP-42 sin atenciones: COINCIDE — obtenido: HTTP 200; cantidad 0; total 0.00
+
+==============================================================================
+CP-07 / DEF-12 — La única administradora: cambio de rol, desactivación y sedes_ids
+==============================================================================
+
+[gerencia] PATCH /api/v1/usuarios/97/  (X-Sede: 51)
+  cuerpo enviado: {"rol": "PODOLOGA"}
+  -> HTTP 422
+  {"type":"https://podocenter.pe/errores/ultimo-administrador","title":"La operación no cumple una regla del negocio","status":422,"detail":"El centro quedaría sin administrador. Designe otro antes de cambiar este rol.","codigo":"ultimo-administrador"}
+  >>> CP-07 cambio de rol: COINCIDE — obtenido: HTTP 422 ultimo-administrador
+
+[gerencia] PATCH /api/v1/usuarios/97/  (X-Sede: 51)
+  cuerpo enviado: {"esta_activo": false}
+  -> HTTP 200
+  {"id":97,"correo":"gerencia@piessanos.pe","nombres":"Elsa","apellidos":"Rodríguez Paredes","nombre_completo":"Elsa Rodríguez Paredes","rol":"ADMIN_CENTRO","esta_activo":true,"segundo_factor_activo":true,"sedes":[{"id":51,"nombre":"Sede Cercado"},{"id":52,"nombre":"Sede Bustamante"}],"creado_en":"2026-11-18T14:36:43.319597-05:00"}
+  >>> CP-07 desactivar por PATCH: COINCIDE — obtenido: HTTP 200; esta_activo después = True
+
+[gerencia] DELETE /api/v1/usuarios/97/  (X-Sede: 51)
+  -> HTTP 422
+  {"type":"https://podocenter.pe/errores/ultimo-administrador","title":"La operación no cumple una regla del negocio","status":422,"detail":"El centro quedaría sin administrador. Designe otro antes de desactivar este.","codigo":"ultimo-administrador"}
+  >>> CP-07 desactivar por DELETE: COINCIDE — obtenido: HTTP 422 ultimo-administrador; esta_activo después = True
+
+[gerencia] PATCH /api/v1/usuarios/99/  (X-Sede: 51)
+  cuerpo enviado: {"sedes_ids": [51, 52]}
+  -> HTTP 200
+  {"id":99,"correo":"k.zapata@piessanos.pe","nombres":"Karina","apellidos":"Zapata Mendoza","nombre_completo":"Karina Zapata Mendoza","rol":"PODOLOGA","esta_activo":true,"segundo_factor_activo":false,"sedes":[{"id":51,"nombre":"Sede Cercado"},{"id":52,"nombre":"Sede Bustamante"}],"creado_en":"2026-11-18T14:36:43.881150-05:00"}
+  >>> DEF-12 sedes_ids: COINCIDE — obtenido: HTTP 200; sedes [51, 52]
+
+[gerencia] PATCH /api/v1/usuarios/99/  (X-Sede: 51)
+  cuerpo enviado: {"sedes_ids": [52]}
+  -> HTTP 200
+  {"id":99,"correo":"k.zapata@piessanos.pe","nombres":"Karina","apellidos":"Zapata Mendoza","nombre_completo":"Karina Zapata Mendoza","rol":"PODOLOGA","esta_activo":true,"segundo_factor_activo":false,"sedes":[{"id":52,"nombre":"Sede Bustamante"}],"creado_en":"2026-11-18T14:36:43.881150-05:00"}
+
+==============================================================================
+DEF-13 — Contraseña inicial al crear un usuario (P27) y primer ingreso
+==============================================================================
+
+[gerencia] POST /api/v1/usuarios/  (X-Sede: 51)
+  cuerpo enviado: {"correo": "prueba.p9@piessanos.pe", "nombres": "Prueba", "apellidos": "Práctica Nueve", "rol": "PODOLOGA", "sedes_ids": [51], "contrasena": "ElegidaPorLaAdmin2026", "password": "ElegidaPorLaAdmin2026"}
+  -> HTTP 201
+  {"id":100,"correo":"prueba.p9@piessanos.pe","nombres":"Prueba","apellidos":"Práctica Nueve","nombre_completo":"Prueba Práctica Nueve","rol":"PODOLOGA","esta_activo":true,"segundo_factor_activo":false,"sedes":[{"id":51,"nombre":"Sede Cercado"}],"creado_en":"2026-11-18T14:36:50.902111-05:00","contrasena_temporal":"Or9QwH87qD0Thb-O"}
+  >>> DEF-13 alta: COINCIDE — obtenido: HTTP 201; ¿devuelve contrasena_temporal? True
+
+[usuario nuevo] POST /api/v1/sesion/ingresar/
+  cuerpo enviado: {"correo": "prueba.p9@piessanos.pe", "contrasena": "ElegidaPorLaAdmin2026"}
+  -> HTTP 401
+  {"type":"about:blank","title":"Credenciales inválidas","status":401,"detail":"El correo o la contraseña no son correctos.","codigo":"credenciales-invalidas"}
+  >>> DEF-13 la admin define la contraseña: NO COINCIDE — obtenido: HTTP 401
+
+[usuario nuevo] POST /api/v1/sesion/ingresar/
+  cuerpo enviado: {"correo": "prueba.p9@piessanos.pe", "contrasena": "Or9QwH87qD0Thb-O"}
+  -> HTTP 200
+  {"autenticado":true,"usuario":{"id":100,"correo":"prueba.p9@piessanos.pe","nombres":"Prueba","apellidos":"Práctica Nueve","nombre_completo":"Prueba Práctica Nueve","rol":"PODOLOGA","rol_descripcion":"Podóloga","centro":24,"centro_nombre":"Centro de Podología Pies Sanos E.I.R.L.","segundo_factor_activo":false,"ultimo_acceso_en":"2026-11-18T19:36:51.664187Z","debe_cambiar_contrasena":true}}
+
+[usuario nuevo] GET /api/v1/pacientes/
+  -> HTTP 422
+  {"type":"https://podocenter.pe/errores/cambio-de-contrasena-pendiente","title":"La operación no cumple una regla del negocio","status":422,"detail":"Cambie la contraseña temporal antes de continuar.","codigo":"cambio-de-contrasena-pendiente"}
+
+[usuario nuevo] POST /api/v1/sesion/contrasena/
+  cuerpo enviado: {"contrasena_actual": "Or9QwH87qD0Thb-O", "contrasena_nueva": "NuevaDelUsuario2026", "confirmacion": "NuevaDelUsuario2026"}
+  -> HTTP 200
+  {"cambiada":true}
+
+  GET /pacientes/ tras cambiar la contraseña -> HTTP 200
+  >>> DEF-13 el usuario puede entrar: COINCIDE — obtenido: temporal: HTTP 200, debe_cambiar=True; antes del cambio HTTP 422 cambio-de-contrasena-pendiente; cambio HTTP 200; después HTTP 200
+
+==============================================================================
+CP-10 / DEF-14 — Horario de una sede nueva
+==============================================================================
+
+[gerencia] POST /api/v1/sedes/  (X-Sede: 51)
+  cuerpo enviado: {"nombre": "Sede Prueba P9", "direccion": "Calle de Prueba 9", "telefono": "054-000009", "horario": [{"dia_semana": 0, "hora_apertura": "09:00", "hora_cierre": "17:00"}, {"dia_semana": 5, "hora_apertura": "09:00", "hora_cierre": "12:00"}]}
+  -> HTTP 201
+  {"id":53,"nombre":"Sede Prueba P9","direccion":"Calle de Prueba 9","telefono":"054-000009","esta_activa":true,"horarios":[{"id":285,"dia_semana":0,"hora_apertura":"09:00:00","hora_cierre":"17:00:00","esta_abierta":true},{"id":286,"dia_semana":5,"hora_apertura":"09:00:00","hora_cierre":"12:00:00","esta_abierta":true}],"creado_en":"2026-11-18T14:36:52.519150-05:00"}
+  >>> CP-10 alta con horario: COINCIDE — obtenido: HTTP 201; días abiertos [0, 5]
+
+[gerencia] PATCH /api/v1/sedes/53/  (X-Sede: 51)
+  cuerpo enviado: {"horario": [{"dia_semana": 1, "hora_apertura": "08:00", "hora_cierre": "18:00"}]}
+  -> HTTP 200
+  {"id":53,"nombre":"Sede Prueba P9","direccion":"Calle de Prueba 9","telefono":"054-000009","esta_activa":true,"horarios":[{"id":287,"dia_semana":1,"hora_apertura":"08:00:00","hora_cierre":"18:00:00","esta_abierta":true}],"creado_en":"2026-11-18T14:36:52.519150-05:00"}
+  >>> CP-10 edición del horario: COINCIDE — obtenido: HTTP 200; días abiertos [1]
+
+[gerencia] PATCH /api/v1/sedes/53/  (X-Sede: 51)
+  cuerpo enviado: {"horario": [{"dia_semana": 2, "hora_apertura": "18:00", "hora_cierre": "08:00"}]}
+  -> HTTP 422
+  {"type":"https://podocenter.pe/errores/horario-invalido","title":"La operación no cumple una regla del negocio","status":422,"detail":"El miércoles, la hora de cierre debe ser posterior a la de apertura.","codigo":"horario-invalido"}
+  >>> CP-10 cierre antes de apertura: COINCIDE — obtenido: HTTP 422 horario-invalido
+
+==============================================================================
+CP-11 / DEF-15 — Nombres repetidos y DELETE de sede o servicio con citas
+==============================================================================
+
+[gerencia] POST /api/v1/sedes/  (X-Sede: 51)
+  cuerpo enviado: {"nombre": "Sede Cercado", "direccion": "Otra 1"}
+  -> HTTP 422
+  {"type":"https://podocenter.pe/errores/sede-duplicada","title":"La operación no cumple una regla del negocio","status":422,"detail":"Ya existe una sede con ese nombre.","codigo":"sede-duplicada"}
+  >>> CP-11 sede repetida: COINCIDE — obtenido: HTTP 422 sede-duplicada
+
+[gerencia] POST /api/v1/servicios/  (X-Sede: 51)
+  cuerpo enviado: {"nombre": "Quiropodia general", "duracion_minutos": 30, "precio": "10.00"}
+  -> HTTP 422
+  {"type":"https://podocenter.pe/errores/servicio-duplicado","title":"La operación no cumple una regla del negocio","status":422,"detail":"Ya existe un servicio con ese nombre.","codigo":"servicio-duplicado"}
+  >>> CP-11 servicio repetido: COINCIDE — obtenido: HTTP 422 servicio-duplicado
+
+[gerencia] DELETE /api/v1/sedes/51/  (X-Sede: 51)
+  -> HTTP 405
+  {"type":"https://podocenter.pe/errores/generico","title":"Method Not Allowed","status":405,"detail":{"detail":"Método \"DELETE\" no permitido."}}
+  >>> CP-11 DELETE sede con citas: COINCIDE — obtenido: HTTP 405
+
+[gerencia] DELETE /api/v1/servicios/139/  (X-Sede: 51)
+  -> HTTP 405
+  {"type":"https://podocenter.pe/errores/generico","title":"Method Not Allowed","status":405,"detail":{"detail":"Método \"DELETE\" no permitido."}}
+  >>> CP-11 DELETE servicio con citas: COINCIDE — obtenido: HTTP 405
+
+==============================================================================
+CP-13 / DEF-16 — Duración del servicio: 9, 10, 240 y 241 minutos
+==============================================================================
+
+[gerencia] POST /api/v1/servicios/  (X-Sede: 51)
+  cuerpo enviado: {"nombre": "Servicio de prueba P9 (9 min)", "duracion_minutos": 9, "precio": "10.00"}
+  -> HTTP 422
+  {"type":"https://podocenter.pe/errores/duracion-fuera-de-rango","title":"La operación no cumple una regla del negocio","status":422,"detail":"La duración debe estar entre 10 y 240 minutos.","codigo":"duracion-fuera-de-rango"}
+  >>> CP-13 9 min: COINCIDE — obtenido: HTTP 422 duracion-fuera-de-rango
+
+[gerencia] POST /api/v1/servicios/  (X-Sede: 51)
+  cuerpo enviado: {"nombre": "Servicio de prueba P9 (10 min)", "duracion_minutos": 10, "precio": "10.00"}
+  -> HTTP 201
+  {"id":143,"nombre":"Servicio de prueba P9 (10 min)","descripcion":"","duracion_minutos":10,"precio":"10.00","esta_activo":true,"creado_en":"2026-11-18T14:36:53.092857-05:00","insumos_habituales":[]}
+  >>> CP-13 10 min: COINCIDE — obtenido: HTTP 201
+
+[gerencia] POST /api/v1/servicios/  (X-Sede: 51)
+  cuerpo enviado: {"nombre": "Servicio de prueba P9 (240 min)", "duracion_minutos": 240, "precio": "10.00"}
+  -> HTTP 201
+  {"id":144,"nombre":"Servicio de prueba P9 (240 min)","descripcion":"","duracion_minutos":240,"precio":"10.00","esta_activo":true,"creado_en":"2026-11-18T14:36:53.166680-05:00","insumos_habituales":[]}
+  >>> CP-13 240 min: COINCIDE — obtenido: HTTP 201
+
+[gerencia] POST /api/v1/servicios/  (X-Sede: 51)
+  cuerpo enviado: {"nombre": "Servicio de prueba P9 (241 min)", "duracion_minutos": 241, "precio": "10.00"}
+  -> HTTP 422
+  {"type":"https://podocenter.pe/errores/duracion-fuera-de-rango","title":"La operación no cumple una regla del negocio","status":422,"detail":"La duración debe estar entre 10 y 240 minutos.","codigo":"duracion-fuera-de-rango"}
+  >>> CP-13 241 min: COINCIDE — obtenido: HTTP 422 duracion-fuera-de-rango
+
+==============================================================================
+CP-25 / DEF-17 — Cita en una sede o con un servicio inactivo
+==============================================================================
+
+[gerencia] PATCH /api/v1/servicios/143/  (X-Sede: 51)
+  cuerpo enviado: {"esta_activo": false}
+  -> HTTP 200
+  {"id":143,"nombre":"Servicio de prueba P9 (10 min)","descripcion":"","duracion_minutos":10,"precio":"10.00","esta_activo":false,"creado_en":"2026-11-18T14:36:53.092857-05:00","insumos_habituales":[]}
+
+[gerencia] POST /api/v1/citas/  (X-Sede: 51)
+  cuerpo enviado: {"sede": 51, "paciente": 274, "profesional": 98, "servicio": 143, "inicio": "2026-11-19T18:15:00-05:00"}
+  -> HTTP 422
+  {"type":"https://podocenter.pe/errores/servicio-inactivo","title":"La operación no cumple una regla del negocio","status":422,"detail":"El servicio está desactivado y no admite citas.","codigo":"servicio-inactivo"}
+  >>> CP-25 servicio inactivo: COINCIDE — obtenido: HTTP 422 servicio-inactivo
+
+[gerencia] PATCH /api/v1/sedes/53/  (X-Sede: 51)
+  cuerpo enviado: {"esta_activa": false}
+  -> HTTP 200
+  {"id":53,"nombre":"Sede Prueba P9","direccion":"Calle de Prueba 9","telefono":"054-000009","esta_activa":false,"horarios":[{"id":287,"dia_semana":1,"hora_apertura":"08:00:00","hora_cierre":"18:00:00","esta_abierta":true}],"creado_en":"2026-11-18T14:36:52.519150-05:00"}
+
+[gerencia] POST /api/v1/citas/  (X-Sede: 51)
+  cuerpo enviado: {"sede": 53, "paciente": 274, "profesional": 98, "servicio": 139, "inicio": "2026-11-19T18:15:00-05:00"}
+  -> HTTP 422
+  {"type":"https://podocenter.pe/errores/sede-inactiva","title":"La operación no cumple una regla del negocio","status":422,"detail":"La sede está desactivada y no admite citas.","codigo":"sede-inactiva"}
+  >>> CP-25 sede inactiva: COINCIDE — obtenido: HTTP 422 sede-inactiva
+
+==============================================================================
+Resumen
+==============================================================================
+COINCIDE     | CP-02                            | esperado: 401 idéntico en ambos casos | obtenido: 401 y 401; cuerpos idénticos
+NO COINCIDE  | CP-03                            | esperado: sexto intento rechazado por bloqueo temporal | obtenido: HTTP 200 (entró: no hay bloqueo)
+COINCIDE     | CP-20                            | esperado: 405 | obtenido: HTTP 405
+COINCIDE     | CP-32 sin stock                  | esperado: 422 stock-insuficiente, sin atención, stock igual, cita programada | obtenido: HTTP 422 stock-insuficiente; atenciones=0; stock 12->12; cita PROGRAMADA
+COINCIDE     | CP-32 con stock                  | esperado: 201, stock -1, monto 65.00, cita ATENDIDA | obtenido: HTTP 201; stock 12->11; monto 65.00; cita ATENDIDA
+COINCIDE     | CP-29                            | esperado: rechazo (422) y la cita sigue ATENDIDA | obtenido: HTTP 422 cita-no-cancelable; cita ATENDIDA
+COINCIDE     | CP-42 con atenciones             | esperado: detalle con la atención de CP-32 y total = suma | obtenido: HTTP 200; 1 atención(es); total 65.00; suma 65.00
+COINCIDE     | CP-42 sin atenciones             | esperado: cantidad 0 y total 0.00 | obtenido: HTTP 200; cantidad 0; total 0.00
+COINCIDE     | CP-07 cambio de rol              | esperado: 422 ultimo-administrador | obtenido: HTTP 422 ultimo-administrador
+COINCIDE     | CP-07 desactivar por PATCH       | esperado: no queda desactivada | obtenido: HTTP 200; esta_activo después = True
+COINCIDE     | CP-07 desactivar por DELETE      | esperado: 422 ultimo-administrador | obtenido: HTTP 422 ultimo-administrador; esta_activo después = True
+COINCIDE     | DEF-12 sedes_ids                 | esperado: 200 y las dos sedes asignadas | obtenido: HTTP 200; sedes [51, 52]
+COINCIDE     | DEF-13 alta                      | esperado: 201 | obtenido: HTTP 201; ¿devuelve contrasena_temporal? True
+NO COINCIDE  | DEF-13 la admin define la contraseña | esperado: entra con la contraseña que eligió la admin | obtenido: HTTP 401
+COINCIDE     | DEF-13 el usuario puede entrar   | esperado: entra y, tras cambiar la temporal, trabaja | obtenido: temporal: HTTP 200, debe_cambiar=True; antes del cambio HTTP 422 cambio-de-contrasena-pendiente; cambio HTTP 200; después HTTP 200
+COINCIDE     | CP-10 alta con horario           | esperado: 201 con lunes y sábado abiertos | obtenido: HTTP 201; días abiertos [0, 5]
+COINCIDE     | CP-10 edición del horario        | esperado: 200 con solo el martes abierto | obtenido: HTTP 200; días abiertos [1]
+COINCIDE     | CP-10 cierre antes de apertura   | esperado: 422 horario-invalido | obtenido: HTTP 422 horario-invalido
+COINCIDE     | CP-11 sede repetida              | esperado: 422 sede-duplicada | obtenido: HTTP 422 sede-duplicada
+COINCIDE     | CP-11 servicio repetido          | esperado: 422 servicio-duplicado | obtenido: HTTP 422 servicio-duplicado
+COINCIDE     | CP-11 DELETE sede con citas      | esperado: 405 (sin DELETE; la baja es desactivar) | obtenido: HTTP 405
+COINCIDE     | CP-11 DELETE servicio con citas  | esperado: 405 (sin DELETE; la baja es desactivar) | obtenido: HTTP 405
+COINCIDE     | CP-13 9 min                      | esperado: 422 | obtenido: HTTP 422 duracion-fuera-de-rango
+COINCIDE     | CP-13 10 min                     | esperado: 201 | obtenido: HTTP 201
+COINCIDE     | CP-13 240 min                    | esperado: 201 | obtenido: HTTP 201
+COINCIDE     | CP-13 241 min                    | esperado: 422 | obtenido: HTTP 422 duracion-fuera-de-rango
+COINCIDE     | CP-25 servicio inactivo          | esperado: 422 servicio-inactivo | obtenido: HTTP 422 servicio-inactivo
+COINCIDE     | CP-25 sede inactiva              | esperado: 422 sede-inactiva | obtenido: HTTP 422 sede-inactiva
