@@ -4,6 +4,7 @@ from datetime import date
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from apps.core.errores import ReglaDeNegocio
 from apps.core.permisos import TieneRol
@@ -11,7 +12,12 @@ from apps.core.vistas import ContextoDeCentro
 from apps.usuarios.roles import Rol
 
 from .models import Cita
-from .serializers import CancelacionSerializer, CitaSerializer
+from .recordatorios import actualizar_configuracion, configuracion_del_centro
+from .serializers import (
+    CancelacionSerializer,
+    CitaSerializer,
+    ConfiguracionRecordatoriosSerializer,
+)
 from .servicios import (
     agenda_del_dia,
     cancelar_cita,
@@ -123,3 +129,22 @@ class CitaViewSet(ContextoDeCentro, mixins.CreateModelMixin, mixins.ListModelMix
             },
             "citas": datos,
         })
+
+
+class ConfiguracionDeRecordatorios(ContextoDeCentro, APIView):
+    """RF07 — la administradora activa o desactiva los recordatorios del
+    centro, fija la hora de envío y elige el canal (decisión de la Gerencia)."""
+
+    permission_classes = [TieneRol]
+    roles_permitidos = {Rol.ADMIN_CENTRO}
+
+    def get(self, request):
+        configuracion = configuracion_del_centro(request.centro_id)
+        return Response(ConfiguracionRecordatoriosSerializer(configuracion).data)
+
+    def put(self, request):
+        entrada = ConfiguracionRecordatoriosSerializer(data=request.data, partial=True)
+        entrada.is_valid(raise_exception=True)
+        configuracion = actualizar_configuracion(centro_id=request.centro_id,
+                                                 datos=dict(entrada.validated_data))
+        return Response(ConfiguracionRecordatoriosSerializer(configuracion).data)

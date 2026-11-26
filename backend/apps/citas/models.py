@@ -6,6 +6,8 @@ una restricción EXCLUDE sobre un rango de tiempo, y no solo en el
 servidor, porque dos peticiones simultáneas pueden pasar la validación de
 aplicación y chocar al escribir.
 """
+from datetime import time
+
 from django.contrib.postgres.constraints import ExclusionConstraint
 from django.contrib.postgres.fields import DateTimeRangeField, RangeOperators
 from django.db import models
@@ -80,12 +82,48 @@ class Cita(ModeloDeCentro):
         return self.estado == self.Estado.PROGRAMADA and self.fin > timezone.now()
 
 
+class CanalDeRecordatorio(models.TextChoices):
+    """Los canales de `apps.citas.canales`; el código es el mismo."""
+
+    CORREO = "CORREO", "Correo electrónico"
+    WHATSAPP_MANUAL = "WHATSAPP_MANUAL", "WhatsApp (envío manual desde la agenda)"
+    WHATSAPP_API = "WHATSAPP_API", "WhatsApp automático (pendiente de aprobación, CC-28)"
+
+
+class ConfiguracionRecordatorios(ModeloDeCentro):
+    """Cómo y cuándo recuerda las citas cada centro (RF07).
+
+    Una por centro. Nace desactivada y con el canal manual: activar el envío
+    automático y elegir el canal es una decisión de la Gerencia (costo del
+    WhatsApp, riesgo R9), no del sistema. La hora es la hora local a partir
+    de la cual se avisa de las citas del día siguiente.
+    """
+
+    activo = models.BooleanField(default=False)
+    hora_envio = models.TimeField(default=time(18, 0))
+    canal = models.CharField(max_length=16, choices=CanalDeRecordatorio.choices,
+                             default=CanalDeRecordatorio.WHATSAPP_MANUAL)
+
+    class Meta:
+        db_table = "configuracion_recordatorios"
+        verbose_name = "configuración de recordatorios"
+        verbose_name_plural = "configuraciones de recordatorios"
+        constraints = [
+            models.UniqueConstraint(fields=["centro"],
+                                    name="uq_configuracion_recordatorios_centro"),
+        ]
+
+    def __str__(self) -> str:
+        estado = "activos" if self.activo else "desactivados"
+        return f"Recordatorios {estado} por {self.get_canal_display()} a las {self.hora_envio}"
+
+
 class Recordatorio(ModeloDeCentro):
-    """Recordatorio de una cita al paciente (RF07, CU15 y CU16 del informe).
+    """Registro del recordatorio de una cita (RF07, CU15 y CU16 del informe).
 
     Uno por cita: la restricción única es la que garantiza que un reintento
-    nunca duplica el mensaje. Se crea al intentar el primer envío, 24 horas
-    antes de la cita, y guarda lo que devolvió el proveedor.
+    nunca duplica el mensaje. Se crea al intentar el primer envío y guarda el
+    canal, el destino, los intentos y el resultado de cada uno.
     """
 
     class Estado(models.TextChoices):
@@ -95,8 +133,9 @@ class Recordatorio(ModeloDeCentro):
         CANCELADO = "CANCELADO", "Cancelado"
 
     cita = models.OneToOneField(Cita, on_delete=models.CASCADE, related_name="recordatorio")
-    canal = models.CharField(max_length=10, default="WHATSAPP")
-    destino = models.CharField(max_length=20)
+    canal = models.CharField(max_length=16, choices=CanalDeRecordatorio.choices)
+    # Un correo puede tener hasta 254 caracteres (RFC 5321).
+    destino = models.CharField(max_length=254)
     estado = models.CharField(max_length=10, choices=Estado.choices, default=Estado.PENDIENTE)
     intentos = models.PositiveSmallIntegerField(default=0)
     id_externo = models.CharField(max_length=120, blank=True)
