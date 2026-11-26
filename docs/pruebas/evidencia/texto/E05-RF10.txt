@@ -1,0 +1,59 @@
+$ pytest -vv backend/apps/atenciones/tests/test_registrar_atencion.py backend/apps/atenciones/tests/test_api_atenciones.py backend/apps/atenciones/tests/test_insumos.py
+# Fecha: 2026-11-26T08:54:12-05:00 · Commit: 1977d6c · rama feat/rf16-rf07-rf18 · RF10 registro de la atención
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-8.3.4, pluggy-1.7.0 -- C:\Users\danie\AppData\Local\Temp\claude\2b75186625f2af13\da2c9158-aeeb-4a99-bce2-b355f8c742f3\scratchpad\venv312\Scripts\python.exe
+cachedir: .pytest_cache
+django: version: 5.2.19, settings: config.settings.dev (from env)
+rootdir: C:\Users\danie\Documents\UNIVERSIDAD\SEMESTRE 10\PROYECTO DE FIN DE CARRERA\podologia\podocenter
+configfile: pyproject.toml
+plugins: cov-6.0.0, django-4.9.0
+collecting ... collected 43 items
+
+backend/apps/atenciones/tests/test_registrar_atencion.py::test_rechaza_registrar_la_atencion_de_una_cita_cancelada PASSED [  2%]
+backend/apps/atenciones/tests/test_registrar_atencion.py::test_rechaza_registrar_la_atencion_de_una_cita_que_todavia_no_llega PASSED [  4%]
+backend/apps/atenciones/tests/test_registrar_atencion.py::test_rechaza_una_segunda_atencion_de_la_misma_cita PASSED [  6%]
+backend/apps/atenciones/tests/test_registrar_atencion.py::test_rechaza_una_cita_que_no_pertenece_al_centro_que_registra PASSED [  9%]
+backend/apps/atenciones/tests/test_registrar_atencion.py::test_rechaza_una_cita_de_otra_sede_que_la_activa PASSED [ 11%]
+backend/apps/atenciones/tests/test_registrar_atencion.py::test_rechaza_el_registro_si_no_hay_sede_activa PASSED [ 13%]
+backend/apps/atenciones/tests/test_registrar_atencion.py::test_rechaza_la_atencion_de_quien_no_esta_asignado_a_la_sede_de_la_cita PASSED [ 16%]
+backend/apps/atenciones/tests/test_registrar_atencion.py::test_otro_centro_no_ve_la_atencion_aunque_consulte_sin_filtrar PASSED [ 18%]
+backend/apps/atenciones/tests/test_registrar_atencion.py::test_registra_la_atencion_con_los_datos_de_la_cita_y_la_marca_como_atendida PASSED [ 20%]
+backend/apps/atenciones/tests/test_registrar_atencion.py::test_si_falla_el_cierre_de_la_cita_no_queda_la_atencion PASSED [ 23%]
+backend/apps/atenciones/tests/test_registrar_atencion.py::test_la_ficha_de_la_atencion_no_cambia_si_despues_se_edita_la_cita PASSED [ 25%]
+backend/apps/atenciones/tests/test_registrar_atencion.py::test_las_observaciones_clinicas_se_guardan_cifradas_en_la_columna PASSED [ 27%]
+backend/apps/atenciones/tests/test_registrar_atencion.py::test_la_auditoria_registra_el_alta_y_el_cierre_sin_copiar_las_notas PASSED [ 30%]
+backend/apps/atenciones/tests/test_api_atenciones.py::test_post_registra_la_atencion_y_devuelve_los_datos_copiados_de_la_cita PASSED [ 32%]
+backend/apps/atenciones/tests/test_api_atenciones.py::test_una_cita_no_atendible_devuelve_el_error_en_formato_rfc_9457 PASSED [ 34%]
+backend/apps/atenciones/tests/test_api_atenciones.py::test_la_segunda_atencion_de_una_cita_llega_con_su_propio_codigo PASSED [ 37%]
+backend/apps/atenciones/tests/test_api_atenciones.py::test_sin_la_cabecera_de_sede_la_api_rechaza_el_registro PASSED [ 39%]
+backend/apps/atenciones/tests/test_api_atenciones.py::test_una_cita_de_otro_centro_responde_como_si_no_existiera PASSED [ 41%]
+backend/apps/atenciones/tests/test_api_atenciones.py::test_el_listado_no_expone_las_observaciones_y_la_ficha_deja_rastro PASSED [ 44%]
+backend/apps/atenciones/tests/test_api_atenciones.py::test_la_api_no_permite_editar_ni_borrar_una_atencion PASSED [ 46%]
+backend/apps/atenciones/tests/test_api_atenciones.py::test_la_administradora_del_centro_tambien_registra_atenciones PASSED [ 48%]
+backend/apps/atenciones/tests/test_api_atenciones.py::test_el_administrador_de_plataforma_no_registra_ni_lee_atenciones PASSED [ 51%]
+backend/apps/atenciones/tests/test_api_atenciones.py::test_sin_sesion_no_se_registra_ninguna_atencion PASSED [ 53%]
+backend/apps/atenciones/tests/test_api_atenciones.py::test_la_agenda_marca_la_cita_que_ya_tiene_atencion PASSED [ 55%]
+backend/apps/atenciones/tests/test_api_atenciones.py::test_la_marca_de_atencion_no_suma_una_consulta_por_cita PASSED [ 58%]
+backend/apps/atenciones/tests/test_api_atenciones.py::test_el_historial_de_un_paciente_trae_el_nombre_de_la_sede PASSED [ 60%]
+backend/apps/atenciones/tests/test_api_atenciones.py::test_el_monto_cobrado_es_obligatorio PASSED [ 62%]
+backend/apps/atenciones/tests/test_api_atenciones.py::test_no_admite_un_monto_negativo PASSED [ 65%]
+backend/apps/atenciones/tests/test_api_atenciones.py::test_el_monto_cobrado_puede_diferir_del_precio_del_catalogo PASSED [ 67%]
+backend/apps/atenciones/tests/test_insumos.py::test_la_atencion_descuenta_el_stock_y_deja_una_salida_por_insumo PASSED [ 69%]
+backend/apps/atenciones/tests/test_insumos.py::test_sin_stock_suficiente_no_se_registra_nada PASSED [ 72%]
+backend/apps/atenciones/tests/test_insumos.py::test_descuenta_de_la_sede_de_la_cita_y_no_de_otra PASSED [ 74%]
+backend/apps/atenciones/tests/test_insumos.py::test_un_insumo_mal_formado_se_rechaza_con_su_codigo[insumos0-producto-requerido] PASSED [ 76%]
+backend/apps/atenciones/tests/test_insumos.py::test_un_insumo_mal_formado_se_rechaza_con_su_codigo[insumos1-cantidad-invalida] PASSED [ 79%]
+backend/apps/atenciones/tests/test_insumos.py::test_un_insumo_mal_formado_se_rechaza_con_su_codigo[insumos2-cantidad-invalida] PASSED [ 81%]
+backend/apps/atenciones/tests/test_insumos.py::test_el_mismo_producto_dos_veces_se_rechaza PASSED [ 83%]
+backend/apps/atenciones/tests/test_insumos.py::test_un_producto_inactivo_no_se_consume PASSED [ 86%]
+backend/apps/atenciones/tests/test_insumos.py::test_un_producto_de_otro_centro_no_se_consume PASSED [ 88%]
+backend/apps/atenciones/tests/test_insumos.py::test_la_ficha_de_la_atencion_trae_sus_insumos PASSED [ 90%]
+backend/apps/atenciones/tests/test_insumos.py::test_sin_insumos_la_atencion_se_registra_igual PASSED [ 93%]
+backend/apps/atenciones/tests/test_insumos.py::test_la_base_impide_una_salida_sin_atencion PASSED [ 95%]
+backend/apps/atenciones/tests/test_registrar_atencion.py::test_la_base_impide_dos_atenciones_de_la_misma_cita_aunque_se_salte_el_servicio PASSED [ 97%]
+backend/apps/atenciones/tests/test_registrar_atencion.py::test_la_base_rechaza_un_monto_negativo_aunque_se_salte_el_servicio PASSED [100%]
+
+============================= 43 passed in 30.88s =============================
+
+[código de salida: 0]

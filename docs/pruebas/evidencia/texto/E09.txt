@@ -1,0 +1,6 @@
+$ DJANGO_SETTINGS_MODULE=config.settings.prod DJANGO_ALLOWED_HOSTS=podocenter.example DJANGO_CSRF_ORIGINS=https://podocenter.example DJANGO_SECRET_KEY=**** CLAVE_CIFRADO_CAMPOS=**** python manage.py check --deploy
+# Fecha: 2026-11-26T08:42:21-05:00 · Commit: 1977d6c · rama feat/rf16-rf07-rf18 · valores ficticios
+
+System check identified no issues (0 silenced).
+
+[código de salida: 0]

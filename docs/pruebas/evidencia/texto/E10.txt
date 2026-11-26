@@ -1,0 +1,6 @@
+$ python manage.py makemigrations --check --dry-run
+# Fecha: 2026-11-26T08:42:26-05:00 · Commit: 1977d6c · rama feat/rf16-rf07-rf18
+
+No changes detected
+
+[código de salida: 0]

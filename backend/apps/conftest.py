@@ -5,7 +5,7 @@ from django.utils import timezone
 from apps.catalogo.models import Servicio
 from apps.core.contexto import fijar_contexto
 from apps.core.models import Centro
-from apps.core.soporte_pruebas import activar_centro
+from apps.core.soporte_pruebas import activar_centro, con_segundo_factor
 from apps.sedes.models import HorarioSede, Sede
 from apps.usuarios.models import AsignacionSede, Usuario
 from apps.usuarios.roles import Rol
@@ -58,6 +58,7 @@ def administradora(centro, sede) -> Usuario:
         nombres="Lucía", apellidos="Ramos", rol=Rol.ADMIN_CENTRO, centro=centro,
     )
     AsignacionSede.objects.create(usuario=usuario, sede=sede, es_predeterminada=True)
+    con_segundo_factor(usuario)
     return usuario
 
 

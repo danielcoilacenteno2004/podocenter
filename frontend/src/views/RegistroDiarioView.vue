@@ -5,9 +5,11 @@
 // tabla de ingresos aparte que pueda descuadrar (Informe, Tabla 39).
 //
 // Del wireframe no se construyen las «ventas» (salen del inventario, que no
-// existe) ni «Exportar» (P22, diferida).
+// existe). «Exportar» (P22, RF16) descarga el día elegido, o un rango de
+// hasta 31 días, en PDF o Excel; el servidor arma el archivo con la misma
+// consulta de esta pantalla, así que el total es el mismo.
 import { onMounted, ref, watch } from 'vue'
-import { api } from '../services/api'
+import { api, descargarArchivo } from '../services/api'
 import { useSesion } from '../stores/sesion'
 import TarjetaSeccion from '../components/TarjetaSeccion.vue'
 
@@ -40,6 +42,28 @@ async function cargar () {
 
 watch(fecha, cargar)
 onMounted(cargar)
+
+// Exportación (RF16): por omisión, el día que se está viendo.
+const variosDias = ref(false)
+const hasta = ref(fecha.value)
+const exportando = ref(null)
+const errorExportar = ref(null)
+watch(fecha, (valor) => { if (!variosDias.value || hasta.value < valor) hasta.value = valor })
+
+async function exportar (formato) {
+  exportando.value = formato
+  errorExportar.value = null
+  try {
+    const params = variosDias.value
+      ? { formato, desde: fecha.value, hasta: hasta.value }
+      : { formato, fecha: fecha.value }
+    await descargarArchivo('/reportes/registro-diario/exportar/', params)
+  } catch (problema) {
+    errorExportar.value = problema.mensaje
+  } finally {
+    exportando.value = null
+  }
+}
 </script>
 
 <template>
@@ -53,11 +77,32 @@ onMounted(cargar)
 
     <form class="filtros" aria-label="Día del registro" @submit.prevent>
       <div class="campo">
-        <label for="fecha-registro">Fecha</label>
+        <label for="fecha-registro">{{ variosDias ? 'Desde' : 'Fecha' }}</label>
         <input id="fecha-registro" v-model="fecha" type="date">
+      </div>
+      <div v-if="variosDias" class="campo">
+        <label for="fecha-hasta">Hasta (para exportar)</label>
+        <input id="fecha-hasta" v-model="hasta" type="date" :min="fecha">
+      </div>
+      <label class="casilla">
+        <input v-model="variosDias" type="checkbox">
+        Exportar varios días
+      </label>
+      <div class="acciones-exportar">
+        <button type="button" class="secundario" :disabled="exportando !== null"
+                :aria-busy="exportando === 'pdf'" @click="exportar('pdf')">
+          {{ exportando === 'pdf' ? 'Generando…' : 'Exportar PDF' }}
+        </button>
+        <button type="button" class="secundario" :disabled="exportando !== null"
+                :aria-busy="exportando === 'xlsx'" @click="exportar('xlsx')">
+          {{ exportando === 'xlsx' ? 'Generando…' : 'Exportar Excel' }}
+        </button>
       </div>
     </form>
 
+    <p v-if="errorExportar" role="alert">
+      {{ errorExportar }}
+    </p>
     <p v-if="error" role="alert">
       {{ error }}
     </p>
@@ -123,3 +168,8 @@ onMounted(cargar)
     </TarjetaSeccion>
   </main>
 </template>
+
+<style scoped>
+.acciones-exportar { display: flex; gap: .5rem; flex-wrap: wrap; margin-left: auto; }
+.filtros .casilla { margin: 0; padding: .55rem 0; }
+</style>

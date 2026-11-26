@@ -1,0 +1,39 @@
+$ pytest -vv backend/apps/atenciones/tests/test_exportar_registro_diario.py
+# Fecha: 2026-11-26T09:00:25-05:00 · Commit: 1977d6c · rama feat/rf16-rf07-rf18 · RF16 exportación
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-8.3.4, pluggy-1.7.0 -- C:\Users\danie\AppData\Local\Temp\claude\2b75186625f2af13\da2c9158-aeeb-4a99-bce2-b355f8c742f3\scratchpad\venv312\Scripts\python.exe
+cachedir: .pytest_cache
+django: version: 5.2.19, settings: config.settings.dev (from env)
+rootdir: C:\Users\danie\Documents\UNIVERSIDAD\SEMESTRE 10\PROYECTO DE FIN DE CARRERA\podologia\podocenter
+configfile: pyproject.toml
+plugins: cov-6.0.0, django-4.9.0
+collecting ... collected 23 items
+
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_el_pdf_es_un_archivo_pdf_valido_con_el_encabezado PASSED [  4%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_el_excel_es_un_libro_valido_con_el_encabezado PASSED [  8%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_el_total_exportado_es_el_mismo_que_el_de_la_pantalla PASSED [ 13%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_el_rango_suma_lo_mismo_que_los_dias_por_separado PASSED [ 17%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_un_rango_sin_atenciones_exporta_un_archivo_con_total_cero[pdf] PASSED [ 21%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_un_rango_sin_atenciones_exporta_un_archivo_con_total_cero[xlsx] PASSED [ 26%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_solo_exporta_la_sede_activa PASSED [ 30%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_una_sede_no_asignada_no_se_puede_exportar PASSED [ 34%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_la_sede_de_otro_centro_tampoco PASSED [ 39%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_un_nombre_con_formula_no_se_ejecuta_en_el_excel PASSED [ 43%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_cada_exportacion_queda_en_la_auditoria PASSED [ 47%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_los_parametros_invalidos_se_rechazan_con_su_codigo[parametros0-formato-no-soportado] PASSED [ 52%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_los_parametros_invalidos_se_rechazan_con_su_codigo[parametros1-rango-invalido] PASSED [ 56%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_los_parametros_invalidos_se_rechazan_con_su_codigo[parametros2-rango-demasiado-largo] PASSED [ 60%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_los_parametros_invalidos_se_rechazan_con_su_codigo[parametros3-fecha-invalida] PASSED [ 65%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_un_nombre_con_marcas_no_rompe_el_pdf PASSED [ 69%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_neutraliza_los_inicios_de_formula_y_deja_los_numeros[=1+1-'=1+1] PASSED [ 73%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_neutraliza_los_inicios_de_formula_y_deja_los_numeros[+51 958-'+51 958] PASSED [ 78%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_neutraliza_los_inicios_de_formula_y_deja_los_numeros[-2-'-2] PASSED [ 82%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_neutraliza_los_inicios_de_formula_y_deja_los_numeros[@SUMA-'@SUMA] PASSED [ 86%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_neutraliza_los_inicios_de_formula_y_deja_los_numeros[\tx-'\tx] PASSED [ 91%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_neutraliza_los_inicios_de_formula_y_deja_los_numeros[Carmen-Carmen] PASSED [ 95%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_neutraliza_los_inicios_de_formula_y_deja_los_numeros[valor6-esperado6] PASSED [100%]
+
+============================= 23 passed in 11.62s =============================
+
+[código de salida: 0]

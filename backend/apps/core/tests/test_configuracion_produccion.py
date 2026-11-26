@@ -64,3 +64,30 @@ def test_cargar_produccion_no_altera_la_configuracion_en_uso(monkeypatch):
     _cargar(monkeypatch)
 
     assert settings.DATABASES["default"].get("OPTIONS", {}) == antes
+
+
+def _nginx() -> str:
+    from django.conf import settings
+
+    return (settings.BASE_DIR.parent / "infra" / "nginx" / "nginx.conf").read_text(
+        encoding="utf-8")
+
+
+def test_nginx_declara_una_csp_que_no_permite_codigo_en_linea():
+    # DEF-27: sin Content-Security-Policy, un script inyectado en cualquier
+    # pantalla se ejecutaría con la sesión de quien la mira. La política solo
+    # sirve si no reabre la puerta con 'unsafe-inline' o 'unsafe-eval'.
+    linea = next(lin for lin in _nginx().splitlines()
+                 if lin.strip().startswith("add_header Content-Security-Policy"))
+
+    assert "script-src 'self'" in linea
+    assert "frame-ancestors 'none'" in linea
+    assert "unsafe-inline" not in linea
+    assert "unsafe-eval" not in linea
+    assert linea.rstrip().endswith("always;")
+
+
+def test_nginx_no_publica_su_version():
+    # La versión en la cabecera Server le dice a un atacante qué fallos
+    # conocidos probar primero (alerta de ZAP de la Práctica N.° 9).
+    assert "server_tokens off;" in _nginx()

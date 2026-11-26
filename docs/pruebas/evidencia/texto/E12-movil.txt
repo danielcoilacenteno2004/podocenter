@@ -1,0 +1,41 @@
+$ python backend/manage.py cargar_demo ; BASE=http://localhost:5174 NODE_PATH='C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/aff9a092-f9bd-4e67-bc0f-84f4b576f946/scratchpad/pw/node_modules' node docs/pruebas/evidencia/scripts/recorridos.cjs movil
+# Fecha: 2026-11-26T08:45:30-05:00 · Commit: 1977d6c · rama feat/rf16-rf07-rf18
+
+$ python backend/manage.py cargar_demo
+Borrando el centro de demostración anterior…
+  cita omitida (2026-11-28 17:00): La sede atiende de 08:00 a 13:00.
+  3 cita(s) del guion no se crearon (hora ya pasada, sede cerrada o solapamiento).
+  2 cita(s) en curso desde las 08:35, lista(s) para registrar la atención.
+
+Centro de demostración listo: Centro de Podología Pies Sanos E.I.R.L.
+  Sedes          : 2
+  Servicios      : 6
+  Pacientes      : 12
+  Citas en agenda: 18
+  Productos      : 6
+
+Cuentas de acceso (todas con la contraseña ****):
+  gerencia@piessanos.pe        Administrador del centro     sedes: Sede Cercado, Sede Bustamante
+  plataforma@podocenter.pe     Administrador de plataforma  sedes: —
+  k.zapata@piessanos.pe        Podóloga                     sedes: Sede Bustamante
+  podologa@piessanos.pe        Podóloga                     sedes: Sede Cercado, Sede Bustamante
+[código de salida de este comando: 0]
+
+$ BASE=http://localhost:5174 NODE_PATH='C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/aff9a092-f9bd-4e67-bc0f-84f4b576f946/scratchpad/pw/node_modules' node docs/pruebas/evidencia/scripts/recorridos.cjs movil
+[movil] chromium 159.0.8154.6 · {"width":390,"height":844} · 2026-11-26T13:45:37.472Z
+[movil] OK    ingreso (4180 ms) — panel del día abierto con la Sede Cercado (id 5) — img/E12-navegador/movil/01-ingreso.png
+[movil] OK    nueva cita (2849 ms) — aviso: «Cita registrada: María Elena Quispe Mamani, a las 12:00 p. m.» (2026-12-02 12:00) — img/E12-navegador/movil/02-nueva-cita.png
+[movil] OK    cancelar cita (1619 ms) — aviso: «Cita cancelada: María Elena Quispe Mamani, a las 12:00 p. m.» — img/E12-navegador/movil/03-cancelar-cita.png
+[movil] OK    registrar atencion (2441 ms) — 4 interacciones; P11 precargó monto «70.00» y 1 insumo(s); la cita 55 quedó ATENDIDA — img/E12-navegador/movil/04-registrar-atencion.png
+[movil] OK    ficha del paciente (2085 ms) — «María Elena Quispe Mamani» · 1 de 1 atención(es), de la más reciente a la más antigua — img/E12-navegador/movil/05-ficha-del-paciente.png
+[movil] FALLA registrar movimiento (15446 ms) — locator.click: Timeout 15000ms exceeded. — img/E12-navegador/movil/06-registrar-movimiento.png
+[movil] FALLA disponibilidad entre sedes (15417 ms) — locator.click: Timeout 15000ms exceeded. — img/E12-navegador/movil/07-disponibilidad-entre-sedes.png
+[movil] OK    registro diario con atenciones (1190 ms) — 1 atención(es); total S/ 70.00 — img/E12-navegador/movil/08-registro-diario-con-atenciones.png
+[movil] OK    registro diario sin atenciones (1691 ms) — total mostrado: (sin fila de total) · texto: «Registro diario Sede Cercado Fecha Exportar varios días Exportar PDF Exportar Excel No hay atenciones registradas en esta sede para ese día.…» — img/E12-navegador/movil/09-registro-diario-sin-atenciones.png
+[movil] FALLA ancho de las pantallas (4837 ms) — desbordan: /pacientes 469/390 px DESBORDA; /inventario 725/390 px DESBORDA; /registro-diario 425/390 px DESBORDA · todas: /panel 390/390 px; /agenda 390/390 px; /pacientes 469/390 px DESBORDA; /inventario 725/390 px DESBORDA; /registro-diario 425/390 px DESBORDA — img/E12-navegador/movil/10-ancho-de-las-pantallas.png
+[movil] errores de consola: ninguno
+[movil] resumen: 7 de 10 pasos OK
+{"proyecto":"movil","interacciones_rnf02":4,"resultados":[{"paso":"ingreso","resultado":"OK","detalle":"panel del día abierto con la Sede Cercado (id 5)","ms":4180,"archivo":"01-ingreso.png"},{"paso":"nueva cita","resultado":"OK","detalle":"aviso: «Cita registrada: María Elena Quispe Mamani, a las 12:00 p. m.» (2026-12-02 12:00)","ms":2849,"archivo":"02-nueva-cita.png"},{"paso":"cancelar cita","resultado":"OK","detalle":"aviso: «Cita cancelada: María Elena Quispe Mamani, a las 12:00 p. m.»","ms":1619,"archivo":"03-cancelar-cita.png"},{"paso":"registrar atencion","resultado":"OK","detalle":"4 interacciones; P11 precargó monto «70.00» y 1 insumo(s); la cita 55 quedó ATENDIDA","ms":2441,"archivo":"04-registrar-atencion.png"},{"paso":"ficha del paciente","resultado":"OK","detalle":"«María Elena Quispe Mamani» · 1 de 1 atención(es), de la más reciente a la más antigua","ms":2085,"archivo":"05-ficha-del-paciente.png"},{"paso":"registrar movimiento","resultado":"FALLA","detalle":"locator.click: Timeout 15000ms exceeded.","ms":15446,"archivo":"06-registrar-movimiento.png"},{"paso":"disponibilidad entre sedes","resultado":"FALLA","detalle":"locator.click: Timeout 15000ms exceeded.","ms":15417,"archivo":"07-disponibilidad-entre-sedes.png"},{"paso":"registro diario con atenciones","resultado":"OK","detalle":"1 atención(es); total S/ 70.00","ms":1190,"archivo":"08-registro-diario-con-atenciones.png"},{"paso":"registro diario sin atenciones","resultado":"OK","detalle":"total mostrado: (sin fila de total) · texto: «Registro diario Sede Cercado Fecha Exportar varios días Exportar PDF Exportar Excel No hay atenciones registradas en esta sede para ese día.…»","ms":1691,"archivo":"09-registro-diario-sin-atenciones.png"},{"paso":"ancho de las pantallas","resultado":"FALLA","detalle":"desbordan: /pacientes 469/390 px DESBORDA; /inventario 725/390 px DESBORDA; /registro-diario 425/390 px DESBORDA · todas: /panel 390/390 px; /agenda 390/390 px; /pacientes 469/390 px DESBORDA; /inventario 725/390 px DESBORDA; /registro-diario 425/390 px DESBORDA","ms":4837,"archivo":"10-ancho-de-las-pantallas.png"}]}
+[código de salida de este comando: 0]
+
+[código de salida: 0]

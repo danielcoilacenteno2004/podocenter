@@ -5,6 +5,7 @@ atención es un hecho clínico ya ocurrido.
 """
 from datetime import date
 
+from django.http import HttpResponse
 from rest_framework import mixins, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -14,6 +15,7 @@ from apps.core.permisos import TieneRol
 from apps.core.vistas import ContextoDeCentro
 from apps.usuarios.roles import Rol
 
+from .exportacion import exportar_registro
 from .models import Atencion
 from .serializers import AtencionResumenSerializer, AtencionSerializer
 from .servicios import atencion_con_auditoria, registrar_atencion, registro_del_dia
@@ -85,3 +87,47 @@ class RegistroDiario(ContextoDeCentro, APIView):
             "sin_monto": registro["sin_monto"],
         })
 
+
+
+def _fecha_del_parametro(request, nombre: str) -> date | None:
+    texto = request.query_params.get(nombre)
+    if not texto:
+        return None
+    try:
+        return date.fromisoformat(texto)
+    except ValueError as error:
+        raise ReglaDeNegocio(
+            "fecha-invalida", "La fecha debe tener el formato AAAA-MM-DD."
+        ) from error
+
+
+class ExportarRegistroDiario(ContextoDeCentro, APIView):
+    """P22 (RF16) — el registro diario de la sede activa en PDF o Excel.
+
+    GET /api/v1/reportes/registro-diario/exportar/?formato=pdf|xlsx y, o bien
+    `fecha` (un día, por omisión hoy), o bien `desde` y `hasta` (un rango).
+    Mismos roles y misma sede activa que el registro en pantalla: la sede no
+    se acepta como parámetro, sale de la cabecera X-Sede ya validada contra
+    las asignaciones del usuario.
+    """
+
+    permission_classes = [TieneRol]
+    roles_permitidos = {Rol.ADMIN_CENTRO, Rol.PODOLOGA}
+
+    def get(self, request):
+        if request.sede_id is None:
+            raise ReglaDeNegocio(
+                "sin-sede-activa", "Elija la sede de la que quiere exportar el registro."
+            )
+        fecha = _fecha_del_parametro(request, "fecha")
+        desde = _fecha_del_parametro(request, "desde") or fecha or date.today()
+        hasta = _fecha_del_parametro(request, "hasta") or fecha or desde
+        contenido, tipo, nombre = exportar_registro(
+            usuario=request.user, centro_id=request.centro_id, sede_id=request.sede_id,
+            desde=desde, hasta=hasta, formato=(request.query_params.get("formato") or "").lower(),
+        )
+        respuesta = HttpResponse(contenido, content_type=tipo)
+        respuesta["Content-Disposition"] = f'attachment; filename="{nombre}"'
+        # Lleva nombres de pacientes: que no quede en cachés intermedias.
+        respuesta["Cache-Control"] = "no-store"
+        return respuesta

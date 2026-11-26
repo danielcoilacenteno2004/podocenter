@@ -1,0 +1,19 @@
+$ pip-audit --version ; pip-audit -r requirements.txt ; pip-audit
+# Fecha: 2026-11-26T08:33:52-05:00 · Commit: 1977d6c · rama feat/rf16-rf07-rf18
+
+$ pip-audit --version
+pip-audit 2.7.3
+[código de salida de este comando: 0]
+
+$ pip-audit -r requirements.txt
+No known vulnerabilities found
+[código de salida de este comando: 0]
+
+$ pip-audit
+Name   Version ID              Fix Versions
+------ ------- --------------- ------------
+pytest 8.3.4   PYSEC-2026-1845 9.0.3
+Found 1 known vulnerability in 1 package
+[código de salida de este comando: 1]
+
+[código de salida: 1]

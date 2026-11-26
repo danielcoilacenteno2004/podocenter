@@ -181,7 +181,12 @@ def restablecer_contrasena(usuario: Usuario, *, por: Usuario) -> str:
     temporal = contrasena_temporal()
     usuario.set_password(temporal)
     usuario.debe_cambiar_contrasena = True
-    usuario.save(update_fields=["password", "debe_cambiar_contrasena", "actualizado_en"])
+    # Es también la salida para una cuenta bloqueada por intentos fallidos: con
+    # la contraseña nueva, el bloqueo ya no protege nada.
+    usuario.intentos_fallidos_ingreso = 0
+    usuario.ingreso_bloqueado_hasta = None
+    usuario.save(update_fields=["password", "debe_cambiar_contrasena", "intentos_fallidos_ingreso",
+                                "ingreso_bloqueado_hasta", "actualizado_en"])
     registrar("EDICION", "usuario", usuario.pk, {"contrasena": "restablecida"})
     return temporal
 

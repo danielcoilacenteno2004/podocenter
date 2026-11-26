@@ -1,0 +1,53 @@
+$ pytest -vv backend/apps/citas/tests/test_programar_cita.py backend/apps/citas/tests/test_agenda_filtros.py backend/apps/citas/tests/test_api_sin_escritura_directa.py
+# Fecha: 2026-11-26T08:53:48-05:00 · Commit: 1977d6c · rama feat/rf16-rf07-rf18 · RF06 citas sin cruce
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-8.3.4, pluggy-1.7.0 -- C:\Users\danie\AppData\Local\Temp\claude\2b75186625f2af13\da2c9158-aeeb-4a99-bce2-b355f8c742f3\scratchpad\venv312\Scripts\python.exe
+cachedir: .pytest_cache
+django: version: 5.2.19, settings: config.settings.dev (from env)
+rootdir: C:\Users\danie\Documents\UNIVERSIDAD\SEMESTRE 10\PROYECTO DE FIN DE CARRERA\podologia\podocenter
+configfile: pyproject.toml
+plugins: cov-6.0.0, django-4.9.0
+collecting ... collected 37 items
+
+backend/apps/citas/tests/test_programar_cita.py::test_programa_una_cita_y_calcula_el_fin_con_la_duracion_del_servicio PASSED [  2%]
+backend/apps/citas/tests/test_programar_cita.py::test_rechaza_una_segunda_cita_que_se_solapa_con_la_misma_profesional PASSED [  5%]
+backend/apps/citas/tests/test_programar_cita.py::test_permite_reutilizar_el_horario_si_la_cita_anterior_fue_cancelada PASSED [  8%]
+backend/apps/citas/tests/test_programar_cita.py::test_rechaza_una_cita_fuera_del_horario_de_atencion_de_la_sede PASSED [ 10%]
+backend/apps/citas/tests/test_programar_cita.py::test_rechaza_una_cita_en_el_pasado PASSED [ 13%]
+backend/apps/citas/tests/test_programar_cita.py::test_no_deja_cancelar_dos_veces_la_misma_cita PASSED [ 16%]
+backend/apps/citas/tests/test_programar_cita.py::test_una_sede_desactivada_no_admite_citas_nuevas PASSED [ 18%]
+backend/apps/citas/tests/test_programar_cita.py::test_un_servicio_desactivado_no_admite_citas_nuevas PASSED [ 21%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_sin_filtros_devuelve_toda_la_jornada PASSED [ 24%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_el_filtro_por_estado_acota_la_jornada PASSED [ 27%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_el_filtro_por_servicio_acota_la_jornada PASSED [ 29%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_el_filtro_por_profesional_acota_la_jornada PASSED [ 32%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_los_filtros_se_combinan PASSED [ 35%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_un_filtro_sin_sentido_se_ignora_en_lugar_de_romper PASSED [ 37%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_un_estado_inexistente_se_rechaza_con_su_codigo PASSED [ 40%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_una_fecha_mal_escrita_se_rechaza_con_su_codigo PASSED [ 43%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_el_panel_trae_los_tres_segmentos_construidos PASSED [ 45%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_el_panel_no_devuelve_el_segmento_de_inventario PASSED [ 48%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_el_segmento_de_citas_cuenta_por_estado PASSED [ 51%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_el_ingreso_esperado_excluye_las_citas_canceladas PASSED [ 54%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_el_ingreso_confirmado_es_lo_cobrado_y_cuadra_con_el_registro_diario PASSED [ 56%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_el_ingreso_se_desglosa_por_servicio PASSED [ 59%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_la_ocupacion_se_mide_contra_el_horario_de_la_sede PASSED [ 62%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_la_ocupacion_cuenta_la_capacidad_de_cada_profesional PASSED [ 64%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_una_cita_terminada_queda_sin_registrar_y_una_empezada_sigue_en_curso PASSED [ 67%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_el_desglose_trae_el_identificador_del_servicio PASSED [ 70%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_las_siguientes_citas_vienen_en_orden_y_la_primera_es_la_proxima PASSED [ 72%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_una_cancelacion_reprogramada_no_cuenta_como_no_concretada PASSED [ 75%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_la_referencia_promedia_los_mismos_dias_de_las_semanas_anteriores PASSED [ 78%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_la_ocupacion_anticipa_los_siete_dias_siguientes PASSED [ 81%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_un_dia_vacio_no_rompe_el_panel PASSED [ 83%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_la_agenda_trae_el_horario_de_la_sede_ese_dia PASSED [ 86%]
+backend/apps/citas/tests/test_agenda_filtros.py::test_un_dia_en_que_la_sede_no_abre_trae_horario_nulo PASSED [ 89%]
+backend/apps/citas/tests/test_api_sin_escritura_directa.py::test_no_se_puede_solapar_una_cita_editandola_por_la_api PASSED [ 91%]
+backend/apps/citas/tests/test_api_sin_escritura_directa.py::test_no_se_puede_sacar_una_cita_del_horario_de_la_sede_por_la_api PASSED [ 94%]
+backend/apps/citas/tests/test_api_sin_escritura_directa.py::test_una_cita_no_se_borra_se_cancela PASSED [ 97%]
+backend/apps/citas/tests/test_programar_cita.py::test_la_base_de_datos_impide_el_solape_aunque_se_salte_la_capa_de_servicios PASSED [100%]
+
+============================= 37 passed in 20.24s =============================
+
+[código de salida: 0]

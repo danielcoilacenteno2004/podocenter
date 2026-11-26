@@ -30,3 +30,18 @@ def activar_centro(centro_id: int) -> None:
     with connection.cursor() as cursor:
         cursor.execute("SELECT set_config('app.centro_id', %s, false)", [str(centro_id)])
     fijar_contexto(centro_id=centro_id)
+
+
+def con_segundo_factor(usuario):
+    """Deja la cuenta con el segundo factor ya dado de alta (RF18).
+
+    Los roles administrativos no pueden usar la API sin él. Las pruebas que
+    no tratan del factor parten de una cuenta que ya lo tiene, como en la
+    operación normal; devuelve el secreto para las que necesitan un código.
+    """
+    from apps.usuarios.totp import generar_secreto
+
+    usuario.secreto_totp = generar_secreto()
+    usuario.segundo_factor_activo = True
+    usuario.save(update_fields=["secreto_totp", "segundo_factor_activo", "actualizado_en"])
+    return usuario.secreto_totp

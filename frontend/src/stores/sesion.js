@@ -34,10 +34,28 @@ export const useSesion = defineStore('sesion', {
       }
     },
 
+    // Devuelve true si falta el segundo paso (RF18): con el factor activo, la
+    // contraseña sola no abre la sesión y la pantalla pide el código.
     async iniciarSesion (correo, contrasena) {
       const { data } = await api.post('/sesion/ingresar/', { correo, contrasena })
+      if (data.segundo_factor_requerido) return true
       this.usuario = data.usuario
       await this.cargarSedes()
+      return false
+    },
+
+    // Segundo paso del ingreso: el código de la aplicación o uno de recuperación.
+    async verificarSegundoFactor ({ codigo = '', codigoRecuperacion = '' }) {
+      const { data } = await api.post('/sesion/segundo-factor/verificar/', {
+        codigo, codigo_recuperacion: codigoRecuperacion
+      })
+      this.usuario = data.usuario
+      await this.cargarSedes()
+    },
+
+    // Tras confirmar el alta del factor, el servidor devuelve la cuenta al día.
+    actualizarUsuario (usuario) {
+      this.usuario = usuario
     },
 
     async cargarSedes () {

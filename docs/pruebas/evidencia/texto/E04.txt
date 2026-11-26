@@ -1,0 +1,39 @@
+$ pytest -vv -k 'aislamiento or otro_centro or otro_inquilino or rol_sin_privilegios'
+# Fecha: 2026-11-26T08:53:11-05:00 · Commit: 1977d6c · rama feat/rf16-rf07-rf18
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-8.3.4, pluggy-1.7.0 -- C:\Users\danie\AppData\Local\Temp\claude\2b75186625f2af13\da2c9158-aeeb-4a99-bce2-b355f8c742f3\scratchpad\venv312\Scripts\python.exe
+cachedir: .pytest_cache
+django: version: 5.2.19, settings: config.settings.dev (from env)
+rootdir: C:\Users\danie\Documents\UNIVERSIDAD\SEMESTRE 10\PROYECTO DE FIN DE CARRERA\podologia\podocenter
+configfile: pyproject.toml
+testpaths: backend/apps
+plugins: cov-6.0.0, django-4.9.0
+collecting ... collected 397 items / 375 deselected / 22 selected
+
+backend/apps/atenciones/tests/test_api_atenciones.py::test_una_cita_de_otro_centro_responde_como_si_no_existiera PASSED [  4%]
+backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_la_sede_de_otro_centro_tampoco PASSED [  9%]
+backend/apps/atenciones/tests/test_insumos.py::test_un_producto_de_otro_centro_no_se_consume PASSED [ 13%]
+backend/apps/atenciones/tests/test_registrar_atencion.py::test_otro_centro_no_ve_la_atencion_aunque_consulte_sin_filtrar PASSED [ 18%]
+backend/apps/catalogo/tests/test_insumos_habituales.py::test_un_producto_de_otro_centro_no_se_declara PASSED [ 22%]
+backend/apps/catalogo/tests/test_insumos_habituales.py::test_otro_centro_no_ve_los_insumos_habituales PASSED [ 27%]
+backend/apps/core/tests/test_aislamiento_multi_centro.py::test_una_consulta_sin_filtro_solo_devuelve_las_sedes_del_centro_activo PASSED [ 31%]
+backend/apps/core/tests/test_aislamiento_multi_centro.py::test_no_se_puede_leer_una_sede_de_otro_centro_ni_pidiendola_por_su_identificador PASSED [ 36%]
+backend/apps/core/tests/test_aislamiento_multi_centro.py::test_la_tabla_de_centros_no_esta_sujeta_al_aislamiento PASSED [ 40%]
+backend/apps/core/tests/test_aislamiento_multi_centro.py::test_una_peticion_sin_centro_no_hereda_el_centro_de_la_anterior PASSED [ 45%]
+backend/apps/inventario/tests/test_inventario.py::test_un_producto_de_otro_centro_responde_como_si_no_existiera PASSED [ 50%]
+backend/apps/inventario/tests/test_inventario.py::test_las_pruebas_de_aislamiento_corren_con_un_rol_sin_privilegios PASSED [ 54%]
+backend/apps/inventario/tests/test_inventario.py::test_otro_centro_no_ve_productos_stock_ni_movimientos PASSED [ 59%]
+backend/apps/inventario/tests/test_productos_y_minimo.py::test_no_se_toca_el_producto_de_otro_centro PASSED [ 63%]
+backend/apps/sedes/tests/test_api_sedes.py::test_no_se_edita_la_sede_de_otro_centro PASSED [ 68%]
+backend/apps/usuarios/tests/test_api_usuarios.py::test_el_listado_no_muestra_usuarios_de_otro_centro PASSED [ 72%]
+backend/apps/usuarios/tests/test_api_usuarios.py::test_no_se_alcanza_la_ficha_de_un_usuario_de_otro_centro PASSED [ 77%]
+backend/apps/usuarios/tests/test_api_usuarios.py::test_no_se_desactiva_a_un_usuario_de_otro_centro PASSED [ 81%]
+backend/apps/usuarios/tests/test_contrasena_temporal.py::test_no_se_restablece_a_un_usuario_de_otro_centro PASSED [ 86%]
+backend/apps/usuarios/tests/test_editar_usuario.py::test_no_se_asigna_una_sede_de_otro_centro PASSED [ 90%]
+backend/apps/core/tests/test_aislamiento_multi_centro.py::test_la_base_rechaza_escribir_una_fila_con_el_centro_de_otro_inquilino PASSED [ 95%]
+backend/apps/inventario/tests/test_inventario.py::test_la_base_rechaza_escribir_stock_con_el_centro_de_otro_inquilino PASSED [100%]
+
+===================== 22 passed, 375 deselected in 15.69s =====================
+
+[código de salida: 0]

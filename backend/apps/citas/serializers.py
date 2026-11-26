@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Cita
+from .models import CanalDeRecordatorio, Cita, ConfiguracionRecordatorios
 
 
 class CitaSerializer(serializers.ModelSerializer):
@@ -43,7 +43,7 @@ class CitaSerializer(serializers.ModelSerializer):
         if recordatorio is None:
             return None
         return {"estado": recordatorio.estado, "enviado_en": recordatorio.enviado_en,
-                "intentos": recordatorio.intentos}
+                "intentos": recordatorio.intentos, "canal": recordatorio.canal}
 
     def get_tiene_atencion(self, cita) -> bool:
         """Usa la anotación de la consulta; una cita recién creada o recién
@@ -55,3 +55,21 @@ class CitaSerializer(serializers.ModelSerializer):
 class CancelacionSerializer(serializers.Serializer):
     motivo = serializers.CharField(max_length=200)
     crear_reemplazo = serializers.BooleanField(default=False)
+
+
+class ConfiguracionRecordatoriosSerializer(serializers.ModelSerializer):
+    """RF07 — activar los recordatorios, su hora y su canal (por centro)."""
+
+    canal = serializers.ChoiceField(choices=CanalDeRecordatorio.choices, required=False)
+    canales = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ConfiguracionRecordatorios
+        fields = ["activo", "hora_envio", "canal", "canales"]
+
+    def get_canales(self, _configuracion) -> list[dict]:
+        """Los canales que conoce el sistema y si hoy se pueden elegir."""
+        from .canales import CANALES
+
+        return [{"codigo": c.codigo, "nombre": c.nombre, "automatico": c.automatico,
+                 "disponible": c.disponible} for c in CANALES.values()]

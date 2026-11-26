@@ -1,0 +1,111 @@
+$ pytest --cov --cov-branch --cov-report=term-missing ; python -m coverage json -o 'C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/da2c9158-aeeb-4a99-bce2-b355f8c742f3/scratchpad/ev/cobertura-actual.json' && python -c "import json; t=json.load(open('C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/da2c9158-aeeb-4a99-bce2-b355f8c742f3/scratchpad/ev/cobertura-actual.json'))['totals']; print('Sentencias: %d de %d cubiertas = %.2f %%' % (t['covered_lines'], t['num_statements'], 100*t['covered_lines']/t['num_statements'])); print('Ramas:      %d de %d cubiertas = %.2f %%' % (t['covered_branches'], t['num_branches'], 100*t['covered_branches']/t['num_branches'])); print('Combinada (columna Cover): %.2f %%' % t['percent_covered'])"
+# Fecha: 2026-11-26T08:49:06-05:00 · Commit: 1977d6c · rama feat/rf16-rf07-rf18
+
+$ pytest --cov --cov-branch --cov-report=term-missing
+........................................................................ [ 18%]
+........................................................................ [ 36%]
+........................................................................ [ 54%]
+........................................................................ [ 72%]
+........................................................................ [ 90%]
+.....................................                                    [100%]
+
+---------- coverage: platform win32, python 3.12.13-final-0 ----------
+Name                                                             Stmts   Miss Branch BrPart  Cover   Missing
+------------------------------------------------------------------------------------------------------------
+backend\apps\__init__.py                                             0      0      0      0   100%
+backend\apps\atenciones\__init__.py                                  0      0      0      0   100%
+backend\apps\atenciones\admin.py                                    15      0      0      0   100%
+backend\apps\atenciones\exportacion.py                             155      7     40      3    95%   141, 183, 258, 261-272
+backend\apps\atenciones\models.py                                   23      1      0      0    96%   51
+backend\apps\atenciones\serializers.py                              26      0      0      0   100%
+backend\apps\atenciones\servicios.py                                49      0     16      0   100%
+backend\apps\atenciones\urls.py                                      6      0      0      0   100%
+backend\apps\atenciones\views.py                                    65      0      8      0   100%
+backend\apps\catalogo\__init__.py                                    0      0      0      0   100%
+backend\apps\catalogo\admin.py                                       8      0      0      0   100%
+backend\apps\catalogo\models.py                                     27      1      0      0    96%   38
+backend\apps\catalogo\serializers.py                                16      0      0      0   100%
+backend\apps\catalogo\servicios.py                                  64      6     30      2    89%   34-39, 55, 88
+backend\apps\catalogo\urls.py                                        6      0      0      0   100%
+backend\apps\catalogo\views.py                                      26      0      2      0   100%
+backend\apps\citas\__init__.py                                       0      0      0      0   100%
+backend\apps\citas\admin.py                                         13      0      0      0   100%
+backend\apps\citas\canales.py                                       79      5      6      1    93%   122-123, 138, 142, 173
+backend\apps\citas\management\__init__.py                            0      0      0      0   100%
+backend\apps\citas\management\commands\__init__.py                   0      0      0      0   100%
+backend\apps\citas\management\commands\enviar_recordatorios.py      26      1      6      1    94%   28
+backend\apps\citas\models.py                                        73      4      0      0    95%   73, 82, 117-118
+backend\apps\citas\panel.py                                        121      4     20      2    96%   100-101, 107, 294
+backend\apps\citas\recordatorios.py                                 94      1     32      4    96%   95->94, 99->101, 168->162, 181
+backend\apps\citas\serializers.py                                   38      1      2      1    95%   45
+backend\apps\citas\servicios.py                                     81      6     34      4    90%   45, 76, 98-102, 127
+backend\apps\citas\urls.py                                           7      0      0      0   100%
+backend\apps\citas\views.py                                         62      0      4      0   100%
+backend\apps\conftest.py                                            49      0      2      0   100%
+backend\apps\core\__init__.py                                        0      0      0      0   100%
+backend\apps\core\admin.py                                          21      0      0      0   100%
+backend\apps\core\auditoria.py                                      15      0      2      0   100%
+backend\apps\core\campos.py                                         30      4      6      1    86%   32, 40, 48-51
+backend\apps\core\contexto.py                                       16      0      0      0   100%
+backend\apps\core\contexto_http.py                                  27      3      2      0    90%   25-27
+backend\apps\core\errores.py                                        17      1      4      1    90%   36
+backend\apps\core\management\__init__.py                             0      0      0      0   100%
+backend\apps\core\management\commands\__init__.py                    0      0      0      0   100%
+backend\apps\core\management\commands\cargar_demo.py               193      3     52      6    96%   245-246, 248->251, 264->268, 268->exit, 376->397, 392, 427->432
+backend\apps\core\middleware.py                                     10      0      0      0   100%
+backend\apps\core\modelos_base.py                                   10      0      0      0   100%
+backend\apps\core\models.py                                         48      1      0      0    98%   76
+backend\apps\core\permisos.py                                       13      1      2      1    87%   15
+backend\apps\core\serializers.py                                    25      1      4      1    93%   15
+backend\apps\core\servicios.py                                      29      0      4      0   100%
+backend\apps\core\soporte_pruebas.py                                20      0      0      0   100%
+backend\apps\core\urls.py                                            6      0      0      0   100%
+backend\apps\core\views.py                                          32      0      0      0   100%
+backend\apps\core\vistas.py                                         13      0      4      0   100%
+backend\apps\inventario\__init__.py                                  0      0      0      0   100%
+backend\apps\inventario\management\__init__.py                       0      0      0      0   100%
+backend\apps\inventario\management\commands\__init__.py              0      0      0      0   100%
+backend\apps\inventario\management\commands\sembrar_volumen.py      88      3     20      3    94%   60, 80, 151
+backend\apps\inventario\models.py                                   46      1      0      0    98%   30
+backend\apps\inventario\servicios.py                               166     10     82      8    93%   37-38, 68, 73, 167, 178, 194, 207, 223, 228
+backend\apps\inventario\urls.py                                      3      0      0      0   100%
+backend\apps\inventario\views.py                                    72      5     18      5    89%   32, 59, 73, 76, 149
+backend\apps\pacientes\__init__.py                                   0      0      0      0   100%
+backend\apps\pacientes\admin.py                                     14      0      0      0   100%
+backend\apps\pacientes\models.py                                    51      2      0      0    96%   47, 87
+backend\apps\pacientes\serializers.py                               20      4      2      0    73%   29-32
+backend\apps\pacientes\servicios.py                                 30      1      6      1    94%   53
+backend\apps\pacientes\urls.py                                       6      0      0      0   100%
+backend\apps\pacientes\views.py                                     32      8      2      1    74%   36, 44-46, 54-55, 59-60
+backend\apps\sedes\__init__.py                                       0      0      0      0   100%
+backend\apps\sedes\admin.py                                         12      0      0      0   100%
+backend\apps\sedes\models.py                                        33      2      0      0    94%   25, 61
+backend\apps\sedes\serializers.py                                   17      0      0      0   100%
+backend\apps\sedes\servicios.py                                     57      4     22      1    91%   62-65, 77->79
+backend\apps\sedes\urls.py                                           6      0      0      0   100%
+backend\apps\sedes\views.py                                         22      0      0      0   100%
+backend\apps\usuarios\__init__.py                                    0      0      0      0   100%
+backend\apps\usuarios\admin.py                                      58      2     10      2    94%   41->exit, 109-110, 111->exit
+backend\apps\usuarios\models.py                                     80      4      2      1    94%   18, 86, 126, 146
+backend\apps\usuarios\roles.py                                       7      0      0      0   100%
+backend\apps\usuarios\segundo_factor.py                            151      8     34      5    93%   88, 132, 221-222, 244, 273, 304-305
+backend\apps\usuarios\serializers.py                                22      0      2      0   100%
+backend\apps\usuarios\servicios.py                                 107      2     42      3    97%   42, 106, 149->exit
+backend\apps\usuarios\sesion.py                                    100      1     18      1    98%   173
+backend\apps\usuarios\totp.py                                       36      0      6      0   100%
+backend\apps\usuarios\urls.py                                        7      0      0      0   100%
+backend\apps\usuarios\views.py                                      72      0      4      0   100%
+------------------------------------------------------------------------------------------------------------
+TOTAL                                                             2969    108    552     59    95%
+
+397 passed in 228.65s (0:03:48)
+[código de salida de este comando: 0]
+
+$ python -m coverage json -o 'C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/da2c9158-aeeb-4a99-bce2-b355f8c742f3/scratchpad/ev/cobertura-actual.json' && python -c "import json; t=json.load(open('C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/da2c9158-aeeb-4a99-bce2-b355f8c742f3/scratchpad/ev/cobertura-actual.json'))['totals']; print('Sentencias: %d de %d cubiertas = %.2f %%' % (t['covered_lines'], t['num_statements'], 100*t['covered_lines']/t['num_statements'])); print('Ramas:      %d de %d cubiertas = %.2f %%' % (t['covered_branches'], t['num_branches'], 100*t['covered_branches']/t['num_branches'])); print('Combinada (columna Cover): %.2f %%' % t['percent_covered'])"
+Sentencias: 2861 de 2969 cubiertas = 96.36 %
+Ramas:      485 de 552 cubiertas = 87.86 %
+Combinada (columna Cover): 95.03 %
+Wrote JSON report to C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/da2c9158-aeeb-4a99-bce2-b355f8c742f3/scratchpad/ev/cobertura-actual.json
+[código de salida de este comando: 0]
+
+[código de salida: 0]

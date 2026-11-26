@@ -1,0 +1,51 @@
+$ ruff --version ; ruff check . ; bandit --version ; bandit -r backend -ll
+# Fecha: 2026-11-26T09:39:50-05:00 · Commit: 1977d6c · rama feat/rf16-rf07-rf18
+
+$ ruff --version
+ruff 0.8.6
+[código de salida de este comando: 0]
+
+$ ruff check .
+All checks passed!
+[código de salida de este comando: 0]
+
+$ bandit --version
+bandit 1.9.4
+  python version = 3.12.13 (main, May 10 2026, 19:35:37) [MSC v.1944 64 bit (AMD64)]
+[código de salida de este comando: 0]
+
+$ bandit -r backend -ll
+Working... ---------------------------------------- 100% 0:00:03
+Run started:2026-11-26 14:39:58.175205+00:00
+
+Test results:
+	No issues identified.
+
+Code scanned:
+	Total lines of code: 10153
+	Total lines skipped (#nosec): 0
+	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 1
+
+Run metrics:
+	Total issues (by severity):
+		Undefined: 0
+		Low: 693
+		Medium: 0
+		High: 0
+	Total issues (by confidence):
+		Undefined: 0
+		Low: 0
+		Medium: 0
+		High: 693
+Files skipped (0):
+[main]	INFO	profile include tests: None
+[main]	INFO	profile exclude tests: None
+[main]	INFO	cli include tests: None
+[main]	INFO	cli exclude tests: None
+[main]	INFO	running on Python 3.12.13
+[tester]	WARNING	nosec encountered (B105), but no failed test on file backend\apps\conftest.py:14
+[tester]	WARNING	nosec encountered (B105), but no failed test on file backend\apps\core\tests\test_cargar_demo.py:26
+[tester]	WARNING	nosec encountered (B105), but no failed test on file backend\apps\usuarios\tests\test_totp.py:13
+[código de salida de este comando: 0]
+
+[código de salida: 0]

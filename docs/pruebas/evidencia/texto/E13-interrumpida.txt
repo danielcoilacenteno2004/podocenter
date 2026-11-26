@@ -1,0 +1,231 @@
+$ python backend/manage.py cargar_demo ; python backend/manage.py sembrar_volumen ; k6 version ; k6 run --quiet --summary-mode=full docs/pruebas/carga_rnf04.js
+# Fecha: 2026-11-26T09:01:53-05:00 · Commit: 1977d6c · rama feat/rf16-rf07-rf18 · servidor de desarrollo local
+
+$ python backend/manage.py cargar_demo
+Borrando el centro de demostración anterior…
+  cita omitida (2026-11-28 17:00): La sede atiende de 08:00 a 13:00.
+  1 cita(s) del guion no se crearon (hora ya pasada, sede cerrada o solapamiento).
+  2 cita(s) en curso desde las 08:52, lista(s) para registrar la atención.
+
+Centro de demostración listo: Centro de Podología Pies Sanos E.I.R.L.
+  Sedes          : 2
+  Servicios      : 6
+  Pacientes      : 12
+  Citas en agenda: 20
+  Productos      : 6
+
+Cuentas de acceso (todas con la contraseña ****):
+  gerencia@piessanos.pe        Administrador del centro     sedes: Sede Cercado, Sede Bustamante
+  plataforma@podocenter.pe     Administrador de plataforma  sedes: —
+  k.zapata@piessanos.pe        Podóloga                     sedes: Sede Bustamante
+  podologa@piessanos.pe        Podóloga                     sedes: Sede Cercado, Sede Bustamante
+[código de salida de este comando: 0]
+
+$ python backend/manage.py sembrar_volumen
+21600 movimientos sembrados en Pies Sanos (730 días).
+[código de salida de este comando: 0]
+
+$ k6 version
+k6.exe v2.4.0 (commit/dd9395906d, go1.26.11, windows/amd64)
+[código de salida de este comando: 0]
+
+$ k6 run --quiet --summary-mode=full docs/pruebas/carga_rnf04.js
+
+
+  █ THRESHOLDS 
+
+    http_req_duration{scenario:vu01,tipo:disponibilidad}
+    ✓ 'p(95)<2000' p(95)=213.3ms
+
+    http_req_duration{scenario:vu05,tipo:disponibilidad}
+    ✓ 'p(95)<2000' p(95)=313.22ms
+
+    http_req_duration{scenario:vu10,tipo:disponibilidad}
+    ✓ 'p(95)<2000' p(95)=786.17ms
+
+    http_req_duration{scenario:vu20,tipo:disponibilidad}
+    ✓ 'p(95)<2000' p(95)=273.71ms
+
+    http_req_duration{tipo:disponibilidad}
+    ✓ 'p(95)<2000' p(95)=285.51ms
+
+    http_req_failed{scenario:vu01,tipo:disponibilidad}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{scenario:vu05,tipo:disponibilidad}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{scenario:vu10,tipo:disponibilidad}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{scenario:vu20,tipo:disponibilidad}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{tipo:disponibilidad}
+    ✓ 'rate<0.01' rate=0.00%
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 3077    4.532412/s
+    checks_succeeded...: 100.00% 3077 out of 3077
+    checks_failed......: 0.00%   0 out of 3077
+
+    ✓ inicio de sesión 200
+    ✓ disponibilidad 200
+    ✓ dos sedes en la respuesta
+
+    HTTP
+    http_req_blocked..........................: min=0s      med=0s       avg=55.64µs  p(90)=0s       p(95)=0s       p(99)=1.74ms   max=22.75ms 
+    http_req_connecting.......................: min=0s      med=0s       avg=42.84µs  p(90)=0s       p(95)=0s       p(99)=916.7µs  max=22.13ms 
+    http_req_duration.........................: min=73.3ms  med=149.17ms avg=176.91ms p(90)=252.53ms p(95)=332.19ms p(99)=583.17ms max=1.09s   
+      { expected_response:true }..............: min=73.3ms  med=149.17ms avg=176.91ms p(90)=252.53ms p(95)=332.19ms p(99)=583.17ms max=1.09s   
+      { scenario:vu01,tipo:disponibilidad }...: min=85.56ms med=109.72ms avg=127.43ms p(90)=191.58ms p(95)=213.3ms  p(99)=236.75ms max=256.84ms
+      { scenario:vu05,tipo:disponibilidad }...: min=83.01ms med=140.17ms avg=172.83ms p(90)=233.33ms p(95)=313.22ms p(99)=971.76ms max=1.09s   
+      { scenario:vu10,tipo:disponibilidad }...: min=87.66ms med=204.83ms avg=248.25ms p(90)=363.26ms p(95)=786.17ms p(99)=857.81ms max=1s      
+      { scenario:vu20,tipo:disponibilidad }...: min=77.49ms med=142.29ms avg=161.4ms  p(90)=229.23ms p(95)=273.71ms p(99)=433.79ms max=489.71ms
+      { tipo:disponibilidad }.................: min=77.49ms med=148.63ms avg=172.31ms p(90)=241.48ms p(95)=285.51ms p(99)=495.82ms max=1.09s   
+    http_req_failed...........................: 0.00%  0 out of 1572
+      { scenario:vu01,tipo:disponibilidad }...: 0.00%  0 out of 53
+      { scenario:vu05,tipo:disponibilidad }...: 0.00%  0 out of 256
+      { scenario:vu10,tipo:disponibilidad }...: 0.00%  0 out of 179
+      { scenario:vu20,tipo:disponibilidad }...: 0.00%  0 out of 1040
+      { tipo:disponibilidad }.................: 0.00%  0 out of 1528
+    http_req_receiving........................: min=0s      med=2.46ms   avg=3.33ms   p(90)=7.76ms   p(95)=9.87ms   p(99)=13.78ms  max=18.62ms 
+    http_req_sending..........................: min=0s      med=0s       avg=82.08µs  p(90)=0s       p(95)=0s       p(99)=541.52µs max=76.53ms 
+    http_req_tls_handshaking..................: min=0s      med=0s       avg=0s       p(90)=0s       p(95)=0s       p(99)=0s       max=0s      
+    http_req_waiting..........................: min=71.89ms med=145.9ms  avg=173.5ms  p(90)=245.16ms p(95)=324.16ms p(99)=580.5ms  max=1.09s   
+    http_reqs.................................: 1572   2.315552/s
+
+    EXECUTION
+    iteration_duration........................: min=1.08s   med=1.14s    avg=1.79s    p(90)=1.25s    p(95)=1.33s    p(99)=1.85s    max=7m44s   
+    iterations................................: 1521   2.240429/s
+    vus.......................................: 20     min=0         max=20
+    vus_max...................................: 20     min=20        max=20
+
+    NETWORK
+    data_received.............................: 940 kB 1.4 kB/s
+    data_sent.................................: 349 kB 513 B/s
+
+
+  █ SCENARIO: vu01 
+
+    checks_total.......: 107     0.157611/s
+    checks_succeeded...: 100.00% 107 out of 107
+    checks_failed......: 0.00%   0 out of 107
+
+    ✓ inicio de sesión 200
+    ✓ disponibilidad 200
+    ✓ dos sedes en la respuesta
+
+    HTTP
+    http_req_blocked...........: min=0s      med=0s       avg=0s       p(90)=0s       p(95)=0s       p(99)=0s       max=0s      
+    http_req_connecting........: min=0s      med=0s       avg=0s       p(90)=0s       p(95)=0s       p(99)=0s       max=0s      
+    http_req_duration..........: min=85.56ms med=109.72ms avg=133.46ms p(90)=196.43ms p(95)=215.02ms p(99)=362.45ms max=486.42ms
+    http_req_failed............: 0.00% 0 out of 55
+    http_req_receiving.........: min=0s      med=1.26ms   avg=2.43ms   p(90)=6.56ms   p(95)=10.12ms  p(99)=11.96ms  max=12.14ms 
+    http_req_sending...........: min=0s      med=0s       avg=9.33µs   p(90)=0s       p(95)=0s       p(99)=236.16µs max=513.4µs 
+    http_req_tls_handshaking...: min=0s      med=0s       avg=0s       p(90)=0s       p(95)=0s       p(99)=0s       max=0s      
+    http_req_waiting...........: min=78.99ms med=108.45ms avg=131.02ms p(90)=194.4ms  p(95)=213.33ms p(99)=360.69ms max=483.3ms 
+    http_reqs..................: 55    0.081015/s
+
+    EXECUTION
+    iteration_duration.........: min=1.08s   med=1.11s    avg=1.13s    p(90)=1.19s    p(95)=1.21s    p(99)=1.46s    max=1.68s   
+    iterations.................: 53    0.078069/s
+
+    NETWORK
+    data_received..............: 33 kB 49 B/s
+    data_sent..................: 12 kB 18 B/s
+
+
+  █ SCENARIO: vu05 
+
+    checks_total.......: 517     0.76154/s
+    checks_succeeded...: 100.00% 517 out of 517
+    checks_failed......: 0.00%   0 out of 517
+
+    ✓ inicio de sesión 200
+    ✓ disponibilidad 200
+    ✓ dos sedes en la respuesta
+
+    HTTP
+    http_req_blocked...........: min=0s      med=0s       avg=159.45µs p(90)=0s       p(95)=0s       p(99)=611.38µs max=22.75ms
+    http_req_connecting........: min=0s      med=0s       avg=96.57µs  p(90)=0s       p(95)=0s       p(99)=611.38µs max=22.13ms
+    http_req_duration..........: min=73.3ms  med=140.17ms avg=177.07ms p(90)=238.4ms  p(95)=356.05ms p(99)=949.89ms max=1.09s  
+    http_req_failed............: 0.00%  0 out of 266
+    http_req_receiving.........: min=0s      med=1.7ms    avg=2.49ms   p(90)=5.91ms   p(95)=8.17ms   p(99)=10.96ms  max=12.6ms 
+    http_req_sending...........: min=0s      med=0s       avg=30.81µs  p(90)=0s       p(95)=0s       p(99)=826.77µs max=2.03ms 
+    http_req_tls_handshaking...: min=0s      med=0s       avg=0s       p(90)=0s       p(95)=0s       p(99)=0s       max=0s     
+    http_req_waiting...........: min=71.89ms med=139.5ms  avg=174.55ms p(90)=233.06ms p(95)=354.91ms p(99)=944.24ms max=1.09s  
+    http_reqs..................: 266    0.391817/s
+
+    EXECUTION
+    iteration_duration.........: min=1.08s   med=1.14s    avg=1.18s    p(90)=1.24s    p(95)=1.36s    p(99)=1.97s    max=2.09s  
+    iterations.................: 256    0.377087/s
+
+    NETWORK
+    data_received..............: 160 kB 235 B/s
+    data_sent..................: 59 kB  87 B/s
+
+
+  █ SCENARIO: vu10 
+
+    checks_total.......: 368     0.542063/s
+    checks_succeeded...: 100.00% 368 out of 368
+    checks_failed......: 0.00%   0 out of 368
+
+    ✓ inicio de sesión 200
+    ✓ disponibilidad 200
+    ✓ dos sedes en la respuesta
+
+    HTTP
+    http_req_blocked...........: min=0s      med=0s       avg=84.23µs  p(90)=0s       p(95)=91.66µs  p(99)=2ms      max=2ms    
+    http_req_connecting........: min=0s      med=0s       avg=73.33µs  p(90)=0s       p(95)=91.66µs  p(99)=2ms      max=2ms    
+    http_req_duration..........: min=76.79ms med=204.83ms avg=256.56ms p(90)=501.96ms p(95)=608.26ms p(99)=856.36ms max=1s     
+    http_req_failed............: 0.00%  0 out of 199
+    http_req_receiving.........: min=0s      med=3.4ms    avg=4.39ms   p(90)=9.48ms   p(95)=12.19ms  p(99)=15.26ms  max=18.62ms
+    http_req_sending...........: min=0s      med=0s       avg=41.45µs  p(90)=0s       p(95)=0s       p(99)=1.42ms   max=2.97ms 
+    http_req_tls_handshaking...: min=0s      med=0s       avg=0s       p(90)=0s       p(95)=0s       p(99)=0s       max=0s     
+    http_req_waiting...........: min=76.19ms med=198.57ms avg=252.12ms p(90)=498.32ms p(95)=602.67ms p(99)=847.95ms max=1s     
+    http_reqs..................: 199    0.293126/s
+
+    EXECUTION
+    iteration_duration.........: min=1.08s   med=1.21s    avg=6.67s    p(90)=1.81s    p(95)=1.85s    p(99)=2m16s    max=7m44s  
+    iterations.................: 172    0.253356/s
+
+    NETWORK
+    data_received..............: 122 kB 179 B/s
+    data_sent..................: 44 kB  65 B/s
+
+
+  █ SCENARIO: vu20 
+
+    checks_total.......: 2084    3.069726/s
+    checks_succeeded...: 100.00% 2084 out of 2084
+    checks_failed......: 0.00%   0 out of 2084
+
+    ✓ disponibilidad 200
+    ✓ dos sedes en la respuesta
+    ✓ inicio de sesión 200
+
+    HTTP
+    http_req_blocked...........: min=0s      med=0s       avg=19.15µs  p(90)=0s       p(95)=0s       p(99)=0s       max=7.57ms  
+    http_req_connecting........: min=0s      med=0s       avg=17.98µs  p(90)=0s       p(95)=0s       p(99)=0s       max=7.57ms  
+    http_req_duration..........: min=77.49ms med=142.84ms avg=163.66ms p(90)=232.89ms p(95)=280.51ms p(99)=447.99ms max=568.38ms
+    http_req_failed............: 0.00%  0 out of 1048
+    http_req_receiving.........: min=0s      med=2.55ms   avg=3.39ms   p(90)=7.72ms   p(95)=9.81ms   p(99)=13.93ms  max=18.46ms 
+    http_req_sending...........: min=0s      med=0s       avg=106.94µs p(90)=0s       p(95)=0s       p(99)=373.16µs max=76.53ms 
+    http_req_tls_handshaking...: min=0s      med=0s       avg=0s       p(90)=0s       p(95)=0s       p(99)=0s       max=0s      
+    http_req_waiting...........: min=72.2ms  med=139.33ms avg=160.17ms p(90)=229.41ms p(95)=274.32ms p(99)=446.39ms max=567.52ms
+    http_reqs..................: 1048   1.543701/s
+
+    EXECUTION
+    iteration_duration.........: min=1.08s   med=1.14s    avg=1.16s    p(90)=1.23s    p(95)=1.27s    p(99)=1.44s    max=2.14s   
+    iterations.................: 1040   1.531917/s
+
+    NETWORK
+    data_received..............: 623 kB 918 B/s
+    data_sent..................: 233 kB 342 B/s
+[código de salida de este comando: 0]
+
+[código de salida: 0]

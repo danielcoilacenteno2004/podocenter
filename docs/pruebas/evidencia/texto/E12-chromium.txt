@@ -1,0 +1,40 @@
+$ python backend/manage.py cargar_demo ; BASE=http://localhost:5174 NODE_PATH='C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/aff9a092-f9bd-4e67-bc0f-84f4b576f946/scratchpad/pw/node_modules' node docs/pruebas/evidencia/scripts/recorridos.cjs chromium
+# Fecha: 2026-11-26T08:44:24-05:00 · Commit: 1977d6c · rama feat/rf16-rf07-rf18
+
+$ python backend/manage.py cargar_demo
+  cita omitida (2026-11-28 17:00): La sede atiende de 08:00 a 13:00.
+  3 cita(s) del guion no se crearon (hora ya pasada, sede cerrada o solapamiento).
+  2 cita(s) en curso desde las 08:34, lista(s) para registrar la atención.
+
+Centro de demostración listo: Centro de Podología Pies Sanos E.I.R.L.
+  Sedes          : 2
+  Servicios      : 6
+  Pacientes      : 12
+  Citas en agenda: 18
+  Productos      : 6
+
+Cuentas de acceso (todas con la contraseña ****):
+  gerencia@piessanos.pe        Administrador del centro     sedes: Sede Cercado, Sede Bustamante
+  plataforma@podocenter.pe     Administrador de plataforma  sedes: —
+  k.zapata@piessanos.pe        Podóloga                     sedes: Sede Bustamante
+  podologa@piessanos.pe        Podóloga                     sedes: Sede Cercado, Sede Bustamante
+[código de salida de este comando: 0]
+
+$ BASE=http://localhost:5174 NODE_PATH='C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/aff9a092-f9bd-4e67-bc0f-84f4b576f946/scratchpad/pw/node_modules' node docs/pruebas/evidencia/scripts/recorridos.cjs chromium
+[chromium] chromium 159.0.8154.6 · {"width":1366,"height":900} · 2026-11-26T13:44:32.556Z
+[chromium] OK    ingreso (4283 ms) — panel del día abierto con la Sede Cercado (id 1) — img/E12-navegador/chromium/01-ingreso.png
+[chromium] OK    nueva cita (2792 ms) — aviso: «Cita registrada: María Elena Quispe Mamani, a las 12:00 p. m.» (2026-12-02 12:00) — img/E12-navegador/chromium/02-nueva-cita.png
+[chromium] OK    cancelar cita (1582 ms) — aviso: «Cita cancelada: María Elena Quispe Mamani, a las 12:00 p. m.» — img/E12-navegador/chromium/03-cancelar-cita.png
+[chromium] OK    registrar atencion (2745 ms) — 4 interacciones; P11 precargó monto «70.00» y 1 insumo(s); la cita 17 quedó ATENDIDA — img/E12-navegador/chromium/04-registrar-atencion.png
+[chromium] OK    ficha del paciente (1775 ms) — «María Elena Quispe Mamani» · 1 de 1 atención(es), de la más reciente a la más antigua — img/E12-navegador/chromium/05-ficha-del-paciente.png
+[chromium] OK    registrar movimiento (1265 ms) — aviso: «Gasa estéril: +5 paquete. Stock en Sede Cercado: 25.» — img/E12-navegador/chromium/06-registrar-movimiento.png
+[chromium] OK    disponibilidad entre sedes (255 ms) — 2 sede(s): Sede Bustamante 8 unidad 4 | Sede Cercado (activa) 1 unidad 4 — img/E12-navegador/chromium/07-disponibilidad-entre-sedes.png
+[chromium] OK    registro diario con atenciones (972 ms) — 1 atención(es); total S/ 70.00 — img/E12-navegador/chromium/08-registro-diario-con-atenciones.png
+[chromium] OK    registro diario sin atenciones (1659 ms) — total mostrado: (sin fila de total) · texto: «Registro diario Sede Cercado Fecha Exportar varios días Exportar PDF Exportar Excel No hay atenciones registradas en esta sede para ese día.…» — img/E12-navegador/chromium/09-registro-diario-sin-atenciones.png
+[chromium] OK    ancho de las pantallas (4960 ms) — /panel 1366/1366 px; /agenda 1366/1366 px; /pacientes 1366/1366 px; /inventario 1366/1366 px; /registro-diario 1366/1366 px — img/E12-navegador/chromium/10-ancho-de-las-pantallas.png
+[chromium] errores de consola: ninguno
+[chromium] resumen: 10 de 10 pasos OK
+{"proyecto":"chromium","interacciones_rnf02":4,"resultados":[{"paso":"ingreso","resultado":"OK","detalle":"panel del día abierto con la Sede Cercado (id 1)","ms":4283,"archivo":"01-ingreso.png"},{"paso":"nueva cita","resultado":"OK","detalle":"aviso: «Cita registrada: María Elena Quispe Mamani, a las 12:00 p. m.» (2026-12-02 12:00)","ms":2792,"archivo":"02-nueva-cita.png"},{"paso":"cancelar cita","resultado":"OK","detalle":"aviso: «Cita cancelada: María Elena Quispe Mamani, a las 12:00 p. m.»","ms":1582,"archivo":"03-cancelar-cita.png"},{"paso":"registrar atencion","resultado":"OK","detalle":"4 interacciones; P11 precargó monto «70.00» y 1 insumo(s); la cita 17 quedó ATENDIDA","ms":2745,"archivo":"04-registrar-atencion.png"},{"paso":"ficha del paciente","resultado":"OK","detalle":"«María Elena Quispe Mamani» · 1 de 1 atención(es), de la más reciente a la más antigua","ms":1775,"archivo":"05-ficha-del-paciente.png"},{"paso":"registrar movimiento","resultado":"OK","detalle":"aviso: «Gasa estéril: +5 paquete. Stock en Sede Cercado: 25.»","ms":1265,"archivo":"06-registrar-movimiento.png"},{"paso":"disponibilidad entre sedes","resultado":"OK","detalle":"2 sede(s): Sede Bustamante 8 unidad 4 | Sede Cercado (activa) 1 unidad 4","ms":255,"archivo":"07-disponibilidad-entre-sedes.png"},{"paso":"registro diario con atenciones","resultado":"OK","detalle":"1 atención(es); total S/ 70.00","ms":972,"archivo":"08-registro-diario-con-atenciones.png"},{"paso":"registro diario sin atenciones","resultado":"OK","detalle":"total mostrado: (sin fila de total) · texto: «Registro diario Sede Cercado Fecha Exportar varios días Exportar PDF Exportar Excel No hay atenciones registradas en esta sede para ese día.…»","ms":1659,"archivo":"09-registro-diario-sin-atenciones.png"},{"paso":"ancho de las pantallas","resultado":"OK","detalle":"/panel 1366/1366 px; /agenda 1366/1366 px; /pacientes 1366/1366 px; /inventario 1366/1366 px; /registro-diario 1366/1366 px","ms":4960,"archivo":"10-ancho-de-las-pantallas.png"}]}
+[código de salida de este comando: 0]
+
+[código de salida: 0]

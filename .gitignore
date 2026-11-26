@@ -13,3 +13,6 @@ htmlcov/
 .pytest_cache/
 .ruff_cache/
 reports/
+# Imágenes de la evidencia: se regeneran desde texto/ (scripts/imagenes.sh)
+docs/pruebas/evidencia/img/
+evidencia_p9.zip

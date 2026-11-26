@@ -1,0 +1,37 @@
+$ pytest -vv backend/apps/core/tests/test_api_permisos.py backend/apps/usuarios/tests/test_sesion.py
+# Fecha: 2026-11-26T08:53:31-05:00 · Commit: 1977d6c · rama feat/rf16-rf07-rf18 · RF02 acceso por rol
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-8.3.4, pluggy-1.7.0 -- C:\Users\danie\AppData\Local\Temp\claude\2b75186625f2af13\da2c9158-aeeb-4a99-bce2-b355f8c742f3\scratchpad\venv312\Scripts\python.exe
+cachedir: .pytest_cache
+django: version: 5.2.19, settings: config.settings.dev (from env)
+rootdir: C:\Users\danie\Documents\UNIVERSIDAD\SEMESTRE 10\PROYECTO DE FIN DE CARRERA\podologia\podocenter
+configfile: pyproject.toml
+plugins: cov-6.0.0, django-4.9.0
+collecting ... collected 21 items
+
+backend/apps/core/tests/test_api_permisos.py::test_la_podologa_no_puede_listar_usuarios PASSED [  4%]
+backend/apps/core/tests/test_api_permisos.py::test_la_administradora_del_centro_si_puede_listar_usuarios PASSED [  9%]
+backend/apps/core/tests/test_api_permisos.py::test_la_podologa_consulta_el_catalogo_pero_no_lo_edita PASSED [ 14%]
+backend/apps/core/tests/test_api_permisos.py::test_una_peticion_sin_sesion_no_llega_a_los_datos PASSED [ 19%]
+backend/apps/core/tests/test_api_permisos.py::test_el_error_de_negocio_viaja_en_formato_problem_details PASSED [ 23%]
+backend/apps/core/tests/test_api_permisos.py::test_la_sonda_de_estado_responde_sin_autenticacion PASSED [ 28%]
+backend/apps/core/tests/test_api_permisos.py::test_la_agenda_devuelve_solo_las_citas_de_la_sede_activa PASSED [ 33%]
+backend/apps/usuarios/tests/test_sesion.py::test_sin_sesion_el_estado_dice_que_no_hay_nadie PASSED [ 38%]
+backend/apps/usuarios/tests/test_sesion.py::test_la_cookie_csrf_se_entrega_al_consultar_el_estado PASSED [ 42%]
+backend/apps/usuarios/tests/test_sesion.py::test_credenciales_validas_abren_la_sesion PASSED [ 47%]
+backend/apps/usuarios/tests/test_sesion.py::test_el_correo_se_normaliza_antes_de_comparar PASSED [ 52%]
+backend/apps/usuarios/tests/test_sesion.py::test_la_respuesta_no_devuelve_la_contrasena PASSED [ 57%]
+backend/apps/usuarios/tests/test_sesion.py::test_la_contrasena_errada_no_abre_la_sesion PASSED [ 61%]
+backend/apps/usuarios/tests/test_sesion.py::test_un_correo_inexistente_responde_igual_que_una_clave_errada PASSED [ 66%]
+backend/apps/usuarios/tests/test_sesion.py::test_faltan_datos_y_el_error_lo_dice PASSED [ 71%]
+backend/apps/usuarios/tests/test_sesion.py::test_un_usuario_desactivado_no_puede_entrar PASSED [ 76%]
+backend/apps/usuarios/tests/test_sesion.py::test_el_acceso_queda_en_la_bitacora PASSED [ 80%]
+backend/apps/usuarios/tests/test_sesion.py::test_tras_ingresar_el_estado_devuelve_al_usuario PASSED [ 85%]
+backend/apps/usuarios/tests/test_sesion.py::test_el_ingreso_deja_constancia_de_la_fecha_de_acceso PASSED [ 90%]
+backend/apps/usuarios/tests/test_sesion.py::test_al_salir_la_sesion_se_cierra PASSED [ 95%]
+backend/apps/usuarios/tests/test_sesion.py::test_salir_sin_sesion_no_es_un_error PASSED [100%]
+
+============================= 21 passed in 14.00s =============================
+
+[código de salida: 0]

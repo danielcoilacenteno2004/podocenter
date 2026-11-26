@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate
 from rest_framework.test import APIClient
 
 from apps.core.models import Centro, RegistroAuditoria
-from apps.core.soporte_pruebas import activar_centro
+from apps.core.soporte_pruebas import activar_centro, con_segundo_factor
 from apps.usuarios.models import Usuario
 from apps.usuarios.roles import Rol
 
@@ -29,6 +29,7 @@ def plataforma(db):
         correo="soporte@podocenter.pe", password=CLAVE_DE_PRUEBA,
         nombres="Soporte", apellidos="Plataforma",
     )
+    con_segundo_factor(usuario)
     cliente = APIClient()
     cliente.force_authenticate(user=usuario)
     return cliente

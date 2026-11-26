@@ -29,6 +29,8 @@ const rutas = [
   { path: '/centros', name: 'centros', component: () => import('./views/CentrosView.vue'), meta: { roles: ['ADMIN_PLATAFORMA'], menu: 'Centros clientes' } },
   // P21: la misma plantilla para la falta de permiso y para la ruta inexistente.
   { path: '/perfil', name: 'perfil', component: () => import('./views/PerfilView.vue') },
+  // P02 (alta): verificación en dos pasos, obligatoria para los roles administrativos.
+  { path: '/segundo-factor', name: 'segundo-factor', component: () => import('./views/SegundoFactorView.vue') },
   { path: '/sin-permiso', name: 'sin-permiso', component: () => import('./views/ErrorView.vue'), props: { codigo: 403 } },
   { path: '/:rutaNoEncontrada(.*)*', name: 'error', component: () => import('./views/ErrorView.vue'), props: { codigo: 404 }, meta: { publica: true } }
 ]
@@ -50,6 +52,12 @@ router.beforeEach((destino) => {
   // usuario a P20 antes que a cualquier otra pantalla, incluida la de sede.
   if (sesion.usuario?.debe_cambiar_contrasena && destino.name !== 'perfil') {
     return { name: 'perfil' }
+  }
+  // RF18: un rol administrativo sin segundo factor solo puede darlo de alta;
+  // el servidor rechaza todo lo demás con «segundo-factor-pendiente».
+  if (sesion.usuario?.debe_activar_segundo_factor && !sesion.usuario?.debe_cambiar_contrasena &&
+      destino.name !== 'segundo-factor') {
+    return { name: 'segundo-factor' }
   }
   if (sesion.autenticado && sesion.necesitaElegirSede && destino.name !== 'elegir-sede') {
     return { name: 'elegir-sede' }

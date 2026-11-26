@@ -1,0 +1,194 @@
+{
+  "fecha": "2026-11-25",
+  "rama": "feat/rf16-rf07-rf18",
+  "commit": "ninguno: el trabajo está sin commit, como se pidió",
+  "entorno_de_verificacion": {
+    "python": "3.12.13 (entorno creado con uv; el .venv del repositorio es 3.14 y no se usó)",
+    "postgresql": "18 local, en un clúster temporal con collation ICU es-PE y el rol «podo» sin superusuario ni BYPASSRLS, como el pipeline. El pipeline usa PostgreSQL 17; Docker no está instalado en la máquina.",
+    "nota": "Con collation C, la prueba existente test_el_listado_viene_ordenado_por_apellidos falla («Álvarez» al final); con ICU pasa. No es un defecto del código."
+  },
+  "resumen_final": {
+    "pruebas_totales": 397,
+    "pruebas_en_verde": 397,
+    "pruebas_antes": 308,
+    "pruebas_nuevas_netas": 89,
+    "cobertura_sentencias": "95.86 % (2846 de 2969)",
+    "cobertura_ramas": "87.14 % (481 de 552)",
+    "cobertura_combinada_de_pytest_cov": "94.49 % (mínimo exigido 80 %)",
+    "ruff": "limpio (All checks passed!)",
+    "bandit": "limpio (código de salida 0; el único aviso es el «nosec» preexistente de backend/apps/conftest.py:14)",
+    "pip_audit": "sin vulnerabilidades conocidas en requirements.txt, con las tres dependencias nuevas",
+    "migraciones": "makemigrations --check sin cambios pendientes",
+    "frontend": "npm run lint limpio y npm run build correcto; sin recorrido en navegador"
+  },
+  "requerimientos": [
+    {
+      "rf": "RF18",
+      "nombre": "Verificación en dos pasos para administradores",
+      "estado": "construido",
+      "control_al_cerrarlo": "353 pruebas en verde, cobertura 95.70 %, ruff y bandit limpios",
+      "archivos_nuevos": [
+        "backend/apps/usuarios/totp.py",
+        "backend/apps/usuarios/segundo_factor.py",
+        "backend/apps/usuarios/migrations/0003_segundo_factor.py",
+        "backend/apps/usuarios/templates/usuarios/admin_login.html",
+        "backend/apps/usuarios/tests/test_totp.py",
+        "backend/apps/usuarios/tests/test_segundo_factor_ingreso.py",
+        "backend/apps/usuarios/tests/test_segundo_factor_alta.py",
+        "backend/apps/usuarios/tests/test_segundo_factor_reinicio.py",
+        "frontend/src/views/SegundoFactorView.vue"
+      ],
+      "archivos_modificados": [
+        "backend/apps/usuarios/models.py",
+        "backend/apps/usuarios/sesion.py",
+        "backend/apps/usuarios/views.py",
+        "backend/apps/usuarios/urls.py",
+        "backend/apps/usuarios/admin.py",
+        "backend/apps/core/vistas.py",
+        "backend/apps/core/views.py",
+        "backend/apps/core/soporte_pruebas.py",
+        "backend/apps/core/management/commands/cargar_demo.py",
+        "backend/apps/conftest.py",
+        "backend/apps/core/tests/test_api_centros.py",
+        "requirements.txt",
+        "frontend/src/stores/sesion.js",
+        "frontend/src/router.js",
+        "frontend/src/views/LoginView.vue",
+        "frontend/src/views/PerfilView.vue"
+      ],
+      "pruebas_nuevas": 45,
+      "pruebas_pedidas_y_donde_estan": {
+        "codigo_valido": "test_un_codigo_valido_completa_el_ingreso_y_queda_en_la_auditoria",
+        "codigo_vencido": "test_un_codigo_vencido_se_rechaza",
+        "codigo_reutilizado": "test_un_codigo_ya_usado_no_vale_otra_vez",
+        "desfasado_un_intervalo": "test_un_codigo_desfasado_un_intervalo_se_acepta (anterior y siguiente)",
+        "recuperacion_usado_dos_veces": "test_un_codigo_de_recuperacion_vale_una_sola_vez",
+        "bloqueo_por_intentos": "test_cinco_codigos_incorrectos_bloquean_la_cuenta_quince_minutos y test_los_intentos_fallidos_se_cuentan_aunque_cada_peticion_falle",
+        "otro_centro_no_reinicia": "test_una_administradora_de_un_centro_no_reinicia_el_factor_de_otro"
+      },
+      "decisiones_y_desviaciones": [
+        "TOTP implementado con la biblioteca estándar (hmac, hashlib), sin dependencia, y verificado contra los vectores del apéndice B del RFC 6238. Parámetros: SHA-1, 6 dígitos, 30 s, tolerancia de un intervalo.",
+        "Nueva dependencia segno 1.6.6 (Python puro, sin dependencias) para dibujar el QR como SVG en el servidor.",
+        "El secreto usa el mismo cifrado Fernet que los datos clínicos (TextoCifrado, CLAVE_CIFRADO_CAMPOS). Se devuelve solo en la respuesta del alta, antes de confirmar; una vez activo, el alta responde «segundo-factor-ya-activo».",
+        "Códigos de recuperación: 10 por cuenta, formato XXXXX-XXXXX (alfabeto sin 0/O/1/I/L), guardados como SHA-256 con sal propia y no con bcrypt: tienen unos 50 bits de azar y comprobar diez con bcrypt haría esperar varios segundos.",
+        "Bloqueo: 5 códigos errados seguidos bloquean el segundo paso 15 minutos. Los valores los eligió el equipo (Claude en esta sesión); no salen de una norma citada y conviene confirmarlos.",
+        "El primer paso aprobado vale 5 minutos para escribir el código; la sesión autenticada solo se abre en el segundo paso.",
+        "Obligatoriedad: un rol administrativo sin factor solo puede cambiar su contraseña, ver sus sedes y dar de alta el factor (código «segundo-factor-pendiente» en todo lo demás). Para eso CentroViewSet (plataforma) ahora hereda ContextoDeCentro.",
+        "/admin/ también pide el código: formulario de ingreso propio y has_permission que niega el admin a quien aún no activó el factor. Si no se hacía, el admin era una puerta con solo contraseña.",
+        "El reinicio lo hace solo el administrador de plataforma (API y acción del admin); no puede reiniciar el suyo propio. La administradora del centro no puede reiniciar el de su personal: es una decisión de seguridad que se puede revisar.",
+        "La tabla codigo_recuperacion no lleva RLS, igual que usuario: se consulta durante el ingreso, antes de conocer el centro, y el administrador de plataforma no tiene centro. El aislamiento del reinicio lo da el permiso de plataforma en el servidor.",
+        "El reinicio del factor de otro administrador de plataforma no queda en registro_auditoria (que exige centro); queda en el registro del servidor, sin secretos.",
+        "cargar_demo ya no marca el factor como activo sin secreto (dejaba las cuentas sin poder entrar): las cuentas administrativas de demostración lo activan en su primer ingreso.",
+        "Las 308 pruebas previas siguen; las cuentas administrativas de los fixtures parten con el factor activo (con_segundo_factor).",
+        "No se construyó: regenerar los códigos de recuperación desde el perfil, ni que la propia persona desactive su factor opcional. No se pidieron."
+      ]
+    },
+    {
+      "rf": "RF16",
+      "nombre": "Exportación del registro diario a PDF y Excel",
+      "estado": "construido",
+      "control_al_cerrarlo": "376 pruebas en verde, ruff, bandit y pip-audit limpios, cobertura ≥ 80 % (93.15 % en esa corrida, rebajada por canales.py de RF07, escrito durante la corrida y todavía sin pruebas)",
+      "archivos_nuevos": [
+        "backend/apps/atenciones/exportacion.py",
+        "backend/apps/atenciones/tests/test_exportar_registro_diario.py",
+        "backend/apps/core/migrations/0005_accion_exportacion.py"
+      ],
+      "archivos_modificados": [
+        "backend/apps/atenciones/servicios.py",
+        "backend/apps/atenciones/views.py",
+        "backend/apps/atenciones/urls.py",
+        "backend/apps/core/models.py",
+        "requirements.txt",
+        "frontend/src/services/api.js",
+        "frontend/src/views/RegistroDiarioView.vue"
+      ],
+      "pruebas_nuevas": 23,
+      "pruebas_pedidas_y_donde_estan": {
+        "formato_valido_pdf": "test_el_pdf_es_un_archivo_pdf_valido_con_el_encabezado",
+        "formato_valido_xlsx": "test_el_excel_es_un_libro_valido_con_el_encabezado",
+        "total_coincidente": "test_el_total_exportado_es_el_mismo_que_el_de_la_pantalla y test_el_rango_suma_lo_mismo_que_los_dias_por_separado",
+        "rango_vacio": "test_un_rango_sin_atenciones_exporta_un_archivo_con_total_cero (pdf y xlsx)",
+        "otra_sede_denegada": "test_una_sede_no_asignada_no_se_puede_exportar y test_la_sede_de_otro_centro_tampoco",
+        "inyeccion_de_formula": "test_un_nombre_con_formula_no_se_ejecuta_en_el_excel y test_neutraliza_los_inicios_de_formula_y_deja_los_numeros"
+      },
+      "decisiones_y_desviaciones": [
+        "Un solo endpoint para los dos casos: GET /api/v1/reportes/registro-diario/exportar/?formato=pdf|xlsx con fecha=AAAA-MM-DD (un día, por omisión hoy) o desde/hasta (rango).",
+        "El total sale de registro_del_rango, la misma consulta que la pantalla: registro_del_dia ahora la llama con desde = hasta. El Excel escribe el total como cifra, no como fórmula.",
+        "Rango máximo de 31 días (código «rango-demasiado-largo»). Lo eligió el equipo (Claude en esta sesión); conviene confirmarlo.",
+        "Dependencias nuevas: reportlab 5.1.2 (PDF; trae pillow y charset-normalizer) y openpyxl 3.1.5 (Excel; trae et-xmlfile). Se fijaron solo las directas, como el resto de requirements.txt.",
+        "Inyección de fórmulas (OWASP CSV Injection): el texto que empieza con =, +, -, @, tabulador o retorno lleva un apóstrofo delante. Los montos son números y no se tocan.",
+        "En el PDF se escapan &, < y > porque ReportLab interpreta etiquetas en el texto (prueba test_un_nombre_con_marcas_no_rompe_el_pdf).",
+        "Nueva acción de auditoría EXPORTACION (migración core 0005) con formato, rango, cantidad y total, sin nombres de pacientes.",
+        "La respuesta lleva Cache-Control: no-store. No se escribe ningún archivo en disco (se genera en memoria); eso se sostiene en el código, no en una prueba.",
+        "Para un rango, el archivo añade un resumen por día (en el Excel, en una hoja «Por día»).",
+        "Frontend: «Exportar PDF» y «Exportar Excel» en P16, más una casilla «Exportar varios días». No es una pantalla P22 propia.",
+        "La fecha por omisión es date.today(), igual que la pantalla P16 actual, para que coincidan. Es la fecha del sistema operativo y no la de TIME_ZONE: en un servidor con otra zona horaria, «hoy» puede ser otro día. Es preexistente y no se cambió."
+      ]
+    },
+    {
+      "rf": "RF07",
+      "nombre": "Recordatorio automático de citas",
+      "estado": "parcial",
+      "motivo_del_estado": "El código está construido y probado, pero no ha salido ningún mensaje real: el canal de correo necesita las credenciales SMTP de Amazon SES y un dominio verificado, y el WhatsApp automático está vacío a propósito hasta CC-28. Tampoco hay pantalla para la configuración por centro: solo la API.",
+      "archivos_nuevos": [
+        "backend/apps/citas/canales.py",
+        "backend/apps/citas/migrations/0005_canales_y_configuracion_de_recordatorios.py"
+      ],
+      "archivos_modificados": [
+        "backend/apps/citas/recordatorios.py",
+        "backend/apps/citas/models.py",
+        "backend/apps/citas/serializers.py",
+        "backend/apps/citas/views.py",
+        "backend/apps/citas/urls.py",
+        "backend/apps/citas/management/commands/enviar_recordatorios.py",
+        "backend/apps/citas/tests/test_recordatorios.py",
+        "backend/config/settings/base.py",
+        "backend/config/settings/dev.py",
+        "docs/DESPLIEGUE.md"
+      ],
+      "pruebas_nuevas": 21,
+      "pruebas_detalle": "test_recordatorios.py pasó de 14 a 35 pruebas. Se retiraron 2 que probaban lo que ya no existe (proveedor simulado y pedido a la API de Meta), 2 se reemplazaron por la nueva semántica (de «24 horas antes» a «la víspera») y las demás se reescribieron para el canal y la configuración.",
+      "pruebas_pedidas_y_donde_estan": {
+        "no_se_envia_dos_veces": "test_no_se_envia_dos_veces_la_misma_cita",
+        "sin_consentimiento": "test_sin_consentimiento_no_se_envia",
+        "cita_cancelada": "test_una_cita_cancelada_no_se_avisa y test_cancelar_anula_el_recordatorio_que_esperaba_un_reintento",
+        "falla_no_corta_el_resto": "test_la_falla_de_un_envio_no_corta_el_resto_del_lote (error esperado y error inesperado) y test_si_falla_un_centro_el_comando_sigue_con_los_demas",
+        "aislamiento_entre_centros": "test_la_pasada_de_un_centro_no_toca_las_citas_de_otro, test_un_centro_no_ve_la_configuracion_de_otro y test_el_comando_procesa_cada_centro_con_su_configuracion"
+      },
+      "decisiones_y_desviaciones": [
+        "Ya existía un RF07 (recordatorio por WhatsApp 24 horas antes, con proveedor simulado y un cliente real de la API de Meta). Se rehízo sobre la interfaz CanalRecordatorio en lugar de empezar de cero.",
+        "DESVÍO A REVISAR: el pedido decía dejar el WhatsApp automático como implementación vacía. El repositorio ya tenía una implementación funcional (ProveedorWhatsAppCloud). Se retiró del flujo y CanalWhatsAppApi quedó vacío y documentado. El código anterior sigue en el historial: backend/apps/citas/recordatorios.py en el commit 08b32bc. Si la intención era conservarlo, se recupera de ahí.",
+        "El canal WhatsApp automático no se puede elegir en la configuración (código «canal-no-disponible»). Si llegara a estar elegido, el planificador lo salta sin intentar nada.",
+        "Correo por Amazon SES a través de su interfaz SMTP con el EmailBackend de Django: no hace falta boto3. Se añadieron en config/settings/base.py las variables EMAIL_* leídas del entorno, con los mismos valores por omisión de Django, así que sin variables nada cambia. No se tocó prod.py ni infra/. En dev.py los correos van a la consola.",
+        "Pendiente fuera de lo permitido en este cambio: añadir EMAIL_* a infra/despliegue/.env.ejemplo. El compose de producción ya pasa .env al servicio recordatorios, así que basta con escribirlas en el .env real.",
+        "Cambio de semántica respecto del informe: antes se avisaba de las citas de las próximas 24 horas; ahora, de las citas del día siguiente a partir de la hora de envío del centro, como se pidió. docs/COHERENCIA.md marca la fila del RF07 como «No coincide» en el momento del aviso.",
+        "Configuración por centro (tabla configuracion_recordatorios, con RLS y FORCE): activo (por omisión, no), hora_envio (por omisión, 18:00; valor del equipo, no del centro) y canal (por omisión, WhatsApp manual). API GET/PUT /api/v1/recordatorios/configuracion/ solo para la administradora, auditada. Sin pantalla.",
+        "Reintento limitado: un intento por pasada del planificador (cada 15 minutos en producción) y como máximo 3 (además, CHECK en la base). Al tercer fallo queda FALLIDO.",
+        "Un fallo no detiene el lote: cualquier excepción del canal se anota en ese recordatorio y se sigue con la cita siguiente. El comando también aísla cada centro: si uno falla, sigue con los demás.",
+        "Registro de cada envío: la tabla recordatorio guarda cita, canal, destino, estado, intentos, último error e identificador del envío. Es un registro por cita con el último resultado, no una fila por intento.",
+        "Los recordatorios previos con canal «WHATSAPP» pasan a «WHATSAPP_API» en la migración, centro por centro, porque la tabla tiene RLS con FORCE.",
+        "Las variables WHATSAPP_* siguen declaradas en base.py, pero hoy ningún código las usa."
+      ]
+    }
+  ],
+  "pendiente_de_decision_humana": [
+    "Canal del recordatorio (RF07): correo por SES (necesita un dominio verificado y credenciales SMTP), WhatsApp manual (sin costo, lo envía una persona) o WhatsApp automático (costo por mensaje, riesgo R9, CC-28). Lo decide la Gerencia de cada centro.",
+    "Hora de envío por omisión de los recordatorios (18:00) y si los centros nuevos deben nacer con los recordatorios desactivados.",
+    "Quién custodia los códigos de recuperación de las cuentas administrativas, sobre todo la del administrador de plataforma, que no tiene a nadie por encima para reiniciarle el factor si pierde el teléfono y los códigos.",
+    "Entorno de demostración: quién activa el factor de gerencia@piessanos.pe y plataforma@podocenter.pe antes de la sustentación (el primero que entra lo ata a su teléfono).",
+    "Si la administradora del centro debería poder reiniciar el factor de su personal; hoy solo lo hace la plataforma.",
+    "Los límites elegidos por el equipo: 5 intentos y 15 minutos de bloqueo (RF18) y 31 días por exportación (RF16).",
+    "Si conservar en el código la implementación previa del WhatsApp automático (commit 08b32bc) o dejarla solo en el historial, como quedó.",
+    "Pantalla para la configuración de recordatorios por centro (hoy solo API) y recorrido en navegador de P02 y de los botones de exportación."
+  ],
+  "documentos_actualizados": [
+    "docs/ESTADO.md",
+    "docs/COHERENCIA.md",
+    "docs/DESPLIEGUE.md",
+    "CLAUDE.md"
+  ],
+  "documentos_no_actualizados": [
+    "docs/entregables/*.docx y *.pdf (informe y Práctica 7): COHERENCIA.md registra qué hay que corregir en ellos (el RF07 ya no avisa 24 horas antes).",
+    "docs/pruebas/02_cobertura.txt: es la evidencia fechada de la Práctica 9 (18/11) y no se sobrescribió."
+  ]
+}

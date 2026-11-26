@@ -111,9 +111,21 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Recordatorios por WhatsApp (RF07). Sin token, el envío automático es
-# simulado: no sale nada y queda anotado. Con la cuenta aprobada por Meta se
-# completan todas (docs/DESPLIEGUE.md).
+# Recordatorios por correo (RF07, CanalCorreo): Amazon SES por su interfaz
+# SMTP. Todo por variable de entorno; sin ellas quedan los valores por
+# omisión de Django (servidor local), salvo el tiempo de espera: 15 s en
+# lugar de ninguno, para que un servidor de correo colgado no detenga el lote.
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "localhost")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "25"))
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "") == "1"
+EMAIL_TIMEOUT = 15
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "webmaster@localhost")
+
+# WhatsApp automático (RF07, CanalWhatsAppApi): el canal está vacío hasta que
+# la Gerencia apruebe el costo (CC-28). Las variables quedan declaradas para
+# cuando se implemente; hoy ningún código las usa.
 WHATSAPP_TOKEN = os.environ.get("WHATSAPP_TOKEN", "")
 WHATSAPP_NUMERO_ID = os.environ.get("WHATSAPP_NUMERO_ID", "")
 WHATSAPP_VERSION_API = os.environ.get("WHATSAPP_VERSION_API", "")

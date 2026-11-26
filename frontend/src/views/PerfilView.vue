@@ -7,8 +7,8 @@
 // con el formulario de Django: comprueba la actual, aplica la política de
 // contraseñas y cierra las demás sesiones abiertas de la cuenta.
 //
-// La verificación en dos pasos (P02) no está construida: se muestra su
-// estado, sin nada que configurar.
+// La verificación en dos pasos (P02, RF18) se activa en su propia pantalla;
+// aquí se muestra su estado y el enlace al alta.
 //
 // Con una contraseña temporal (alta o restablecimiento) el router trae aquí
 // al usuario y no lo deja salir hasta cambiarla; el servidor bloquea el
@@ -147,9 +147,20 @@ async function guardar () {
           {{ sesion.usuario?.segundo_factor_activo ? 'Activada' : 'Desactivada' }}
         </span>
       </template>
-      <p class="ayuda">
-        Todavía no se puede configurar desde el sistema (P02 pendiente).
+      <p v-if="sesion.usuario?.segundo_factor_activo" class="ayuda">
+        Al ingresar se le pide el código de su aplicación autenticadora. Si pierde el teléfono y
+        sus códigos de recuperación, pida al soporte de la plataforma que la reinicie.
       </p>
+      <template v-else>
+        <p class="ayuda">
+          {{ sesion.usuario?.requiere_segundo_factor
+            ? 'Su rol la exige.'
+            : 'Es opcional para su rol y protege su cuenta aunque alguien conozca su contraseña.' }}
+        </p>
+        <div class="dialogo-acciones">
+          <RouterLink class="boton-secundario" :to="{ name: 'segundo-factor' }">Activar</RouterLink>
+        </div>
+      </template>
     </TarjetaSeccion>
   </main>
 </template>
