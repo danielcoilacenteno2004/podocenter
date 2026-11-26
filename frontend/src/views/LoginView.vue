@@ -38,12 +38,28 @@ function usarCuenta (cuenta) {
   contrasena.value = CONTRASENA_DEMO
 }
 
+// P02 — segundo paso (RF18): aparece solo si la cuenta tiene el factor activo.
+const pideCodigo = ref(false)
+const usaRecuperacion = ref(false)
+const codigo = ref('')
+const campoCodigo = ref(null)
+watch([codigo, usaRecuperacion], () => { error.value = null })
+
+function continuar () {
+  router.push({ name: sesion.necesitaElegirSede ? 'elegir-sede' : 'panel' })
+}
+
 async function ingresar () {
   enviando.value = true
   error.value = null
   try {
-    await sesion.iniciarSesion(correo.value, contrasena.value)
-    router.push({ name: sesion.necesitaElegirSede ? 'elegir-sede' : 'panel' })
+    pideCodigo.value = await sesion.iniciarSesion(correo.value, contrasena.value)
+    if (pideCodigo.value) {
+      await nextTick()
+      campoCodigo.value?.focus()
+      return
+    }
+    continuar()
   } catch (problema) {
     error.value = problema.mensaje
     // Se deja el foco en la contraseña, que es lo que casi siempre se corrige.
@@ -52,6 +68,31 @@ async function ingresar () {
   } finally {
     enviando.value = false
   }
+}
+
+async function verificarCodigo () {
+  enviando.value = true
+  error.value = null
+  try {
+    await sesion.verificarSegundoFactor(usaRecuperacion.value
+      ? { codigoRecuperacion: codigo.value }
+      : { codigo: codigo.value })
+    continuar()
+  } catch (problema) {
+    error.value = problema.mensaje
+    // El primer paso venció o la cuenta cambió: hay que volver a la contraseña.
+    if (problema.codigo === 'segundo-factor-sin-primer-paso') volverAContrasena()
+    else campoCodigo.value?.select()
+  } finally {
+    enviando.value = false
+  }
+}
+
+function volverAContrasena () {
+  pideCodigo.value = false
+  usaRecuperacion.value = false
+  codigo.value = ''
+  contrasena.value = ''
 }
 </script>
 
@@ -66,14 +107,41 @@ async function ingresar () {
 
     <main class="ingreso-panel">
       <section class="ingreso-formulario" aria-labelledby="titulo-acceso">
-        <h1 id="titulo-acceso">Ingresar</h1>
-        <p class="subtitulo">Escriba su correo y su contraseña.</p>
+        <h1 id="titulo-acceso">{{ pideCodigo ? 'Verificación en dos pasos' : 'Ingresar' }}</h1>
+        <p class="subtitulo">
+          <template v-if="!pideCodigo">Escriba su correo y su contraseña.</template>
+          <template v-else-if="usaRecuperacion">Escriba uno de sus códigos de recuperación. Cada uno sirve una sola vez.</template>
+          <template v-else>Escriba el código de seis dígitos que muestra su aplicación autenticadora.</template>
+        </p>
 
         <Transition name="aparecer">
           <p v-if="error" role="alert">{{ error }}</p>
         </Transition>
 
-        <form @submit.prevent="ingresar">
+        <form v-if="pideCodigo" @submit.prevent="verificarCodigo">
+          <div class="campo">
+            <label for="codigo">{{ usaRecuperacion ? 'Código de recuperación' : 'Código' }}</label>
+            <input v-if="usaRecuperacion" id="codigo" ref="campoCodigo" v-model.trim="codigo"
+                   autocomplete="off" autocapitalize="characters" spellcheck="false"
+                   placeholder="XXXXX-XXXXX" maxlength="11" required>
+            <input v-else id="codigo" ref="campoCodigo" v-model.trim="codigo"
+                   inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}"
+                   placeholder="000000" maxlength="6" required>
+          </div>
+          <button class="bloque-completo" type="submit" :disabled="enviando" :aria-busy="enviando">
+            <span v-if="enviando" class="rueda-carga" aria-hidden="true" />
+            {{ enviando ? 'Verificando…' : 'Verificar' }}
+          </button>
+          <p class="ayuda">
+            <button type="button" class="enlace" @click="usaRecuperacion = !usaRecuperacion; codigo = ''">
+              {{ usaRecuperacion ? 'Usar el código de la aplicación' : 'No tengo mi teléfono: usar un código de recuperación' }}
+            </button>
+            ·
+            <button type="button" class="enlace" @click="volverAContrasena">Volver</button>
+          </p>
+        </form>
+
+        <form v-else @submit.prevent="ingresar">
           <div class="campo">
             <label for="correo">Correo</label>
             <input id="correo" v-model.trim="correo" type="email" autocomplete="username"

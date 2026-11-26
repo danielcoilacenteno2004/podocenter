@@ -47,6 +47,11 @@ Cuentas del entorno de demostración, todas con la contraseña `Podocenter2026`:
 | `k.zapata@piessanos.pe` | Podóloga (una sede) |
 | `plataforma@podocenter.pe` | Administrador de plataforma (`/admin/`) |
 
+Las dos cuentas administrativas exigen verificación en dos pasos (RF18) y
+`cargar_demo` las crea sin ella: en el primer ingreso piden escanear un QR
+con una aplicación autenticadora. En pruebas, `con_segundo_factor(usuario)`
+de `apps.core.soporte_pruebas` deja una cuenta con el factor ya activo.
+
 `cargar_demo` borra y rehace el centro de demostración; con `--conservar` no
 toca nada si ya existe.
 

@@ -8,6 +8,7 @@ from .models import Centro
 from .permisos import EsAdministradorDePlataforma
 from .serializers import AltaDeCentroSerializer, CentroSerializer
 from .servicios import crear_centro, registrar_cambio_de_centro
+from .vistas import ContextoDeCentro
 
 
 class EstadoDelServicio(APIView):
@@ -19,12 +20,14 @@ class EstadoDelServicio(APIView):
         return Response({"estado": "operativo", "version": "0.4.0"})
 
 
-class CentroViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin,
-                    mixins.UpdateModelMixin, viewsets.GenericViewSet):
+class CentroViewSet(ContextoDeCentro, mixins.CreateModelMixin, mixins.ListModelMixin,
+                    mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet):
     """RF17 — alta y mantenimiento de los centros clientes (P19 y P29).
 
     No hay DELETE: un centro cliente no se borra, se suspende con motivo; y
-    borrar uno con datos fallaba con un 500.
+    borrar uno con datos fallaba con un 500. Hereda `ContextoDeCentro` por sus
+    dos cerrojos de cuenta (contraseña temporal y segundo factor), que valen
+    también para la plataforma; el centro queda vacío, como antes.
     """
 
     queryset = Centro.objects.all()

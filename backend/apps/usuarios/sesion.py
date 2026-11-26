@@ -1,9 +1,16 @@
-"""Endpoints de inicio y cierre de sesión (RF02, CU02).
+"""Endpoints de inicio y cierre de sesión (RF02, CU02) y del segundo factor (RF18).
 
 La autenticación es por sesión de Django sobre cookie, no por token en el
 navegador: así la credencial queda fuera del alcance de JavaScript y el
 CSRF lo cubre el propio framework (Práctica N.° 5, RNF01).
+
+Con el segundo factor activo, el ingreso tiene dos pasos. El primero valida
+la contraseña y solo anota en la sesión anónima quién la pasó; la sesión
+autenticada (`login`) se abre en el segundo, con el código. Así no existe en
+ningún momento una sesión válida que no haya pasado los dos factores.
 """
+import time
+
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -19,7 +26,13 @@ from apps.core.contexto_http import fijar_centro_en_la_sesion
 from apps.core.errores import ReglaDeNegocio
 from apps.core.vistas import ContextoDeCentro
 
+from . import segundo_factor
+from .models import Usuario
 from .servicios import cambiar_contrasena
+
+# Lo que dura el primer paso aprobado mientras se espera el código.
+VIGENCIA_DEL_PRIMER_PASO_SEGUNDOS = 300
+_PRIMER_PASO = "segundo_factor_pendiente"
 
 
 def _datos_de(usuario) -> dict:
@@ -34,6 +47,11 @@ def _datos_de(usuario) -> dict:
         "centro": usuario.centro_id,
         "centro_nombre": usuario.centro.razon_social if usuario.centro_id else None,
         "segundo_factor_activo": usuario.segundo_factor_activo,
+        "requiere_segundo_factor": usuario.requiere_segundo_factor,
+        # Rol administrativo sin factor todavía: la interfaz lo lleva al alta y
+        # el servidor no le deja hacer nada más (ContextoDeCentro).
+        "debe_activar_segundo_factor": (usuario.requiere_segundo_factor
+                                        and not usuario.segundo_factor_activo),
         "ultimo_acceso_en": usuario.ultimo_acceso_en,
         "debe_cambiar_contrasena": usuario.debe_cambiar_contrasena,
     }
@@ -95,15 +113,87 @@ class IniciarSesion(APIView):
                 f"El acceso de {centro.nombre_comercial or centro.razon_social} está "
                 "suspendido. Consulte con el proveedor del sistema.",
             )
-        login(request, usuario)
-        usuario.ultimo_acceso_en = timezone.now()
-        usuario.save(update_fields=["ultimo_acceso_en"])
-        # La petición llegó sin usuario: hay que fijar su centro también en la
-        # base, o el registro de auditoría choca con la política RLS.
-        fijar_centro_en_la_sesion(usuario.centro_id)
-        fijar_contexto(centro_id=usuario.centro_id, usuario_id=usuario.pk)
-        registrar("ACCESO", "sesion", usuario.pk, {"correo": usuario.correo})
-        return Response({"autenticado": True, "usuario": _datos_de(usuario)})
+        if usuario.segundo_factor_activo:
+            # Primer paso aprobado: todavía no hay sesión, solo la marca de
+            # quién la pidió y hasta cuándo puede escribir el código.
+            request.session.cycle_key()
+            request.session[_PRIMER_PASO] = {
+                "usuario": usuario.pk,
+                "expira": time.time() + VIGENCIA_DEL_PRIMER_PASO_SEGUNDOS,
+            }
+            return Response({"autenticado": False, "segundo_factor_requerido": True,
+                             "usuario": None})
+        return _abrir_sesion(request, usuario, {"correo": usuario.correo})
+
+
+def _abrir_sesion(request, usuario, datos_de_auditoria: dict) -> Response:
+    # El usuario puede llegar del segundo paso, sin pasar por authenticate().
+    login(request, usuario, backend="django.contrib.auth.backends.ModelBackend")
+    usuario.ultimo_acceso_en = timezone.now()
+    usuario.save(update_fields=["ultimo_acceso_en"])
+    # La petición llegó sin usuario: hay que fijar su centro también en la
+    # base, o el registro de auditoría choca con la política RLS.
+    fijar_centro_en_la_sesion(usuario.centro_id)
+    fijar_contexto(centro_id=usuario.centro_id, usuario_id=usuario.pk)
+    registrar("ACCESO", "sesion", usuario.pk, datos_de_auditoria)
+    return Response({"autenticado": True, "usuario": _datos_de(usuario)})
+
+
+class VerificarSegundoFactor(APIView):
+    """P02 — segundo paso del ingreso: código de la aplicación o de recuperación."""
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        pendiente = request.session.get(_PRIMER_PASO)
+        if not pendiente or pendiente.get("expira", 0) < time.time():
+            request.session.pop(_PRIMER_PASO, None)
+            raise ReglaDeNegocio(
+                "segundo-factor-sin-primer-paso",
+                "Vuelva a escribir su correo y contraseña.",
+            )
+        # Entre los dos pasos pudieron desactivar la cuenta o suspender el
+        # centro: se vuelve a comprobar con los mismos criterios del primero.
+        usuario = Usuario.objects.select_related("centro").filter(
+            pk=pendiente["usuario"], esta_activo=True).first()
+        if usuario is None or (usuario.centro is not None and not usuario.centro.esta_operativo):
+            request.session.pop(_PRIMER_PASO, None)
+            raise ReglaDeNegocio(
+                "segundo-factor-sin-primer-paso",
+                "Vuelva a escribir su correo y contraseña.",
+            )
+        metodo = segundo_factor.verificar_en_el_ingreso(
+            usuario,
+            codigo=str(request.data.get("codigo") or ""),
+            codigo_recuperacion=str(request.data.get("codigo_recuperacion") or ""),
+        )
+        request.session.pop(_PRIMER_PASO, None)
+        datos = {"correo": usuario.correo, "segundo_factor": metodo}
+        if metodo == "recuperacion":
+            datos["codigos_de_recuperacion_vigentes"] = (
+                segundo_factor.codigos_de_recuperacion_vigentes(usuario))
+        return _abrir_sesion(request, usuario, datos)
+
+
+class AltaDeSegundoFactor(ContextoDeCentro, APIView):
+    """P02 (alta) — genera el secreto y su QR para la aplicación autenticadora."""
+
+    permite_segundo_factor_pendiente = True
+
+    def post(self, request):
+        return Response(segundo_factor.iniciar_alta(request.user))
+
+
+class ConfirmarSegundoFactor(ContextoDeCentro, APIView):
+    """P02 (alta) — activa el factor con el primer código y entrega los de recuperación."""
+
+    permite_segundo_factor_pendiente = True
+
+    def post(self, request):
+        codigos = segundo_factor.confirmar_alta(request.user,
+                                                str(request.data.get("codigo") or ""))
+        request.user.refresh_from_db()
+        return Response({"usuario": _datos_de(request.user), "codigos_recuperacion": codigos})
 
 
 class CerrarSesion(APIView):
@@ -128,6 +218,7 @@ class CambiarContrasena(ContextoDeCentro, APIView):
     """
 
     permite_contrasena_pendiente = True
+    permite_segundo_factor_pendiente = True
 
     def post(self, request):
         datos = request.data

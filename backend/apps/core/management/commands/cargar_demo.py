@@ -289,23 +289,24 @@ class Command(BaseCommand):
         return sedes
 
     def _usuarios(self, centro, sedes):
-        plataforma = Usuario.objects.create_superuser(
+        Usuario.objects.create_superuser(
             correo=CORREO_PLATAFORMA,
             password=CLAVE,
             nombres="Soporte",
             apellidos="Podocenter",
             rol=Rol.ADMIN_PLATAFORMA,
         )
-        plataforma.segundo_factor_activo = True
-        plataforma.save(update_fields=["segundo_factor_activo"])
+        # Las cuentas administrativas nacen sin segundo factor (RF18): marcarlo
+        # activo sin secreto las dejaba sin poder entrar. En el primer ingreso
+        # el servidor las lleva a darlo de alta con su propio teléfono; el
+        # repositorio no guarda ningún secreto de demostración.
 
         admin_centro = Usuario.objects.create_user(
             correo="gerencia@piessanos.pe", password=CLAVE, nombres="Elsa",
             apellidos="Rodríguez Paredes", rol=Rol.ADMIN_CENTRO, centro=centro,
         )
         admin_centro.is_staff = True
-        admin_centro.segundo_factor_activo = True
-        admin_centro.save(update_fields=["is_staff", "segundo_factor_activo"])
+        admin_centro.save(update_fields=["is_staff"])
         for indice, sede in enumerate(sedes):
             AsignacionSede.objects.create(
                 usuario=admin_centro, sede=sede, es_predeterminada=(indice == 0)

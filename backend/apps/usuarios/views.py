@@ -1,4 +1,5 @@
 """API del módulo Usuarios y roles (RF01) y de la sesión (RF02)."""
+from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -6,11 +7,12 @@ from rest_framework.views import APIView
 
 from apps.core.auditoria import registrar
 from apps.core.errores import ReglaDeNegocio
-from apps.core.permisos import TieneRol
+from apps.core.permisos import EsAdministradorDePlataforma, TieneRol
 from apps.core.vistas import ContextoDeCentro
 
 from .models import Usuario
 from .roles import Rol
+from .segundo_factor import reiniciar_segundo_factor
 from .serializers import SedeAsignadaSerializer, UsuarioSerializer
 from .servicios import (
     actualizar_usuario,
@@ -90,8 +92,10 @@ class SedesDeLaSesion(ContextoDeCentro, APIView):
     """Sedes entre las que el usuario elige al entrar (pantalla P03)."""
 
     # Solo lectura de sus propias asignaciones: la interfaz la pide al entrar,
-    # antes de llevar al usuario a cambiar la contraseña temporal.
+    # antes de llevar al usuario a cambiar la contraseña temporal o a dar de
+    # alta el segundo factor.
     permite_contrasena_pendiente = True
+    permite_segundo_factor_pendiente = True
 
     def get(self, request):
         datos = SedeAsignadaSerializer(sedes_disponibles(request.user), many=True).data
@@ -117,3 +121,19 @@ class ProfesionalesDeLaSede(ContextoDeCentro, APIView):
         return Response({"profesionales": [
             {"id": p.pk, "nombre_completo": p.nombre_completo} for p in profesionales
         ]})
+
+
+class ReiniciarSegundoFactor(ContextoDeCentro, APIView):
+    """RF18 — el administrador de plataforma quita el factor de una cuenta.
+
+    Para quien perdió el teléfono y los códigos de recuperación. Si su rol lo
+    exige, la cuenta vuelve a darlo de alta en su próximo ingreso.
+    """
+
+    permission_classes = [EsAdministradorDePlataforma]
+
+    def post(self, request, pk: int):
+        usuario = get_object_or_404(Usuario, pk=pk)
+        reiniciar_segundo_factor(usuario, por=request.user,
+                                 motivo=str(request.data.get("motivo") or ""))
+        return Response({"id": usuario.pk, "segundo_factor_activo": False})
