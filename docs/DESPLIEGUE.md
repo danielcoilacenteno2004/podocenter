@@ -98,11 +98,17 @@ docker compose -f docker-compose.prod.yml exec api python manage.py createsuperu
 
 Luego, en `https://<dominio>`:
 
-1. Entre con esa cuenta y abra **Centros clientes**. Al dar de alta un centro
-   se crea su administradora y la pantalla muestra **una sola vez** su
-   contraseña temporal.
+1. Entre con esa cuenta. Antes de nada, el sistema le pide activar la
+   **verificación en dos pasos** (RF18): escanee el QR con una aplicación
+   autenticadora, escriba el primer código y guarde los diez códigos de
+   recuperación, que solo se muestran esa vez. Desde entonces, también
+   `/admin/` pide el código. Luego abra **Centros clientes**. Al dar de alta
+   un centro se crea su administradora y la pantalla muestra **una sola vez**
+   su contraseña temporal.
 2. La administradora del centro entra con ella. El sistema la obliga a
-   elegir una contraseña propia antes de hacer nada más.
+   elegir una contraseña propia y, después, a activar su verificación en
+   dos pasos, antes de hacer nada más. Para las podólogas es opcional
+   (desde **Mi perfil**).
 3. En este orden:
    - **Sedes**: cada una con su horario de atención. Sin horario, la sede no
      admite citas.
@@ -115,28 +121,45 @@ Luego, en `https://<dominio>`:
 Si alguien olvida su contraseña, la administradora pulsa **Restablecer
 contraseña** en Usuarios. No hay recuperación por correo (P23/P24).
 
-## 6 bis. Recordatorios por WhatsApp
+Si alguien pierde el teléfono **y** sus códigos de recuperación, el
+administrador de plataforma le quita el segundo factor desde `/admin/`
+(Usuarios → acción «Reiniciar la verificación en dos pasos») o con
+`POST /api/v1/plataforma/usuarios/<id>/reiniciar-segundo-factor/`. Queda en
+la bitácora del centro y la persona lo vuelve a activar al entrar.
 
-El servicio `recordatorios` corre cada quince minutos y manda el recordatorio
-de las citas de las próximas 24 horas a los pacientes que aceptaron
-recordatorios y tienen celular. **Mientras las variables `WHATSAPP_*` estén
-vacías, el envío es simulado**: no sale ningún mensaje; queda anotado en el
-registro del servicio y en la tabla `recordatorio`.
+## 6 bis. Recordatorios de cita (RF07)
 
-Para que salgan de verdad, el centro necesita una cuenta de WhatsApp Business
-aprobada por Meta, con un número verificado y una **plantilla de mensaje
-aprobada** que reciba seis parámetros, en este orden: nombre del paciente,
-servicio, fecha, hora, nombre del centro y sede con dirección. Luego complete
-en `.env` el token, el identificador del número, la versión de la API que
-indique Meta, el nombre de la plantilla y su idioma, y reinicie el servicio:
+El servicio `recordatorios` corre `enviar_recordatorios` cada quince minutos.
+En cada pasada, cada centro decide con su configuración
+(`GET`/`PUT /api/v1/recordatorios/configuracion/`, solo la administradora):
+
+- **Desactivados** (así nace todo centro): no se envía nada.
+- **Activos**, a partir de la **hora de envío** (por omisión las 18:00), se
+  avisa una sola vez de cada cita del día siguiente, solo a pacientes que
+  aceptaron recordatorios y tienen un contacto válido para el canal. Ante un
+  fallo se reintenta en la pasada siguiente, hasta tres veces.
+
+El **canal** lo elige la Gerencia del centro:
+
+- **Correo** (Amazon SES). Sale por la interfaz SMTP de SES con estas
+  variables en `.env`: `EMAIL_HOST` (el servidor SMTP de SES de la región),
+  `EMAIL_PORT=587`, `EMAIL_USE_TLS=1`, `EMAIL_HOST_USER` y
+  `EMAIL_HOST_PASSWORD` (las credenciales SMTP que genera SES) y
+  `DEFAULT_FROM_EMAIL` (una dirección del dominio verificado en SES). Sin
+  ellas, Django intenta el servidor de correo local y cada intento queda
+  como fallido en la tabla `recordatorio`. **Pendiente**: añadir estas
+  variables a `infra/despliegue/.env.ejemplo`, que no se tocó en este cambio.
+- **WhatsApp manual** (por omisión): no hay envío automático; la agenda
+  ofrece el botón «WhatsApp», que abre el mensaje escrito en el teléfono de
+  quien lo pulsa.
+- **WhatsApp automático**: no se puede elegir. El canal está vacío hasta que
+  la Gerencia apruebe el costo por mensaje (CC-28). Las variables
+  `WHATSAPP_*` siguen declaradas, pero hoy ningún código las usa.
 
 ```bash
 docker compose -f docker-compose.prod.yml up -d recordatorios
 docker compose -f docker-compose.prod.yml logs -f recordatorios
 ```
-
-Sin esa cuenta, la agenda ofrece igual el botón «WhatsApp», que abre el
-mensaje escrito en el teléfono de quien lo pulsa.
 
 ## 7. Actualizar
 

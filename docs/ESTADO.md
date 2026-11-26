@@ -2,6 +2,14 @@
 
 Corte: 12 de noviembre de 2026. Primera entrega comprometida: **12/11/2026**.
 
+> **Actualización del 25/11/2026, rama `feat/rf16-rf07-rf18`, sin commit.**
+> Se construyeron RF18 (verificación en dos pasos), RF16 (exportación del
+> registro diario a PDF y Excel) y se rehízo RF07 (recordatorios con canal
+> intercambiable). Las cifras marcadas «25/11» de este documento son de esa
+> rama; el detalle, con lo que se desvió del pedido, está en
+> `docs/resultados_rf.json`. Hasta que se haga el commit, `main` sigue como
+> describe el resto del documento.
+
 ## 1. El riesgo principal
 
 La Tabla 64 del informe compromete para el 12/11 lo siguiente, textualmente:
@@ -14,7 +22,7 @@ Contra eso, el estado real es:
 
 | Compromiso | Estado |
 |---|---|
-| Usuarios y roles | Pantallas: ingreso (P01), elección de sede (P03), gestión de usuarios (P17/P27, con rol y sedes editables) y perfil con cambio de contraseña (P20). El alta y «Restablecer contraseña» dan una **contraseña temporal** que se muestra una vez, y el servidor no deja hacer nada más hasta cambiarla. **Sin P02 (dos pasos) ni P23/P24 (correo): la contraseña olvidada la restablece la administradora** |
+| Usuarios y roles | Pantallas: ingreso (P01), elección de sede (P03), gestión de usuarios (P17/P27, con rol y sedes editables) y perfil con cambio de contraseña (P20). El alta y «Restablecer contraseña» dan una **contraseña temporal** que se muestra una vez, y el servidor no deja hacer nada más hasta cambiarla. **25/11: P02 (dos pasos) construida** (RF18): obligatoria para la administradora del centro y el administrador de plataforma, también en `/admin/`; opcional para la podóloga. **Sin P23/P24 (correo): la contraseña olvidada la restablece la administradora** |
 | Sedes | Pantallas P18/P28 con el **horario de atención editable** por día (CC-15). Una sede o un servicio desactivados ya no admiten citas nuevas |
 | Pacientes con consentimiento | Pantallas: búsqueda (P08), alta con consentimiento (P09), ficha con historial (P10) y detalle de atención (P25). **Sin edición: se quitaron PUT, PATCH y DELETE de `/pacientes/`** porque escribían sin auditoría; vuelve con un servicio que la audite |
 | Citas sin recordatorios | Terminado: agenda (P05) en cuadrícula por hora y profesional y en lista con filtros, nueva cita (P06, también desde un hueco de la cuadrícula), cancelación con reemplazo (P07) y panel del día (P04). Aunque el compromiso era «sin recordatorios», ya existen (ver RF07 en la sección 4) |
@@ -32,8 +40,9 @@ Construido:
   profesional, servicio y sede al registrarse, para que la ficha no cambie si
   después alguien edita la cita.
 - Observación clínica cifrada, como los antecedentes del paciente.
-- Política de seguridad por fila sobre la tabla `atencion`. Hoy son **trece**
-  tablas con RLS, todas con `FORCE`:
+- Política de seguridad por fila sobre la tabla `atencion`. Hoy son **catorce**
+  tablas con RLS, todas con `FORCE` (25/11: se suma
+  `configuracion_recordatorios`):
   `SELECT relname FROM pg_class WHERE relrowsecurity;`
 - Reglas en el servicio, cada una con su código RFC 9457:
   - `cita-no-atendible`: la cita no está programada.
@@ -93,7 +102,10 @@ válida para el RNF02 es la que se haga con la podóloga.
   **87.2 %** de ramas, sobre PostgreSQL real y no sobre una base en memoria,
   con Python 3.12. La cifra varía unas décimas entre ejecuciones. Corrida del
   18/11/2026 para la Práctica N.° 9: `docs/pruebas/02_cobertura.txt` y, por
-  módulo, `docs/pruebas/02_cobertura_por_modulo.txt`.
+  módulo, `docs/pruebas/02_cobertura_por_modulo.txt`. **25/11, rama
+  `feat/rf16-rf07-rf18`: 397 pruebas en verde, 95.86 % de sentencias y
+  87.14 % de ramas** (Python 3.12.13, PostgreSQL 18 local con el rol sin
+  privilegios; sin evidencia guardada en `docs/pruebas/`).
 - **Panel del día (P04) con cifras que cuadran.** Lo cobrado sale del mismo
   cálculo que el registro diario (P16), así que las dos pantallas dan la
   misma cifra; la ocupación se mide contra la capacidad real de la sede
@@ -110,15 +122,20 @@ válida para el RNF02 es la que se haga con la podóloga.
   Antes, con dos profesionales, la ocupación salía el doble de la real.
 - **Cero vulnerabilidades** conocidas en las dependencias de Python tras
   subir a Django 5.2 LTS, DRF 3.18.2, django-filter 25.2 y cryptography
-  50.0.2 (`pip-audit`, 18/11/2026). **El frontend no está igual**: `npm audit`
+  50.0.2 (`pip-audit`, 18/11/2026). El 25/11 se añadieron `segno` 1.6.6 (QR
+  del segundo factor), `reportlab` 5.1.2 y `openpyxl` 3.1.5 (exportación), y
+  `pip-audit -r requirements.txt` sigue sin hallazgos. **El frontend no está igual**: `npm audit`
   da 11, y 3 altas llegan a producción (`axios` 1.7.9 y `vue` 3.5.13); ver
   `docs/pruebas/defectos.md`.
 - `ruff`, `bandit` 1.9.4 y `npm run lint` limpios. `bandit` se comprobó
   además contra un archivo deliberadamente inseguro, en Python 3.12 y 3.14,
   para asegurar que **sí falla** cuando debe.
-- **Aislamiento multi-inquilino probado con 21 pruebas**, contando las que
-  usan el centro ajeno de prueba (`otro_centro`): 5 en `core`, 5 en
-  usuarios, 4 en atenciones, 4 en inventario, 2 en catálogo y 1 en sedes.
+- **Aislamiento multi-inquilino probado con 29 pruebas** (25/11; eran 21),
+  contando las que usan el centro ajeno de prueba (`otro_centro`): 5 en
+  `core`, 8 en usuarios, 5 en atenciones, 4 en citas, 4 en inventario, 2 en
+  catálogo y 1 en sedes. Las nuevas: nadie de un centro reinicia el segundo
+  factor de otro, una sede de otro centro no se exporta, y el lote de
+  recordatorios de un centro no toca las citas ni la configuración de otro.
   Comprueban que un centro no ve, no abre y no modifica datos de otro, ni
   usa sus sedes o productos. Es lo que sostiene el modelo de arriendo ante
   el jurado.
@@ -129,6 +146,7 @@ válida para el RNF02 es la que se haga con la podóloga.
   `--format=%aN`), no de `--format=%an`, que no aplica `.mailmap`.
 - Entorno de demostración reproducible con un comando y probado con nueve
   pruebas, incluida una que verifica que las credenciales publicadas funcionan.
+- 25/11: se suma **P02** (verificación en dos pasos: alta con QR y paso del código en el ingreso), así que son **26 de 29**. «Exportar» (P22) quedó como dos botones y un rango opcional dentro de P16, no como una pantalla propia; no se cuenta entre las 26. **P02 y los botones de P16 no se han recorrido todavía en un navegador**: pasaron `npm run lint` y `npm run build`, nada más.
 - Frontend: **25 pantallas de las 29 diseñadas en la Práctica N.° 7 (P01, P03, P04, P05, P06, P07, P08, P09, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20, P21, P25, P26, P27, P28, P29)**, más la ventana de producto sobre P12, que no está en el diseño. El frontend no tiene pruebas automáticas; cada pantalla se comprobó con un recorrido en Playwright. La interfaz usa la paleta oficial de Artemisa (#3C5154, #57696D, #A1B5AC y blanco) declarada una sola vez como variables, y piezas comunes: tarjeta (`TarjetaSeccion`), iconos (`IconoTrazo`), marca (`MarcaArtemisa`) y barra superior con las secciones tomadas de las rutas. P01 y P04 se rediseñaron sobre esa base.
 - **Configuración de producción endurecida**: no arranca sin `DJANGO_SECRET_KEY`
   y `CLAVE_CIFRADO_CAMPOS` propias (ni vacías ni con el texto de la
@@ -175,7 +193,9 @@ Registradas en la Práctica N.° 7 y pendientes de decisión de alcance:
 | CC-12 | Tercer indicador del panel (stock), alerta automática del RF13, pantalla de reprogramación del RF08 |
 | CC-18 | *Añade* la barra de filtros de la agenda |
 | CC-19 | *Añade* el panel segmentado por decisión; no revierte CC-12 |
-| RF07 | **Construido, sin envío real.** El temporizador (CU15) manda cada quince minutos el recordatorio por WhatsApp de las citas de las próximas 24 horas, con tres intentos y anulado si se cancela la cita; **mientras Meta no apruebe la cuenta de WhatsApp Business del centro, el envío es simulado**. La agenda ofrece además «WhatsApp», que abre el mensaje escrito para enviarlo a mano. Falta la llamada de retorno con el estado de entrega (CU16), y el estado se ve en P05, no en P10 como dice la Práctica 7 |
+| RF07 | **25/11: rehecho con canal intercambiable, sin envío real todavía.** `CanalRecordatorio` con tres implementaciones: correo (Amazon SES por SMTP), WhatsApp manual (el botón de la agenda) y WhatsApp automático **vacío hasta que la Gerencia apruebe el costo (CC-28)**; la implementación anterior contra la API de Meta se retiró del flujo y queda en el historial (`08b32bc`). Cada centro activa o desactiva los recordatorios, fija la hora de envío y elige el canal (`/recordatorios/configuracion/`, sin pantalla todavía); nace desactivado y con el canal manual. El planificador corre cada quince minutos y, pasada la hora del centro, avisa una vez de cada cita **del día siguiente** (antes: de las próximas 24 horas), con tres intentos, anulado si se cancela la cita y sin que un fallo detenga el lote. **No ha salido ningún correo real**: faltan las credenciales SMTP de SES. Falta la llamada de retorno con el estado de entrega (CU16), y el estado se ve en P05, no en P10 como dice la Práctica 7 |
+| RF16 | **25/11: construido.** `GET /reportes/registro-diario/exportar/?formato=pdf\|xlsx` con `fecha` o con `desde`/`hasta` (hasta 31 días), con la misma consulta y los mismos permisos que P16; el archivo se genera en memoria, lleva encabezado, neutraliza fórmulas en Excel y queda auditado (acción `EXPORTACION`). Botones «Exportar PDF» y «Exportar Excel» en P16 |
+| RF18 | **25/11: construido.** TOTP (RFC 6238) con secreto cifrado, alta con QR y primer código, ingreso en dos pasos (también en `/admin/`), 10 códigos de recuperación con resumen SHA-256 con sal, bloqueo de 15 minutos tras 5 códigos errados y reinicio solo por el administrador de plataforma, auditado. Las cuentas administrativas de `cargar_demo` nacen **sin** factor y lo activan en su primer ingreso |
 
 ## 5. Huecos de la API encontrados el 11/11 y cerrados el 12/11
 
@@ -211,3 +231,14 @@ Queda abierto: la edición de pacientes (ver la sección 6).
 - **La prueba de usabilidad** necesita una hora de la dueña y una de la
   podóloga. Es el requisito más barato de los tres y el que lleva más tiempo
   parado. Además, es la que valida de verdad el RNF02.
+- **El canal del recordatorio (RF07)** es de la Gerencia: correo (requiere
+  un dominio verificado en Amazon SES y sus credenciales SMTP), WhatsApp
+  manual (sin costo, lo envía una persona) o WhatsApp automático (costo por
+  mensaje, riesgo R9, pendiente de CC-28). También la hora de envío: las
+  18:00 son un valor por omisión del equipo, no una indicación del centro.
+- **Quién custodia los códigos de recuperación de las cuentas
+  administrativas (RF18)**, en especial la del administrador de plataforma,
+  que no tiene a nadie por encima para reiniciarle el factor si pierde el
+  teléfono y los códigos. Y, en el entorno de demostración, quién activa el
+  factor de `gerencia@` y `plataforma@` el día de la sustentación: el primero
+  que entre lo ata a su teléfono.
