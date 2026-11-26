@@ -1,0 +1,6 @@
+$ python manage.py makemigrations --check --dry-run
+# Fecha: 2026-11-26T11:14:45-05:00 · Commit: 1977d6c · rama feat/rf16-rf07-rf18 + corrección de DEF-25 a DEF-27, sin commit
+
+No changes detected
+
+[código de salida: 0]

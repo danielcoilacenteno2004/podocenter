@@ -1,0 +1,49 @@
+$ pytest -vv backend/apps/inventario/tests/test_inventario.py backend/apps/inventario/tests/test_productos_y_minimo.py -k 'not disponibilidad'
+# Fecha: 2026-11-26T08:54:46-05:00 · Commit: 1977d6c · rama feat/rf16-rf07-rf18 · RF11 movimientos de inventario
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-8.3.4, pluggy-1.7.0 -- C:\Users\danie\AppData\Local\Temp\claude\2b75186625f2af13\da2c9158-aeeb-4a99-bce2-b355f8c742f3\scratchpad\venv312\Scripts\python.exe
+cachedir: .pytest_cache
+django: version: 5.2.19, settings: config.settings.dev (from env)
+rootdir: C:\Users\danie\Documents\UNIVERSIDAD\SEMESTRE 10\PROYECTO DE FIN DE CARRERA\podologia\podocenter
+configfile: pyproject.toml
+plugins: cov-6.0.0, django-4.9.0
+collecting ... collected 34 items / 1 deselected / 33 selected
+
+backend/apps/inventario/tests/test_inventario.py::test_una_entrada_suma_al_stock_de_la_sede PASSED [  3%]
+backend/apps/inventario/tests/test_inventario.py::test_una_merma_resta_del_stock PASSED [  6%]
+backend/apps/inventario/tests/test_inventario.py::test_una_merma_no_puede_dejar_el_stock_en_negativo PASSED [  9%]
+backend/apps/inventario/tests/test_inventario.py::test_un_ajuste_a_la_baja_no_puede_dejar_el_stock_en_negativo PASSED [ 12%]
+backend/apps/inventario/tests/test_inventario.py::test_un_ajuste_puede_ser_al_alta_o_a_la_baja PASSED [ 15%]
+backend/apps/inventario/tests/test_inventario.py::test_un_ajuste_sin_direccion_se_rechaza PASSED [ 18%]
+backend/apps/inventario/tests/test_inventario.py::test_la_merma_y_el_ajuste_exigen_motivo[MERMA] PASSED [ 21%]
+backend/apps/inventario/tests/test_inventario.py::test_la_merma_y_el_ajuste_exigen_motivo[AJUSTE] PASSED [ 24%]
+backend/apps/inventario/tests/test_inventario.py::test_la_salida_por_consumo_no_se_registra_a_mano PASSED [ 27%]
+backend/apps/inventario/tests/test_inventario.py::test_la_cantidad_debe_ser_un_entero_positivo[0] PASSED [ 30%]
+backend/apps/inventario/tests/test_inventario.py::test_la_cantidad_debe_ser_un_entero_positivo[-3] PASSED [ 33%]
+backend/apps/inventario/tests/test_inventario.py::test_la_cantidad_debe_ser_un_entero_positivo[None] PASSED [ 36%]
+backend/apps/inventario/tests/test_inventario.py::test_un_movimiento_sin_sede_se_rechaza_con_su_codigo PASSED [ 39%]
+backend/apps/inventario/tests/test_inventario.py::test_un_movimiento_sin_producto_se_rechaza_con_su_codigo PASSED [ 42%]
+backend/apps/inventario/tests/test_inventario.py::test_un_producto_de_otro_centro_responde_como_si_no_existiera PASSED [ 45%]
+backend/apps/inventario/tests/test_inventario.py::test_el_stock_de_la_sede_incluye_los_productos_sin_movimientos PASSED [ 48%]
+backend/apps/inventario/tests/test_inventario.py::test_el_administrador_de_plataforma_no_ve_inventarios PASSED [ 51%]
+backend/apps/inventario/tests/test_inventario.py::test_las_pruebas_de_aislamiento_corren_con_un_rol_sin_privilegios PASSED [ 54%]
+backend/apps/inventario/tests/test_inventario.py::test_otro_centro_no_ve_productos_stock_ni_movimientos PASSED [ 57%]
+backend/apps/inventario/tests/test_productos_y_minimo.py::test_la_administradora_da_de_alta_un_producto_que_aparece_sin_stock PASSED [ 60%]
+backend/apps/inventario/tests/test_productos_y_minimo.py::test_el_codigo_repetido_es_error_de_negocio PASSED [ 63%]
+backend/apps/inventario/tests/test_productos_y_minimo.py::test_sin_nombre_no_hay_producto PASSED [ 66%]
+backend/apps/inventario/tests/test_productos_y_minimo.py::test_desactivar_lo_saca_del_inventario_y_se_puede_recuperar PASSED [ 69%]
+backend/apps/inventario/tests/test_productos_y_minimo.py::test_la_podologa_no_cambia_el_catalogo PASSED [ 72%]
+backend/apps/inventario/tests/test_productos_y_minimo.py::test_el_minimo_de_la_sede_decide_bajo_minimo_y_queda_auditado PASSED [ 75%]
+backend/apps/inventario/tests/test_productos_y_minimo.py::test_el_minimo_es_por_sede PASSED [ 78%]
+backend/apps/inventario/tests/test_productos_y_minimo.py::test_un_minimo_invalido_se_rechaza[-1] PASSED [ 81%]
+backend/apps/inventario/tests/test_productos_y_minimo.py::test_un_minimo_invalido_se_rechaza[dos] PASSED [ 84%]
+backend/apps/inventario/tests/test_productos_y_minimo.py::test_un_minimo_invalido_se_rechaza[None] PASSED [ 87%]
+backend/apps/inventario/tests/test_productos_y_minimo.py::test_la_podologa_no_cambia_el_minimo PASSED [ 90%]
+backend/apps/inventario/tests/test_productos_y_minimo.py::test_no_se_toca_el_producto_de_otro_centro PASSED [ 93%]
+backend/apps/inventario/tests/test_inventario.py::test_la_base_impide_un_stock_negativo_aunque_se_salte_el_servicio PASSED [ 96%]
+backend/apps/inventario/tests/test_inventario.py::test_la_base_rechaza_escribir_stock_con_el_centro_de_otro_inquilino PASSED [100%]
+
+================ 33 passed, 1 deselected in 319.19s (0:05:19) =================
+
+[código de salida: 0]

@@ -1,0 +1,834 @@
+{
+  "generado": "2026-11-26T11:25:23-05:00",
+  "rama": "feat/rf16-rf07-rf18",
+  "commit_actual": "1977d6c",
+  "commit_11_11": "7db1281 (2026-11-11 18:22, último commit cuyo docs/ESTADO.md registra 196 pruebas y 94.3 %; ver LEEME.md)",
+  "python": "Python 3.12.13",
+  "postgresql": "PostgreSQL 18.1 on x86_64-windows, compiled by msvc-19.44.35219, 64-bit",
+  "entorno": "Equipo local Windows 11; base PostgreSQL local de prueba (puerto 5433) con el rol podo sin SUPERUSER ni BYPASSRLS; config.settings.dev. Sin producción ni cuentas de AWS.",
+  "capturas": [
+    {
+      "id": "E01-1111",
+      "que": "Suite completa del servidor",
+      "comando": "pytest -vv",
+      "commit": "7db1281",
+      "fecha_hora": "2026-11-26T08:33:21-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0
+      ],
+      "resultado": "196 passed in 566.93s (0:09:26)",
+      "texto": "texto/E01-1111.txt",
+      "imagenes": [
+        "img/E01-1111-lista-a.png",
+        "img/E01-1111-lista-b.png",
+        "img/E01-1111-lista-c.png",
+        "img/E01-1111-resumen.png"
+      ],
+      "nota": "commit del 11/11 (git worktree)"
+    },
+    {
+      "id": "E01-actual",
+      "que": "Suite completa del servidor",
+      "comando": "pytest -vv",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T08:45:13-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0
+      ],
+      "resultado": "397 passed in 227.99s (0:03:47)",
+      "texto": "texto/E01-actual.txt",
+      "imagenes": [
+        "img/E01-actual-lista-a.png",
+        "img/E01-actual-lista-b.png",
+        "img/E01-actual-lista-c.png",
+        "img/E01-actual-lista-d.png",
+        "img/E01-actual-lista-e.png",
+        "img/E01-actual-lista-f.png",
+        "img/E01-actual-resumen.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18"
+    },
+    {
+      "id": "E01-correccion",
+      "que": "Suite completa del servidor",
+      "comando": "pytest -vv",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T11:17:35-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0
+      ],
+      "resultado": "408 passed in 197.03s (0:03:17)",
+      "texto": "texto/E01-correccion.txt",
+      "imagenes": [
+        "img/E01-correccion-lista-a.png",
+        "img/E01-correccion-lista-b.png",
+        "img/E01-correccion-lista-c.png",
+        "img/E01-correccion-lista-d.png",
+        "img/E01-correccion-lista-e.png",
+        "img/E01-correccion-lista-f.png",
+        "img/E01-correccion-resumen.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18 + corrección de DEF-25 a DEF-27, sin commit"
+    },
+    {
+      "id": "E02-1111",
+      "que": "Cobertura de sentencias y de ramas",
+      "comando": "pytest --cov --cov-branch --cov-report=term-missing ; python -m coverage json -o 'C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/da2c9158-aeeb-4a99-bce2-b355f8c742f3/scratchpad/ev/cobertura-1111.json' && python -c \"import json; t=json.load(open('C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/da2c9158-aeeb-4a99-bce2-b355f8c742f3/scratchpad/ev/cobertura-1111.json'))['totals']; print('Sentencias: %d de %d cubiertas = %.2f %%' % (t['covered_lines'], t['num_statements'], 100*t['covered_lines']/t['num_statements'])); print('Ramas:      %d de %d cubiertas = %.2f %%' % (t['covered_branches'], t['num_branches'], 100*t['covered_branches']/t['num_branches'])); print('Combinada (columna Cover): %.2f %%' % t['percent_covered'])\"",
+      "commit": "7db1281",
+      "fecha_hora": "2026-11-26T08:42:52-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0,
+        0
+      ],
+      "resultado": "196 passed in 133.41s (0:02:13); Sentencias: 1585 de 1665 cubiertas = 95.20 %; Ramas:      176 de 208 cubiertas = 84.62 %; fila TOTAL 1665 80 208 24 94%",
+      "texto": "texto/E02-1111.txt",
+      "imagenes": [
+        "img/E02-1111-resumen.png",
+        "img/E02-1111.png"
+      ],
+      "nota": "commit del 11/11 (git worktree)"
+    },
+    {
+      "id": "E02-actual",
+      "que": "Cobertura de sentencias y de ramas",
+      "comando": "pytest --cov --cov-branch --cov-report=term-missing ; python -m coverage json -o 'C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/da2c9158-aeeb-4a99-bce2-b355f8c742f3/scratchpad/ev/cobertura-actual.json' && python -c \"import json; t=json.load(open('C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/da2c9158-aeeb-4a99-bce2-b355f8c742f3/scratchpad/ev/cobertura-actual.json'))['totals']; print('Sentencias: %d de %d cubiertas = %.2f %%' % (t['covered_lines'], t['num_statements'], 100*t['covered_lines']/t['num_statements'])); print('Ramas:      %d de %d cubiertas = %.2f %%' % (t['covered_branches'], t['num_branches'], 100*t['covered_branches']/t['num_branches'])); print('Combinada (columna Cover): %.2f %%' % t['percent_covered'])\"",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T08:49:06-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0,
+        0
+      ],
+      "resultado": "397 passed in 228.65s (0:03:48); Sentencias: 2861 de 2969 cubiertas = 96.36 %; Ramas:      485 de 552 cubiertas = 87.86 %; fila TOTAL 2969 108 552 59 95%",
+      "texto": "texto/E02-actual.txt",
+      "imagenes": [
+        "img/E02-actual-resumen.png",
+        "img/E02-actual.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18"
+    },
+    {
+      "id": "E02-correccion",
+      "que": "Cobertura de sentencias y de ramas",
+      "comando": "pytest --cov --cov-branch --cov-report=term-missing ; python -m coverage json -o 'C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/da2c9158-aeeb-4a99-bce2-b355f8c742f3/scratchpad/ev/cobertura-correccion.json' && python -c \"import json; t=json.load(open('C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/da2c9158-aeeb-4a99-bce2-b355f8c742f3/scratchpad/ev/cobertura-correccion.json'))['totals']; print('Sentencias: %d de %d cubiertas = %.2f %%' % (t['covered_lines'], t['num_statements'], 100*t['covered_lines']/t['num_statements'])); print('Ramas:      %d de %d cubiertas = %.2f %%' % (t['covered_branches'], t['num_branches'], 100*t['covered_branches']/t['num_branches'])); print('Combinada (columna Cover): %.2f %%' % t['percent_covered'])\"",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T11:20:56-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0,
+        0
+      ],
+      "resultado": "408 passed in 191.03s (0:03:11); Sentencias: 2921 de 3027 cubiertas = 96.50 %; Ramas:      499 de 566 cubiertas = 88.16 %; fila TOTAL 3027 106 566 59 95%",
+      "texto": "texto/E02-correccion.txt",
+      "imagenes": [
+        "img/E02-correccion-resumen.png",
+        "img/E02-correccion.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18 + corrección de DEF-25 a DEF-27, sin commit"
+    },
+    {
+      "id": "E03-1111",
+      "que": "Cobertura por módulo",
+      "comando": "python 'C:/Users/danie/Documents/UNIVERSIDAD/SEMESTRE 10/PROYECTO DE FIN DE CARRERA/podologia/podocenter/docs/pruebas/evidencia/scripts/cobertura_por_modulo.py' 'C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/da2c9158-aeeb-4a99-bce2-b355f8c742f3/scratchpad/ev/cobertura-1111.json'",
+      "commit": "7db1281",
+      "fecha_hora": "2026-11-26T08:45:12-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0
+      ],
+      "resultado": "Cobertura combinada (sentencias + ramas, la columna Cover): 94.02 %",
+      "texto": "texto/E03-1111.txt",
+      "imagenes": [
+        "img/E03-1111.png"
+      ],
+      "nota": "commit del 11/11 (git worktree)"
+    },
+    {
+      "id": "E03-actual",
+      "que": "Cobertura por módulo",
+      "comando": "python 'C:/Users/danie/Documents/UNIVERSIDAD/SEMESTRE 10/PROYECTO DE FIN DE CARRERA/podologia/podocenter/docs/pruebas/evidencia/scripts/cobertura_por_modulo.py' 'C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/da2c9158-aeeb-4a99-bce2-b355f8c742f3/scratchpad/ev/cobertura-actual.json'",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T08:53:03-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0
+      ],
+      "resultado": "Cobertura combinada (sentencias + ramas, la columna Cover): 95.03 %",
+      "texto": "texto/E03-actual.txt",
+      "imagenes": [
+        "img/E03-actual.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18"
+    },
+    {
+      "id": "E03-correccion",
+      "que": "Cobertura por módulo",
+      "comando": "python 'C:/Users/danie/Documents/UNIVERSIDAD/SEMESTRE 10/PROYECTO DE FIN DE CARRERA/podologia/podocenter/docs/pruebas/evidencia/scripts/cobertura_por_modulo.py' 'C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/da2c9158-aeeb-4a99-bce2-b355f8c742f3/scratchpad/ev/cobertura-correccion.json'",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T11:24:13-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0
+      ],
+      "resultado": "Cobertura combinada (sentencias + ramas, la columna Cover): 95.19 %",
+      "texto": "texto/E03-correccion.txt",
+      "imagenes": [
+        "img/E03-correccion.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18 + corrección de DEF-25 a DEF-27, sin commit"
+    },
+    {
+      "id": "E04",
+      "que": "Pruebas de aislamiento entre centros",
+      "comando": "pytest -vv -k 'aislamiento or otro_centro or otro_inquilino or rol_sin_privilegios'",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T08:53:11-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0
+      ],
+      "resultado": "22 passed, 375 deselected in 15.69s",
+      "texto": "texto/E04.txt",
+      "imagenes": [
+        "img/E04.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18"
+    },
+    {
+      "id": "E05-DEF25-correccion",
+      "que": "Pruebas por requerimiento crítico",
+      "comando": "pytest -vv backend/apps/usuarios/tests/test_bloqueo_de_ingreso.py backend/apps/core/tests/test_configuracion_produccion.py",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T11:14:09-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0
+      ],
+      "resultado": "18 passed in 23.57s",
+      "texto": "texto/E05-DEF25-correccion.txt",
+      "imagenes": [
+        "img/E05-DEF25-correccion.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18 + corrección de DEF-25 a DEF-27, sin commit · bloqueo tras intentos fallidos"
+    },
+    {
+      "id": "E05-RF02",
+      "que": "Pruebas por requerimiento crítico",
+      "comando": "pytest -vv backend/apps/core/tests/test_api_permisos.py backend/apps/usuarios/tests/test_sesion.py",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T08:53:31-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0
+      ],
+      "resultado": "21 passed in 14.00s",
+      "texto": "texto/E05-RF02.txt",
+      "imagenes": [
+        "img/E05-RF02-resumen.png",
+        "img/E05-RF02.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18 · RF02 acceso por rol"
+    },
+    {
+      "id": "E05-RF06",
+      "que": "Pruebas por requerimiento crítico",
+      "comando": "pytest -vv backend/apps/citas/tests/test_programar_cita.py backend/apps/citas/tests/test_agenda_filtros.py backend/apps/citas/tests/test_api_sin_escritura_directa.py",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T08:53:48-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0
+      ],
+      "resultado": "37 passed in 20.24s",
+      "texto": "texto/E05-RF06.txt",
+      "imagenes": [
+        "img/E05-RF06-resumen.png",
+        "img/E05-RF06.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18 · RF06 citas sin cruce"
+    },
+    {
+      "id": "E05-RF10",
+      "que": "Pruebas por requerimiento crítico",
+      "comando": "pytest -vv backend/apps/atenciones/tests/test_registrar_atencion.py backend/apps/atenciones/tests/test_api_atenciones.py backend/apps/atenciones/tests/test_insumos.py",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T08:54:12-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0
+      ],
+      "resultado": "43 passed in 30.88s",
+      "texto": "texto/E05-RF10.txt",
+      "imagenes": [
+        "img/E05-RF10-resumen.png",
+        "img/E05-RF10.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18 · RF10 registro de la atención"
+    },
+    {
+      "id": "E05-RF11",
+      "que": "Pruebas por requerimiento crítico",
+      "comando": "pytest -vv backend/apps/inventario/tests/test_inventario.py backend/apps/inventario/tests/test_productos_y_minimo.py -k 'not disponibilidad'",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T08:54:46-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0
+      ],
+      "resultado": "33 passed, 1 deselected in 319.19s (0:05:19)",
+      "texto": "texto/E05-RF11.txt",
+      "imagenes": [
+        "img/E05-RF11-resumen.png",
+        "img/E05-RF11.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18 · RF11 movimientos de inventario"
+    },
+    {
+      "id": "E05-RF12",
+      "que": "Pruebas por requerimiento crítico",
+      "comando": "pytest -vv backend/apps/inventario/tests/test_inventario.py -k disponibilidad",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T09:00:13-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0
+      ],
+      "resultado": "1 passed, 21 deselected in 6.50s",
+      "texto": "texto/E05-RF12.txt",
+      "imagenes": [
+        "img/E05-RF12-resumen.png",
+        "img/E05-RF12.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18 · RF12 disponibilidad entre sedes"
+    },
+    {
+      "id": "E05-RF16",
+      "que": "Pruebas por requerimiento crítico",
+      "comando": "pytest -vv backend/apps/atenciones/tests/test_exportar_registro_diario.py",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T09:00:25-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0
+      ],
+      "resultado": "23 passed in 11.62s",
+      "texto": "texto/E05-RF16.txt",
+      "imagenes": [
+        "img/E05-RF16-resumen.png",
+        "img/E05-RF16.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18 · RF16 exportación"
+    },
+    {
+      "id": "E05-RF18",
+      "que": "Pruebas por requerimiento crítico",
+      "comando": "pytest -vv backend/apps/usuarios/tests/test_cambiar_contrasena.py backend/apps/usuarios/tests/test_totp.py backend/apps/usuarios/tests/test_segundo_factor_alta.py backend/apps/usuarios/tests/test_segundo_factor_ingreso.py backend/apps/usuarios/tests/test_segundo_factor_reinicio.py",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T09:00:41-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0
+      ],
+      "resultado": "54 passed in 34.90s",
+      "texto": "texto/E05-RF18.txt",
+      "imagenes": [
+        "img/E05-RF18-resumen.png",
+        "img/E05-RF18.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18 · RF18 contraseña y segundo factor"
+    },
+    {
+      "id": "E06",
+      "que": "Análisis estático (ruff y bandit)",
+      "comando": "ruff --version ; ruff check . ; bandit --version ; bandit -r backend -ll",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T09:39:50-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "resultado": "ruff: All checks passed!; bandit -ll: No issues identified. (medios 0, altos 0)",
+      "texto": "texto/E06.txt",
+      "imagenes": [
+        "img/E06.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18"
+    },
+    {
+      "id": "E06-correccion",
+      "que": "Análisis estático (ruff y bandit)",
+      "comando": "ruff check . ; bandit --version ; bandit -r backend -ll",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T11:14:37-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0,
+        0,
+        0
+      ],
+      "resultado": "ruff: All checks passed!; bandit -ll: No issues identified. (medios 0, altos 0)",
+      "texto": "texto/E06-correccion.txt",
+      "imagenes": [
+        "img/E06-correccion.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18 + corrección de DEF-25 a DEF-27, sin commit"
+    },
+    {
+      "id": "E07",
+      "que": "Dependencias del servidor (pip-audit)",
+      "comando": "pip-audit --version ; pip-audit -r requirements.txt ; pip-audit",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T08:33:52-05:00",
+      "codigo_salida": 1,
+      "codigos_por_comando": [
+        0,
+        0,
+        1
+      ],
+      "resultado": "-r requirements.txt: No known vulnerabilities found; entorno completo: Found 1 known vulnerability in 1 package",
+      "texto": "texto/E07.txt",
+      "imagenes": [
+        "img/E07.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18"
+    },
+    {
+      "id": "E08",
+      "que": "Dependencias del cliente (npm audit)",
+      "comando": "npm --version ; npm audit",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T08:42:04-05:00",
+      "codigo_salida": 1,
+      "codigos_por_comando": [
+        0,
+        1
+      ],
+      "resultado": "11 vulnerabilities (2 low, 3 moderate, 4 high, 2 critical)",
+      "texto": "texto/E08.txt",
+      "imagenes": [
+        "img/E08-resumen.png",
+        "img/E08.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18"
+    },
+    {
+      "id": "E08-correccion",
+      "que": "Dependencias del cliente (npm audit)",
+      "comando": "npm --version ; npm audit",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T11:14:40-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0,
+        0
+      ],
+      "resultado": "found 0 vulnerabilities",
+      "texto": "texto/E08-correccion.txt",
+      "imagenes": [
+        "img/E08-correccion.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18 + corrección de DEF-25 a DEF-27, sin commit"
+    },
+    {
+      "id": "E09",
+      "que": "Configuración de producción (check --deploy, valores ficticios)",
+      "comando": "DJANGO_SETTINGS_MODULE=config.settings.prod DJANGO_ALLOWED_HOSTS=podocenter.example DJANGO_CSRF_ORIGINS=https://podocenter.example DJANGO_SECRET_KEY=clave-ficticia-solo-para-check-deploy-0123456789abcdefghijklmnopqrstuvwxyz CLAVE_CIFRADO_CAMPOS=Zm9vYmFyZm9vYmFyZm9vYmFyZm9vYmFyZm9vYmFyMDA= python manage.py check --deploy",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T08:42:21-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0
+      ],
+      "resultado": "System check identified no issues (0 silenced).",
+      "texto": "texto/E09.txt",
+      "imagenes": [
+        "img/E09.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18 · valores ficticios"
+    },
+    {
+      "id": "E10",
+      "que": "Migraciones (makemigrations --check)",
+      "comando": "python manage.py makemigrations --check --dry-run",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T08:42:26-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0
+      ],
+      "resultado": "No changes detected",
+      "texto": "texto/E10.txt",
+      "imagenes": [
+        "img/E10.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18"
+    },
+    {
+      "id": "E10-correccion",
+      "que": "Migraciones (makemigrations --check)",
+      "comando": "python manage.py makemigrations --check --dry-run",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T11:14:45-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0
+      ],
+      "resultado": "No changes detected",
+      "texto": "texto/E10-correccion.txt",
+      "imagenes": [
+        "img/E10-correccion.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18 + corrección de DEF-25 a DEF-27, sin commit"
+    },
+    {
+      "id": "E11",
+      "que": "Cliente web (lint y build)",
+      "comando": "npm run lint ; npm run build",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T08:42:30-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0,
+        0
+      ],
+      "resultado": "lint sin errores; ✓ built in 2.86s",
+      "texto": "texto/E11.txt",
+      "imagenes": [
+        "img/E11.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18"
+    },
+    {
+      "id": "E11-correccion",
+      "que": "Cliente web (lint y build)",
+      "comando": "npm run lint ; npm run build",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T11:14:48-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0,
+        0
+      ],
+      "resultado": "lint sin errores; ✓ built in 3.08s",
+      "texto": "texto/E11-correccion.txt",
+      "imagenes": [
+        "img/E11-correccion.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18 + corrección de DEF-25 a DEF-27, sin commit"
+    },
+    {
+      "id": "E12-chromium",
+      "que": "Usabilidad y compatibilidad (Playwright)",
+      "comando": "python backend/manage.py cargar_demo ; BASE=http://localhost:5174 NODE_PATH='C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/aff9a092-f9bd-4e67-bc0f-84f4b576f946/scratchpad/pw/node_modules' node docs/pruebas/evidencia/scripts/recorridos.cjs chromium",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T08:44:24-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0,
+        0
+      ],
+      "resultado": "[chromium] resumen: 10 de 10 pasos OK",
+      "texto": "texto/E12-chromium.txt",
+      "imagenes": [
+        "img/E12-chromium-resumen.png",
+        "img/E12-chromium.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18"
+    },
+    {
+      "id": "E12-movil",
+      "que": "Usabilidad y compatibilidad (Playwright)",
+      "comando": "python backend/manage.py cargar_demo ; BASE=http://localhost:5174 NODE_PATH='C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/aff9a092-f9bd-4e67-bc0f-84f4b576f946/scratchpad/pw/node_modules' node docs/pruebas/evidencia/scripts/recorridos.cjs movil",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T08:45:30-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0,
+        0
+      ],
+      "resultado": "[movil] resumen: 7 de 10 pasos OK",
+      "texto": "texto/E12-movil.txt",
+      "imagenes": [
+        "img/E12-movil-resumen.png",
+        "img/E12-movil.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18"
+    },
+    {
+      "id": "E12-webkit",
+      "que": "Usabilidad y compatibilidad (Playwright)",
+      "comando": "python backend/manage.py cargar_demo ; BASE=http://localhost:5174 NODE_PATH='C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/aff9a092-f9bd-4e67-bc0f-84f4b576f946/scratchpad/pw/node_modules' node docs/pruebas/evidencia/scripts/recorridos.cjs webkit",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T08:44:55-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0,
+        0
+      ],
+      "resultado": "[webkit] resumen: 10 de 10 pasos OK",
+      "texto": "texto/E12-webkit.txt",
+      "imagenes": [
+        "img/E12-webkit-resumen.png",
+        "img/E12-webkit.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18"
+    },
+    {
+      "id": "E13",
+      "que": "Carga de la consulta entre sedes (RNF04, k6)",
+      "comando": "python backend/manage.py cargar_demo ; python backend/manage.py sembrar_volumen ; k6 version ; k6 run --quiet --summary-mode=full docs/pruebas/carga_rnf04.js",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T09:34:28-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "resultado": "10 de 10 umbrales cumplidos; p95 global de la consulta 336.05ms; peticiones fallidas 0.00% 0 out of 1774",
+      "texto": "texto/E13.txt",
+      "imagenes": [
+        "img/E13-a.png",
+        "img/E13-b.png",
+        "img/E13-resumen.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18 · servidor de desarrollo local"
+    },
+    {
+      "id": "E13-interrumpida",
+      "que": "Carga de la consulta entre sedes (RNF04, k6)",
+      "comando": "python backend/manage.py cargar_demo ; python backend/manage.py sembrar_volumen ; k6 version ; k6 run --quiet --summary-mode=full docs/pruebas/carga_rnf04.js",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T09:01:53-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "resultado": "INTERRUMPIDA por la suspensión del equipo, no vale como medida (10 de 10 umbrales cumplidos; p95 global de la consulta 285.51ms; peticiones fallidas 0.00% 0 out of 1572)",
+      "texto": "texto/E13-interrumpida.txt",
+      "imagenes": [
+        "img/E13-interrumpida-a.png",
+        "img/E13-interrumpida-b.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18 · servidor de desarrollo local · INTERRUMPIDA: el equipo entró en Modern Standby de 09:03 a 09:08 y de 09:11 a 09:19 (registro de eventos de Windows, Kernel-Power 506/507); no vale como medida de rendimiento"
+    },
+    {
+      "id": "E13-interrumpida-2",
+      "que": "Carga de la consulta entre sedes (RNF04, k6)",
+      "comando": "python backend/manage.py cargar_demo ; python backend/manage.py sembrar_volumen ; k6 version ; k6 run --quiet --summary-mode=full docs/pruebas/carga_rnf04.js",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T09:20:38-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "resultado": "INTERRUMPIDA por la suspensión del equipo, no vale como medida (10 de 10 umbrales cumplidos; p95 global de la consulta 250.67ms; peticiones fallidas 0.00% 0 out of 1638)",
+      "texto": "texto/E13-interrumpida-2.txt",
+      "imagenes": [
+        "img/E13-interrumpida-2-a.png",
+        "img/E13-interrumpida-2-b.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18 · servidor de desarrollo local · INTERRUMPIDA: el equipo entró en Modern Standby por inactividad de 09:24:00 a 09:32:14 (Kernel-Power 506/507); el intento de impedirlo falló (la llamada a SetThreadExecutionState daba error de conversión en PowerShell 5.1); no vale como medida"
+    },
+    {
+      "id": "E14",
+      "que": "Escaneo dinámico (OWASP ZAP baseline)",
+      "comando": "python backend/manage.py cargar_demo ; python docs/pruebas/evidencia/scripts/zap_evidencia.py C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/da2c9158-aeeb-4a99-bce2-b355f8c742f3/scratchpad/ev/zap",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T08:47:19-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0,
+        0
+      ],
+      "resultado": "Alto 0, Medio 3, Bajo 4, Informativo 3",
+      "texto": "texto/E14.txt",
+      "imagenes": [
+        "img/E14-a.png",
+        "img/E14-b.png",
+        "img/E14-c.png",
+        "img/E14-resumen.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18 · entorno local de prueba"
+    },
+    {
+      "id": "E14-correccion",
+      "que": "Escaneo dinámico (OWASP ZAP baseline)",
+      "comando": "python backend/manage.py cargar_demo ; ZAP_OBJETIVO=http://localhost:8088 python docs/pruebas/evidencia/scripts/zap_evidencia.py 'C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/da2c9158-aeeb-4a99-bce2-b355f8c742f3/scratchpad/ev/zap2'",
+      "commit": "1977d6c",
+      "fecha_hora": "2026-11-26T11:15:00-05:00",
+      "codigo_salida": 0,
+      "codigos_por_comando": [
+        0,
+        0
+      ],
+      "resultado": "Alto 0, Medio 0, Bajo 3, Informativo 3",
+      "texto": "texto/E14-correccion.txt",
+      "imagenes": [
+        "img/E14-correccion-a.png",
+        "img/E14-correccion-b.png",
+        "img/E14-correccion-c.png",
+        "img/E14-correccion-resumen.png"
+      ],
+      "nota": "rama feat/rf16-rf07-rf18 + corrección de DEF-25 a DEF-27, sin commit · SPA compilada con la CSP de Nginx"
+    }
+  ],
+  "casos_a_pruebas": {
+    "criterio": "La Tabla 7 no nombra pruebas. Se relacionan solo los casos cuya entrada y resultado esperado coinciden con lo que afirma una prueba automatizada concreta de la rama actual; el resto se omite.",
+    "relacion": {
+      "CP-02": [
+        "backend/apps/usuarios/tests/test_sesion.py::test_un_correo_inexistente_responde_igual_que_una_clave_errada",
+        "backend/apps/usuarios/tests/test_sesion.py::test_la_contrasena_errada_no_abre_la_sesion"
+      ],
+      "CP-04": [
+        "backend/apps/core/tests/test_api_permisos.py::test_la_podologa_no_puede_listar_usuarios",
+        "backend/apps/core/tests/test_api_permisos.py::test_la_podologa_consulta_el_catalogo_pero_no_lo_edita"
+      ],
+      "CP-05": [
+        "backend/apps/usuarios/tests/test_api_usuarios.py::test_un_correo_repetido_se_rechaza_antes_de_tocar_la_base"
+      ],
+      "CP-06": [
+        "backend/apps/usuarios/tests/test_api_usuarios.py::test_no_se_puede_desactivar_al_ultimo_administrador",
+        "backend/apps/usuarios/tests/test_usuarios_y_roles.py::test_no_deja_al_centro_sin_administrador"
+      ],
+      "CP-07": [
+        "backend/apps/usuarios/tests/test_editar_usuario.py::test_la_unica_administradora_no_pierde_el_rol"
+      ],
+      "CP-08": [
+        "backend/apps/usuarios/tests/test_cambiar_contrasena.py (9 pruebas)"
+      ],
+      "CP-11": [
+        "backend/apps/sedes/tests/test_api_sedes.py::test_un_nombre_repetido_es_error_de_negocio_y_no_500",
+        "backend/apps/catalogo/tests/test_api_servicios.py::test_un_nombre_repetido_es_error_de_negocio_y_no_500"
+      ],
+      "CP-13": [
+        "backend/apps/catalogo/tests/test_api_servicios.py::test_la_duracion_fuera_de_10_a_240_se_rechaza[5|9|241]",
+        "backend/apps/catalogo/tests/test_api_servicios.py::test_la_base_tambien_impide_una_duracion_fuera_de_rango"
+      ],
+      "CP-15": [
+        "backend/apps/pacientes/tests/test_registro_paciente.py::test_registra_el_paciente_con_su_consentimiento_en_la_misma_operacion"
+      ],
+      "CP-16": [
+        "backend/apps/pacientes/tests/test_registro_paciente.py::test_rechaza_un_segundo_paciente_con_el_mismo_documento"
+      ],
+      "CP-17": [
+        "backend/apps/pacientes/tests/test_registro_paciente.py::test_no_registra_un_paciente_sin_consentimiento_de_tratamiento_de_datos"
+      ],
+      "CP-19": [
+        "backend/apps/pacientes/tests/test_registro_paciente.py::test_los_antecedentes_se_guardan_cifrados_en_la_columna"
+      ],
+      "CP-20": [
+        "backend/apps/pacientes/tests/test_api_sin_escritura_directa.py::test_los_antecedentes_no_se_cambian_por_fuera_del_servicio"
+      ],
+      "CP-22": [
+        "backend/apps/citas/tests/test_programar_cita.py::test_rechaza_una_segunda_cita_que_se_solapa_con_la_misma_profesional",
+        "backend/apps/citas/tests/test_programar_cita.py::test_la_base_de_datos_impide_el_solape_aunque_se_salte_la_capa_de_servicios"
+      ],
+      "CP-23": [
+        "backend/apps/citas/tests/test_programar_cita.py::test_rechaza_una_cita_fuera_del_horario_de_atencion_de_la_sede"
+      ],
+      "CP-24": [
+        "backend/apps/citas/tests/test_programar_cita.py::test_rechaza_una_cita_en_el_pasado"
+      ],
+      "CP-25": [
+        "backend/apps/citas/tests/test_programar_cita.py::test_una_sede_desactivada_no_admite_citas_nuevas",
+        "backend/apps/citas/tests/test_programar_cita.py::test_un_servicio_desactivado_no_admite_citas_nuevas"
+      ],
+      "CP-26": [
+        "backend/apps/citas/tests/test_api_sin_escritura_directa.py (3 pruebas)"
+      ],
+      "CP-27": [
+        "backend/apps/citas/tests/test_agenda_filtros.py::test_el_filtro_por_estado_acota_la_jornada",
+        "backend/apps/citas/tests/test_agenda_filtros.py::test_el_filtro_por_servicio_acota_la_jornada",
+        "backend/apps/citas/tests/test_agenda_filtros.py::test_el_filtro_por_profesional_acota_la_jornada",
+        "backend/apps/citas/tests/test_agenda_filtros.py::test_los_filtros_se_combinan",
+        "backend/apps/citas/tests/test_agenda_filtros.py::test_una_fecha_mal_escrita_se_rechaza_con_su_codigo"
+      ],
+      "CP-31": [
+        "backend/apps/atenciones/tests/test_registrar_atencion.py::test_rechaza_registrar_la_atencion_de_una_cita_que_todavia_no_llega"
+      ],
+      "CP-32": [
+        "backend/apps/atenciones/tests/test_insumos.py::test_la_atencion_descuenta_el_stock_y_deja_una_salida_por_insumo",
+        "backend/apps/atenciones/tests/test_insumos.py::test_sin_stock_suficiente_no_se_registra_nada"
+      ],
+      "CP-33": [
+        "backend/apps/atenciones/tests/test_registrar_atencion.py::test_otro_centro_no_ve_la_atencion_aunque_consulte_sin_filtrar"
+      ],
+      "CP-34": [
+        "backend/apps/inventario/tests/test_inventario.py::test_una_entrada_suma_al_stock_de_la_sede"
+      ],
+      "CP-35": [
+        "backend/apps/inventario/tests/test_inventario.py::test_una_merma_resta_del_stock"
+      ],
+      "CP-36": [
+        "backend/apps/inventario/tests/test_inventario.py::test_una_merma_no_puede_dejar_el_stock_en_negativo",
+        "backend/apps/inventario/tests/test_inventario.py::test_la_base_impide_un_stock_negativo_aunque_se_salte_el_servicio"
+      ],
+      "CP-37": [
+        "backend/apps/inventario/tests/test_inventario.py::test_la_salida_por_consumo_no_se_registra_a_mano",
+        "backend/apps/inventario/tests/test_inventario.py::test_un_movimiento_sin_sede_se_rechaza_con_su_codigo",
+        "backend/apps/inventario/tests/test_inventario.py::test_un_movimiento_sin_producto_se_rechaza_con_su_codigo"
+      ],
+      "CP-38": [
+        "backend/apps/inventario/tests/test_inventario.py::test_la_disponibilidad_muestra_todas_las_sedes_del_centro"
+      ],
+      "CP-40": [
+        "backend/apps/inventario/tests/test_productos_y_minimo.py::test_un_minimo_invalido_se_rechaza[-1]",
+        "backend/apps/inventario/tests/test_productos_y_minimo.py::test_el_minimo_de_la_sede_decide_bajo_minimo_y_queda_auditado"
+      ],
+      "CP-41": [
+        "backend/apps/inventario/tests/test_inventario.py::test_otro_centro_no_ve_productos_stock_ni_movimientos",
+        "backend/apps/inventario/tests/test_inventario.py::test_las_pruebas_de_aislamiento_corren_con_un_rol_sin_privilegios"
+      ],
+      "CP-42": [
+        "backend/apps/atenciones/tests/test_registro_diario.py::test_lista_las_atenciones_del_dia_con_su_monto_y_el_total",
+        "backend/apps/atenciones/tests/test_registro_diario.py::test_un_dia_sin_atenciones_da_total_cero"
+      ],
+      "CP-43": [
+        "backend/apps/citas/tests/test_agenda_filtros.py::test_el_ingreso_esperado_excluye_las_citas_canceladas",
+        "backend/apps/citas/tests/test_agenda_filtros.py::test_el_ingreso_confirmado_es_lo_cobrado_y_cuadra_con_el_registro_diario",
+        "backend/apps/citas/tests/test_agenda_filtros.py::test_la_ocupacion_se_mide_contra_el_horario_de_la_sede"
+      ],
+      "CP-44": [
+        "backend/apps/core/tests/test_api_centros.py::test_el_alta_crea_el_centro_con_su_administrador_listo_para_entrar"
+      ],
+      "CP-45": [
+        "backend/apps/core/tests/test_api_centros.py::test_un_centro_suspendido_no_puede_iniciar_sesion",
+        "backend/apps/core/tests/test_api_centros.py::test_al_reactivar_el_centro_sus_usuarios_vuelven_a_entrar"
+      ],
+      "CP-46": [
+        "backend/apps/core/tests/test_aislamiento_multi_centro.py::test_una_peticion_sin_centro_no_hereda_el_centro_de_la_anterior"
+      ],
+      "CP-53": [
+        "backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_el_total_exportado_es_el_mismo_que_el_de_la_pantalla"
+      ],
+      "CP-54": [
+        "backend/apps/atenciones/tests/test_exportar_registro_diario.py::test_un_rango_sin_atenciones_exporta_un_archivo_con_total_cero[pdf|xlsx]"
+      ],
+      "CP-55": [
+        "backend/apps/usuarios/tests/test_segundo_factor_alta.py::test_confirmar_con_un_codigo_valido_activa_el_factor_y_entrega_diez_codigos",
+        "backend/apps/usuarios/tests/test_segundo_factor_ingreso.py::test_un_codigo_valido_completa_el_ingreso_y_queda_en_la_auditoria"
+      ],
+      "CP-56": [
+        "backend/apps/usuarios/tests/test_segundo_factor_ingreso.py::test_la_contrasena_sola_no_abre_la_sesion_de_una_cuenta_con_factor"
+      ],
+      "CP-57": [
+        "backend/apps/usuarios/tests/test_segundo_factor_alta.py::test_confirmar_con_un_codigo_valido_activa_el_factor_y_entrega_diez_codigos"
+      ]
+    }
+  }
+}

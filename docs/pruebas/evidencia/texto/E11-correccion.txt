@@ -1,0 +1,50 @@
+$ npm run lint ; npm run build
+# Fecha: 2026-11-26T11:14:48-05:00 · Commit: 1977d6c · rama feat/rf16-rf07-rf18 + corrección de DEF-25 a DEF-27, sin commit
+
+$ npm run lint
+
+> podocenter-frontend@0.4.0 lint
+> eslint src
+[código de salida de este comando: 0]
+
+$ npm run build
+
+> podocenter-frontend@0.4.0 build
+> vite build
+
+vite v6.4.6 building for production...
+transforming...
+✓ 139 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                  0.53 kB │ gzip:  0.33 kB
+dist/assets/RegistroDiarioView-DnHhuZlf.css      0.15 kB │ gzip:  0.14 kB
+dist/assets/SegundoFactorView-CMyYbiJA.css       0.46 kB │ gzip:  0.29 kB
+dist/assets/TarjetaSeccion-Bu5FwlfL.css          0.97 kB │ gzip:  0.40 kB
+dist/assets/AgendaView-B5yBZ0BB.css              2.95 kB │ gzip:  0.99 kB
+dist/assets/PanelDelDiaView-Dug2LGv-.css        11.04 kB │ gzip:  2.55 kB
+dist/assets/index-28TfnLVP.css                  25.45 kB │ gzip:  6.06 kB
+dist/assets/ElegirSedeView-D_T1cXOC.js           0.86 kB │ gzip:  0.57 kB
+dist/assets/TarjetaSeccion-DsjNn29r.js           1.22 kB │ gzip:  0.60 kB
+dist/assets/ErrorView-B9Iogcvy.js                1.56 kB │ gzip:  0.90 kB
+dist/assets/DisponibilidadDialogo-BKl3hqYy.js    2.29 kB │ gzip:  1.14 kB
+dist/assets/PacientesView-WTeD4XgJ.js            2.83 kB │ gzip:  1.45 kB
+dist/assets/RegistroDiarioView-CNTZgc07.js       4.12 kB │ gzip:  1.88 kB
+dist/assets/SegundoFactorView-D7atKQkj.js        4.38 kB │ gzip:  2.09 kB
+dist/assets/PerfilView-l9QBbT1Y.js               4.92 kB │ gzip:  2.13 kB
+dist/assets/LoginView-BU5u3usz.js                5.41 kB │ gzip:  2.28 kB
+dist/assets/NuevoPacienteView-CVP1nk6G.js        6.06 kB │ gzip:  2.32 kB
+dist/assets/SedesView-B0-Vc5fp.js                7.50 kB │ gzip:  3.02 kB
+dist/assets/FichaPacienteView-CVMHqOdo.js        7.69 kB │ gzip:  2.97 kB
+dist/assets/ServiciosView-p69GbdRq.js            8.08 kB │ gzip:  3.06 kB
+dist/assets/RegistrarAtencionView-Uwpkt-LE.js    8.74 kB │ gzip:  3.61 kB
+dist/assets/UsuariosView-CuKLO32w.js             9.56 kB │ gzip:  3.44 kB
+dist/assets/CentrosView-BJYZZuhU.js              9.62 kB │ gzip:  3.37 kB
+dist/assets/InventarioView-DQn10SG-.js          15.21 kB │ gzip:  5.20 kB
+dist/assets/PanelDelDiaView-3uze_gng.js         17.24 kB │ gzip:  6.05 kB
+dist/assets/AgendaView-ChFf2rLS.js              25.95 kB │ gzip:  8.72 kB
+dist/assets/index-Ck4M1M7M.js                  184.77 kB │ gzip: 70.74 kB
+✓ built in 3.08s
+[código de salida de este comando: 0]
+
+[código de salida: 0]

@@ -1,0 +1,210 @@
+$ python backend/manage.py cargar_demo ; ZAP_OBJETIVO=http://localhost:8088 python docs/pruebas/evidencia/scripts/zap_evidencia.py 'C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/da2c9158-aeeb-4a99-bce2-b355f8c742f3/scratchpad/ev/zap2'
+# Fecha: 2026-11-26T11:15:00-05:00 · Commit: 1977d6c · rama feat/rf16-rf07-rf18 + corrección de DEF-25 a DEF-27, sin commit · SPA compilada con la CSP de Nginx
+
+$ python backend/manage.py cargar_demo
+Borrando el centro de demostración anterior…
+  cita omitida (2026-11-28 17:00): La sede atiende de 08:00 a 13:00.
+  3 cita(s) del guion no se crearon (hora ya pasada, sede cerrada o solapamiento).
+  2 cita(s) en curso desde las 11:05, lista(s) para registrar la atención.
+
+Centro de demostración listo: Centro de Podología Pies Sanos E.I.R.L.
+  Sedes          : 2
+  Servicios      : 6
+  Pacientes      : 12
+  Citas en agenda: 18
+  Productos      : 6
+
+Cuentas de acceso (todas con la contraseña ****):
+  gerencia@piessanos.pe        Administrador del centro     sedes: Sede Cercado, Sede Bustamante
+  plataforma@podocenter.pe     Administrador de plataforma  sedes: —
+  k.zapata@piessanos.pe        Podóloga                     sedes: Sede Bustamante
+  podologa@piessanos.pe        Podóloga                     sedes: Sede Cercado, Sede Bustamante
+[código de salida de este comando: 0]
+
+$ ZAP_OBJETIVO=http://localhost:8088 python docs/pruebas/evidencia/scripts/zap_evidencia.py 'C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/da2c9158-aeeb-4a99-bce2-b355f8c742f3/scratchpad/ev/zap2'
+Segundo factor de gerencia@piessanos.pe dado de alta en la base local de prueba (secreto y códigos de recuperación no se muestran).
+Resumen del escaneo OWASP ZAP (baseline: araña + escaneo pasivo, sin ataques)
+Objetivo local de prueba; nunca producción. Fecha: 2026-11-26T11:17:35
+ZAP: 2.17.0 · Objetivo: http://localhost:8088
+Sesión: CON la sesión de la administradora (gerencia@piessanos.pe), inyectada en cada
+petición por una regla replacer; además, cabecera X-Sede con la Sede Cercado.
+Entorno: servidor local con la CSP de infra/nginx/nginx.conf como proxy de Django con config.settings.dev
+(DEBUG=True). Las cabeceras de producción las pone Nginx y no se midieron aquí.
+
+Alertas por nivel de riesgo:
+  Alto         0
+  Medio        0
+  Bajo         3
+  Informativo  3
+
+[Bajo] Cookie No HttpOnly Flag (pluginid 10010, CWE-1004, confianza 2) — 4 instancia(s)
+      http://localhost:8088/admin/
+      http://localhost:8088/admin/password_change/
+      http://localhost:8088/api/v1/sesion/actual/
+[Bajo] Server Leaks Version Information via "Server" HTTP Response Header Field (pluginid 10036, CWE-497, confianza 3) — 5 instancia(s)
+      http://localhost:8088/
+      http://localhost:8088/agenda
+      http://localhost:8088/api/v1/sesion/profesionales/
+      http://localhost:8088/pacientes
+      http://localhost:8088/sedes
+[Bajo] X-Content-Type-Options Header Missing (pluginid 10021, CWE-693, confianza 2) — 5 instancia(s)
+      http://localhost:8088/inventario
+      http://localhost:8088/panel
+      http://localhost:8088/registro-diario
+      http://localhost:8088/sedes
+      http://localhost:8088/usuarios
+[Informativo] Information Disclosure - Suspicious Comments (pluginid 10027, CWE-615, confianza 1) — 1 instancia(s)
+      http://localhost:8088/assets/index-Ck4M1M7M.js
+[Informativo] Modern Web Application (pluginid 10109, CWE--1, confianza 2) — 5 instancia(s)
+      http://localhost:8088/
+      http://localhost:8088/agenda
+      http://localhost:8088/inventario
+      http://localhost:8088/sedes
+      http://localhost:8088/usuarios
+[Informativo] Session Management Response Identified (pluginid 10112, CWE--1, confianza 2) — 5 instancia(s)
+      http://localhost:8088/admin/
+      http://localhost:8088/admin/password_change/
+      http://localhost:8088/api/v1/sesion/actual/
+
+Salida de ZAP (consola):
+702 [main] INFO  org.parosproxy.paros.Constant - Copying default configuration to C:\Users\danie\AppData\Local\Temp\claude\2b75186625f2af13\da2c9158-aeeb-4a99-bce2-b355f8c742f3\scratchpad\ev\zap2\zap_home\config.xml
+890 [main] INFO  org.parosproxy.paros.Constant - Creating directory C:\Users\danie\AppData\Local\Temp\claude\2b75186625f2af13\da2c9158-aeeb-4a99-bce2-b355f8c742f3\scratchpad\ev\zap2\zap_home\session
+901 [main] INFO  org.parosproxy.paros.Constant - Creating directory C:\Users\danie\AppData\Local\Temp\claude\2b75186625f2af13\da2c9158-aeeb-4a99-bce2-b355f8c742f3\scratchpad\ev\zap2\zap_home\dirbuster
+901 [main] INFO  org.parosproxy.paros.Constant - Creating directory C:\Users\danie\AppData\Local\Temp\claude\2b75186625f2af13\da2c9158-aeeb-4a99-bce2-b355f8c742f3\scratchpad\ev\zap2\zap_home\fuzzers
+902 [main] INFO  org.parosproxy.paros.Constant - Creating directory C:\Users\danie\AppData\Local\Temp\claude\2b75186625f2af13\da2c9158-aeeb-4a99-bce2-b355f8c742f3\scratchpad\ev\zap2\zap_home\plugin
+Job replacer set deleteAllRules = true
+Job replacer set description = Sesi�n de la administradora del centro
+Job replacer set matchType = req_header
+Job replacer set matchString = Cookie
+Job replacer set matchRegex = false
+Job replacer set replacementString = [cookie de sesión omitida]
+Job replacer set description = Sede activa
+Job replacer set matchType = req_header
+Job replacer set matchString = X-Sede
+Job replacer set matchRegex = false
+Job replacer set replacementString = 23
+Job requestor set url = http://localhost:8088/
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/ingresar
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/panel
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/agenda
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/pacientes
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/inventario
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/registro-diario
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/usuarios
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/sedes
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/servicios
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/perfil
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/api/v1/sesion/actual/
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/api/v1/sesion/sedes/
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/api/v1/sesion/profesionales/
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/api/v1/usuarios/
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/api/v1/sedes/
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/api/v1/servicios/
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/api/v1/pacientes/
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/api/v1/citas/
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/api/v1/citas/agenda/
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/api/v1/panel/
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/api/v1/atenciones/
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/api/v1/reportes/registro-diario/
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/api/v1/inventario/productos/
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/api/v1/inventario/stock/
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/api/v1/estado/
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/api/v1/inventario/disponibilidad/?producto=68
+Job requestor set method = GET
+Job requestor set url = http://localhost:8088/admin/
+Job requestor set method = GET
+Job spider set context = podocenter
+Job spider set url = http://localhost:8088
+Job spider set maxDuration = 2
+Job spiderAjax set context = podocenter
+Job spiderAjax set url = http://localhost:8088
+Job spiderAjax set maxDuration = 3
+Job spiderAjax set browserId = edge-headless
+Job passiveScan-wait set maxDuration = 5
+Job report set template = traditional-html
+Job report set reportDir = C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/da2c9158-aeeb-4a99-bce2-b355f8c742f3/scratchpad/ev/zap2/zap_informes
+Job report set reportFile = 04_zap
+Job report set reportTitle = PodoCenter � ZAP baseline (sesi�n de la administradora)
+Job report set template = traditional-json
+Job report set reportDir = C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/da2c9158-aeeb-4a99-bce2-b355f8c742f3/scratchpad/ev/zap2/zap_informes
+Job report set reportFile = 04_zap
+Job replacer set deleteAllRules = true
+Job replacer started
+Existing Replace rules deleted
+Job replacer finished, time taken: 00:00:00
+Job requestor started
+Job requestor requesting URL http://localhost:8088/
+Job requestor requesting URL http://localhost:8088/ingresar
+Job requestor requesting URL http://localhost:8088/panel
+Job requestor requesting URL http://localhost:8088/agenda
+Job requestor requesting URL http://localhost:8088/pacientes
+Job requestor requesting URL http://localhost:8088/inventario
+Job requestor requesting URL http://localhost:8088/registro-diario
+Job requestor requesting URL http://localhost:8088/usuarios
+Job requestor requesting URL http://localhost:8088/sedes
+Job requestor requesting URL http://localhost:8088/servicios
+Job requestor requesting URL http://localhost:8088/perfil
+Job requestor requesting URL http://localhost:8088/api/v1/sesion/actual/
+Job requestor requesting URL http://localhost:8088/api/v1/sesion/sedes/
+Job requestor requesting URL http://localhost:8088/api/v1/sesion/profesionales/
+Job requestor requesting URL http://localhost:8088/api/v1/usuarios/
+Job requestor requesting URL http://localhost:8088/api/v1/sedes/
+Job requestor requesting URL http://localhost:8088/api/v1/servicios/
+Job requestor requesting URL http://localhost:8088/api/v1/pacientes/
+Job requestor requesting URL http://localhost:8088/api/v1/citas/
+Job requestor requesting URL http://localhost:8088/api/v1/citas/agenda/
+Job requestor requesting URL http://localhost:8088/api/v1/panel/
+Job requestor requesting URL http://localhost:8088/api/v1/atenciones/
+Job requestor requesting URL http://localhost:8088/api/v1/reportes/registro-diario/
+Job requestor requesting URL http://localhost:8088/api/v1/inventario/productos/
+Job requestor requesting URL http://localhost:8088/api/v1/inventario/stock/
+Job requestor requesting URL http://localhost:8088/api/v1/estado/
+Job requestor requesting URL http://localhost:8088/api/v1/inventario/disponibilidad/?producto=68
+Job requestor requesting URL http://localhost:8088/admin/
+Job requestor finished, time taken: 00:00:05
+Job spider started
+Job spider requesting URL http://localhost:8088
+Job spider found 98 URLs
+Job spider finished, time taken: 00:00:02
+Job spiderAjax started
+Job spiderAjax found 118 URLs
+Job spiderAjax finished, time taken: 00:00:52
+Job passiveScan-wait started
+Job passiveScan-wait finished, time taken: 00:00:02
+Job report started
+Job report generated report C:\Users\danie\AppData\Local\Temp\claude\2b75186625f2af13\da2c9158-aeeb-4a99-bce2-b355f8c742f3\scratchpad\ev\zap2\zap_informes\04_zap.html
+Job report finished, time taken: 00:00:00
+Job report started
+Job report generated report C:\Users\danie\AppData\Local\Temp\claude\2b75186625f2af13\da2c9158-aeeb-4a99-bce2-b355f8c742f3\scratchpad\ev\zap2\zap_informes\04_zap.json
+Job report finished, time taken: 00:00:00
+Automation plan succeeded!
+[código de salida de ZAP: 0]
+[código de salida de este comando: 0]
+
+[código de salida: 0]

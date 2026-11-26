@@ -1,0 +1,17 @@
+$ pytest -vv backend/apps/inventario/tests/test_inventario.py -k disponibilidad
+# Fecha: 2026-11-26T09:00:13-05:00 · Commit: 1977d6c · rama feat/rf16-rf07-rf18 · RF12 disponibilidad entre sedes
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-8.3.4, pluggy-1.7.0 -- C:\Users\danie\AppData\Local\Temp\claude\2b75186625f2af13\da2c9158-aeeb-4a99-bce2-b355f8c742f3\scratchpad\venv312\Scripts\python.exe
+cachedir: .pytest_cache
+django: version: 5.2.19, settings: config.settings.dev (from env)
+rootdir: C:\Users\danie\Documents\UNIVERSIDAD\SEMESTRE 10\PROYECTO DE FIN DE CARRERA\podologia\podocenter
+configfile: pyproject.toml
+plugins: cov-6.0.0, django-4.9.0
+collecting ... collected 22 items / 21 deselected / 1 selected
+
+backend/apps/inventario/tests/test_inventario.py::test_la_disponibilidad_muestra_todas_las_sedes_del_centro PASSED [100%]
+
+====================== 1 passed, 21 deselected in 6.50s =======================
+
+[código de salida: 0]

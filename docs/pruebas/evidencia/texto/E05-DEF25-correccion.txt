@@ -1,0 +1,34 @@
+$ pytest -vv backend/apps/usuarios/tests/test_bloqueo_de_ingreso.py backend/apps/core/tests/test_configuracion_produccion.py
+# Fecha: 2026-11-26T11:14:09-05:00 · Commit: 1977d6c · rama feat/rf16-rf07-rf18 + corrección de DEF-25 a DEF-27, sin commit · bloqueo tras intentos fallidos
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-8.3.4, pluggy-1.7.0 -- C:\Users\danie\AppData\Local\Temp\claude\2b75186625f2af13\da2c9158-aeeb-4a99-bce2-b355f8c742f3\scratchpad\venv312\Scripts\python.exe
+cachedir: .pytest_cache
+django: version: 5.2.19, settings: config.settings.dev (from env)
+rootdir: C:\Users\danie\Documents\UNIVERSIDAD\SEMESTRE 10\PROYECTO DE FIN DE CARRERA\podologia\podocenter
+configfile: pyproject.toml
+plugins: cov-6.0.0, django-4.9.0
+collecting ... collected 18 items
+
+backend/apps/usuarios/tests/test_bloqueo_de_ingreso.py::test_el_quinto_fallo_bloquea_y_ni_la_contrasena_correcta_entra PASSED [  5%]
+backend/apps/usuarios/tests/test_bloqueo_de_ingreso.py::test_pasados_quince_minutos_vuelve_a_entrar PASSED [ 11%]
+backend/apps/usuarios/tests/test_bloqueo_de_ingreso.py::test_el_bloqueo_dura_quince_minutos PASSED [ 16%]
+backend/apps/usuarios/tests/test_bloqueo_de_ingreso.py::test_un_ingreso_correcto_reinicia_la_cuenta_de_fallos PASSED [ 22%]
+backend/apps/usuarios/tests/test_bloqueo_de_ingreso.py::test_un_correo_inexistente_nunca_se_bloquea PASSED [ 27%]
+backend/apps/usuarios/tests/test_bloqueo_de_ingreso.py::test_el_bloqueo_de_una_cuenta_no_afecta_a_otra PASSED [ 33%]
+backend/apps/usuarios/tests/test_bloqueo_de_ingreso.py::test_el_bloqueo_queda_en_la_bitacora_del_centro PASSED [ 38%]
+backend/apps/usuarios/tests/test_bloqueo_de_ingreso.py::test_la_contrasena_temporal_levanta_el_bloqueo PASSED [ 44%]
+backend/apps/usuarios/tests/test_bloqueo_de_ingreso.py::test_el_admin_de_django_tambien_bloquea PASSED [ 50%]
+backend/apps/core/tests/test_configuracion_produccion.py::test_sin_secretos_produccion_no_arranca[DJANGO_SECRET_KEY] PASSED [ 55%]
+backend/apps/core/tests/test_configuracion_produccion.py::test_sin_secretos_produccion_no_arranca[CLAVE_CIFRADO_CAMPOS] PASSED [ 61%]
+backend/apps/core/tests/test_configuracion_produccion.py::test_una_clave_vacia_o_de_plantilla_tampoco_arranca[] PASSED [ 66%]
+backend/apps/core/tests/test_configuracion_produccion.py::test_una_clave_vacia_o_de_plantilla_tampoco_arranca[  ] PASSED [ 72%]
+backend/apps/core/tests/test_configuracion_produccion.py::test_una_clave_vacia_o_de_plantilla_tampoco_arranca[generar-con-Fernet.generate_key] PASSED [ 77%]
+backend/apps/core/tests/test_configuracion_produccion.py::test_detras_de_nginx_reconoce_el_https PASSED [ 83%]
+backend/apps/core/tests/test_configuracion_produccion.py::test_cargar_produccion_no_altera_la_configuracion_en_uso PASSED [ 88%]
+backend/apps/core/tests/test_configuracion_produccion.py::test_nginx_declara_una_csp_que_no_permite_codigo_en_linea PASSED [ 94%]
+backend/apps/core/tests/test_configuracion_produccion.py::test_nginx_no_publica_su_version PASSED [100%]
+
+============================= 18 passed in 23.57s =============================
+
+[código de salida: 0]

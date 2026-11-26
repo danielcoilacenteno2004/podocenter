@@ -1,0 +1,18 @@
+$ python 'C:/Users/danie/Documents/UNIVERSIDAD/SEMESTRE 10/PROYECTO DE FIN DE CARRERA/podologia/podocenter/docs/pruebas/evidencia/scripts/cobertura_por_modulo.py' 'C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/da2c9158-aeeb-4a99-bce2-b355f8c742f3/scratchpad/ev/cobertura-correccion.json'
+# Fecha: 2026-11-26T11:24:13-05:00 · Commit: 1977d6c · rama feat/rf16-rf07-rf18 + corrección de DEF-25 a DEF-27, sin commit
+
+Módulo          Sent.  Cubier.  % sent.  Ramas  Cubier.  % ramas
+(apps, raíz)       49       49   100.00      2        2   100.00
+atenciones        339      331    97.64     64       61    95.31
+catalogo          147      140    95.24     32       28    87.50
+citas             594      572    96.30    104       89    85.58
+core              525      511    97.33     80       70    87.50
+inventario        375      356    94.93    120      104    86.67
+pacientes         153      138    90.20     10        6    60.00
+sedes             147      141    95.92     22       19    86.36
+usuarios          698      683    97.85    132      120    90.91
+TOTAL            3027     2921    96.50    566      499    88.16
+
+Cobertura combinada (sentencias + ramas, la columna Cover): 95.19 %
+
+[código de salida: 0]

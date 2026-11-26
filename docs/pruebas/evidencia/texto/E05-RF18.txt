@@ -1,0 +1,70 @@
+$ pytest -vv backend/apps/usuarios/tests/test_cambiar_contrasena.py backend/apps/usuarios/tests/test_totp.py backend/apps/usuarios/tests/test_segundo_factor_alta.py backend/apps/usuarios/tests/test_segundo_factor_ingreso.py backend/apps/usuarios/tests/test_segundo_factor_reinicio.py
+# Fecha: 2026-11-26T09:00:41-05:00 · Commit: 1977d6c · rama feat/rf16-rf07-rf18 · RF18 contraseña y segundo factor
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-8.3.4, pluggy-1.7.0 -- C:\Users\danie\AppData\Local\Temp\claude\2b75186625f2af13\da2c9158-aeeb-4a99-bce2-b355f8c742f3\scratchpad\venv312\Scripts\python.exe
+cachedir: .pytest_cache
+django: version: 5.2.19, settings: config.settings.dev (from env)
+rootdir: C:\Users\danie\Documents\UNIVERSIDAD\SEMESTRE 10\PROYECTO DE FIN DE CARRERA\podologia\podocenter
+configfile: pyproject.toml
+plugins: cov-6.0.0, django-4.9.0
+collecting ... collected 54 items
+
+backend/apps/usuarios/tests/test_cambiar_contrasena.py::test_cambia_la_contrasena_y_la_vieja_deja_de_servir PASSED [  1%]
+backend/apps/usuarios/tests/test_cambiar_contrasena.py::test_mantiene_la_sesion_actual_y_cierra_las_demas PASSED [  3%]
+backend/apps/usuarios/tests/test_cambiar_contrasena.py::test_rechaza_el_cambio_si_la_contrasena_actual_no_es_correcta PASSED [  5%]
+backend/apps/usuarios/tests/test_cambiar_contrasena.py::test_aplica_la_politica_de_contrasenas_de_django[corta1] PASSED [  7%]
+backend/apps/usuarios/tests/test_cambiar_contrasena.py::test_aplica_la_politica_de_contrasenas_de_django[1234567890123] PASSED [  9%]
+backend/apps/usuarios/tests/test_cambiar_contrasena.py::test_aplica_la_politica_de_contrasenas_de_django[password1234] PASSED [ 11%]
+backend/apps/usuarios/tests/test_cambiar_contrasena.py::test_rechaza_una_confirmacion_que_no_coincide PASSED [ 12%]
+backend/apps/usuarios/tests/test_cambiar_contrasena.py::test_el_cambio_queda_en_la_bitacora_sin_ninguna_contrasena PASSED [ 14%]
+backend/apps/usuarios/tests/test_cambiar_contrasena.py::test_sin_sesion_no_se_puede_cambiar_ninguna_contrasena PASSED [ 16%]
+backend/apps/usuarios/tests/test_segundo_factor_alta.py::test_una_administradora_sin_factor_no_puede_usar_la_api PASSED [ 18%]
+backend/apps/usuarios/tests/test_segundo_factor_alta.py::test_al_ingresar_sin_factor_la_respuesta_avisa_que_debe_activarlo PASSED [ 20%]
+backend/apps/usuarios/tests/test_segundo_factor_alta.py::test_el_administrador_de_plataforma_tambien_lo_necesita PASSED [ 22%]
+backend/apps/usuarios/tests/test_segundo_factor_alta.py::test_el_alta_entrega_el_secreto_y_el_qr_para_la_aplicacion PASSED [ 24%]
+backend/apps/usuarios/tests/test_segundo_factor_alta.py::test_confirmar_con_un_codigo_valido_activa_el_factor_y_entrega_diez_codigos PASSED [ 25%]
+backend/apps/usuarios/tests/test_segundo_factor_alta.py::test_confirmar_con_un_codigo_incorrecto_no_activa_nada PASSED [ 27%]
+backend/apps/usuarios/tests/test_segundo_factor_alta.py::test_confirmar_sin_haber_pedido_el_alta_se_rechaza PASSED [ 29%]
+backend/apps/usuarios/tests/test_segundo_factor_alta.py::test_el_secreto_no_vuelve_a_salir_por_la_api_despues_del_alta PASSED [ 31%]
+backend/apps/usuarios/tests/test_segundo_factor_alta.py::test_el_secreto_y_los_codigos_no_se_guardan_en_claro PASSED [ 33%]
+backend/apps/usuarios/tests/test_segundo_factor_alta.py::test_con_contrasena_temporal_primero_se_cambia_la_contrasena PASSED [ 35%]
+backend/apps/usuarios/tests/test_segundo_factor_ingreso.py::test_la_contrasena_sola_no_abre_la_sesion_de_una_cuenta_con_factor PASSED [ 37%]
+backend/apps/usuarios/tests/test_segundo_factor_ingreso.py::test_un_codigo_valido_completa_el_ingreso_y_queda_en_la_auditoria PASSED [ 38%]
+backend/apps/usuarios/tests/test_segundo_factor_ingreso.py::test_sin_primer_paso_el_codigo_no_sirve PASSED [ 40%]
+backend/apps/usuarios/tests/test_segundo_factor_ingreso.py::test_un_codigo_vencido_se_rechaza PASSED [ 42%]
+backend/apps/usuarios/tests/test_segundo_factor_ingreso.py::test_un_codigo_desfasado_un_intervalo_se_acepta[-1] PASSED [ 44%]
+backend/apps/usuarios/tests/test_segundo_factor_ingreso.py::test_un_codigo_desfasado_un_intervalo_se_acepta[1] PASSED [ 46%]
+backend/apps/usuarios/tests/test_segundo_factor_ingreso.py::test_un_codigo_ya_usado_no_vale_otra_vez PASSED [ 48%]
+backend/apps/usuarios/tests/test_segundo_factor_ingreso.py::test_un_codigo_anterior_al_ultimo_aceptado_tampoco_vale PASSED [ 50%]
+backend/apps/usuarios/tests/test_segundo_factor_ingreso.py::test_un_codigo_de_recuperacion_vale_una_sola_vez PASSED [ 51%]
+backend/apps/usuarios/tests/test_segundo_factor_ingreso.py::test_el_codigo_de_recuperacion_se_acepta_sin_guion_y_en_minusculas PASSED [ 53%]
+backend/apps/usuarios/tests/test_segundo_factor_ingreso.py::test_cinco_codigos_incorrectos_bloquean_la_cuenta_quince_minutos PASSED [ 55%]
+backend/apps/usuarios/tests/test_segundo_factor_ingreso.py::test_los_intentos_fallidos_se_cuentan_aunque_cada_peticion_falle PASSED [ 57%]
+backend/apps/usuarios/tests/test_segundo_factor_ingreso.py::test_una_cuenta_desactivada_entre_los_dos_pasos_no_entra PASSED [ 59%]
+backend/apps/usuarios/tests/test_segundo_factor_ingreso.py::test_el_primer_paso_vence_a_los_cinco_minutos PASSED [ 61%]
+backend/apps/usuarios/tests/test_segundo_factor_ingreso.py::test_la_podologa_sin_factor_entra_solo_con_la_contrasena PASSED [ 62%]
+backend/apps/usuarios/tests/test_segundo_factor_reinicio.py::test_la_plataforma_reinicia_el_factor_y_queda_en_la_bitacora_del_centro PASSED [ 64%]
+backend/apps/usuarios/tests/test_segundo_factor_reinicio.py::test_una_administradora_de_un_centro_no_reinicia_el_factor_de_otro PASSED [ 66%]
+backend/apps/usuarios/tests/test_segundo_factor_reinicio.py::test_tampoco_reinicia_el_de_su_propio_centro PASSED [ 68%]
+backend/apps/usuarios/tests/test_segundo_factor_reinicio.py::test_la_plataforma_no_reinicia_el_suyo PASSED [ 70%]
+backend/apps/usuarios/tests/test_segundo_factor_reinicio.py::test_el_admin_de_django_pide_el_codigo PASSED [ 72%]
+backend/apps/usuarios/tests/test_segundo_factor_reinicio.py::test_el_admin_no_deja_entrar_a_quien_aun_no_dio_de_alta_el_factor PASSED [ 74%]
+backend/apps/usuarios/tests/test_segundo_factor_reinicio.py::test_la_accion_del_admin_reinicia_con_auditoria PASSED [ 75%]
+backend/apps/usuarios/tests/test_totp.py::test_coincide_con_los_vectores_de_prueba_del_rfc_6238[59-287082] PASSED [ 77%]
+backend/apps/usuarios/tests/test_totp.py::test_coincide_con_los_vectores_de_prueba_del_rfc_6238[1111111109-081804] PASSED [ 79%]
+backend/apps/usuarios/tests/test_totp.py::test_coincide_con_los_vectores_de_prueba_del_rfc_6238[1111111111-050471] PASSED [ 81%]
+backend/apps/usuarios/tests/test_totp.py::test_coincide_con_los_vectores_de_prueba_del_rfc_6238[1234567890-005924] PASSED [ 83%]
+backend/apps/usuarios/tests/test_totp.py::test_coincide_con_los_vectores_de_prueba_del_rfc_6238[2000000000-279037] PASSED [ 85%]
+backend/apps/usuarios/tests/test_totp.py::test_acepta_el_intervalo_anterior_y_el_siguiente_y_no_mas PASSED [ 87%]
+backend/apps/usuarios/tests/test_totp.py::test_un_codigo_mal_formado_no_vale[] PASSED [ 88%]
+backend/apps/usuarios/tests/test_totp.py::test_un_codigo_mal_formado_no_vale[12345] PASSED [ 90%]
+backend/apps/usuarios/tests/test_totp.py::test_un_codigo_mal_formado_no_vale[1234567] PASSED [ 92%]
+backend/apps/usuarios/tests/test_totp.py::test_un_codigo_mal_formado_no_vale[abcdef] PASSED [ 94%]
+backend/apps/usuarios/tests/test_totp.py::test_un_codigo_mal_formado_no_vale[None] PASSED [ 96%]
+backend/apps/usuarios/tests/test_totp.py::test_el_secreto_generado_tiene_160_bits_y_es_distinto_cada_vez PASSED [ 98%]
+backend/apps/usuarios/tests/test_totp.py::test_el_enlace_lleva_el_secreto_y_el_emisor_que_lee_la_aplicacion PASSED [100%]
+
+============================= 54 passed in 34.90s =============================
+
+[código de salida: 0]

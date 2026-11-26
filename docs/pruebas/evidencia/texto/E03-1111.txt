@@ -1,0 +1,18 @@
+$ python 'C:/Users/danie/Documents/UNIVERSIDAD/SEMESTRE 10/PROYECTO DE FIN DE CARRERA/podologia/podocenter/docs/pruebas/evidencia/scripts/cobertura_por_modulo.py' 'C:/Users/danie/AppData/Local/Temp/claude/2b75186625f2af13/da2c9158-aeeb-4a99-bce2-b355f8c742f3/scratchpad/ev/cobertura-1111.json'
+# Fecha: 2026-11-26T08:45:12-05:00 · Commit: 7db1281 · commit del 11/11 (git worktree)
+
+Módulo          Sent.  Cubier.  % sent.  Ramas  Cubier.  % ramas
+(apps, raíz)       48       48   100.00      2        2   100.00
+atenciones        147      143    97.28     18       18   100.00
+catalogo           56       54    96.43      2        2   100.00
+citas             234      222    94.87     30       24    80.00
+core              502      484    96.41     70       60    85.71
+inventario        168      155    92.26     42       35    83.33
+pacientes         153      134    87.58     10        5    50.00
+sedes              84       76    90.48      2        0     0.00
+usuarios          273      269    98.53     32       30    93.75
+TOTAL            1665     1585    95.20    208      176    84.62
+
+Cobertura combinada (sentencias + ramas, la columna Cover): 94.02 %
+
+[código de salida: 0]
