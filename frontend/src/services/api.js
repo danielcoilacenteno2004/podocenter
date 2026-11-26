@@ -34,8 +34,13 @@ function textoDelDetalle (detalle) {
 // Traduce el problem+json del servidor al mensaje que ve la usuaria.
 api.interceptors.response.use(
   (respuesta) => respuesta,
-  (error) => {
-    const datos = error.response?.data ?? {}
+  async (error) => {
+    let datos = error.response?.data ?? {}
+    // En una descarga (responseType 'blob') el error también llega como
+    // archivo: se lee para no perder el código estable del servidor.
+    if (typeof Blob !== 'undefined' && datos instanceof Blob) {
+      try { datos = JSON.parse(await datos.text()) } catch { datos = {} }
+    }
     const porCampo = datos.detail && typeof datos.detail === 'object' ? datos.detail : {}
     return Promise.reject({
       codigo: datos.codigo ?? 'error-desconocido',
@@ -46,3 +51,19 @@ api.interceptors.response.use(
     })
   }
 )
+
+// Descarga un archivo que genera el servidor (RF16) con el nombre que este
+// propone. Pasa por el mismo cliente para llevar la sede activa y la cookie.
+export async function descargarArchivo (ruta, params) {
+  const respuesta = await api.get(ruta, { params, responseType: 'blob' })
+  const disposicion = respuesta.headers['content-disposition'] ?? ''
+  const nombre = /filename="([^"]+)"/.exec(disposicion)?.[1] ?? 'descarga'
+  const url = URL.createObjectURL(respuesta.data)
+  const enlace = document.createElement('a')
+  enlace.href = url
+  enlace.download = nombre
+  document.body.appendChild(enlace)
+  enlace.click()
+  enlace.remove()
+  URL.revokeObjectURL(url)
+}

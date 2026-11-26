@@ -98,11 +98,22 @@ def registro_del_dia(*, centro_id: int, sede_id: int, fecha) -> dict:
     campo monto_cobrado se cuentan aparte y no suman al total: sumarlas como
     cero falsearía el día.
     """
-    inicio = timezone.make_aware(timezone.datetime.combine(fecha, timezone.datetime.min.time()))
+    return registro_del_rango(centro_id=centro_id, sede_id=sede_id, desde=fecha, hasta=fecha)
+
+
+def registro_del_rango(*, centro_id: int, sede_id: int, desde, hasta) -> dict:
+    """El registro diario de varios días seguidos, ambos extremos incluidos.
+
+    Es la misma consulta que la del día (que la llama con desde = hasta),
+    para que la exportación (RF16) y la pantalla no puedan dar totales
+    distintos por calcularse de dos formas.
+    """
+    inicio = timezone.make_aware(timezone.datetime.combine(desde, timezone.datetime.min.time()))
+    fin = timezone.make_aware(timezone.datetime.combine(hasta + timedelta(days=1),
+                                                        timezone.datetime.min.time()))
     atenciones = (
         Atencion.objects.filter(centro_id=centro_id, sede_id=sede_id,
-                                registrada_en__gte=inicio,
-                                registrada_en__lt=inicio + timedelta(days=1))
+                                registrada_en__gte=inicio, registrada_en__lt=fin)
         .select_related("paciente", "profesional", "servicio")
         .order_by("registrada_en")
     )

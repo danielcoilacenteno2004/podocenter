@@ -51,6 +51,8 @@ class RegistroAuditoria(models.Model):
         ACCESO = "ACCESO", "Inicio de sesión"
         SALIDA = "SALIDA", "Cierre de sesión"
         ACCESO_DENEGADO = "ACCESO_DENEGADO", "Acceso denegado"
+        # RF16: los datos salen del sistema en un archivo; no es una consulta más.
+        EXPORTACION = "EXPORTACION", "Exportación"
 
     centro = models.ForeignKey(Centro, on_delete=models.PROTECT, related_name="auditoria")
     usuario_id = models.BigIntegerField(null=True, blank=True)
