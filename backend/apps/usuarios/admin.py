@@ -12,7 +12,7 @@ from django.core.exceptions import ValidationError
 
 from apps.core.errores import ReglaDeNegocio
 
-from . import segundo_factor
+from . import bloqueo_de_ingreso, segundo_factor
 from .models import AsignacionSede, Usuario
 
 
@@ -25,7 +25,25 @@ class IngresoAdminConSegundoFactor(AdminAuthenticationForm):
         widget=forms.TextInput(attrs={"autocomplete": "one-time-code"}),
     )
 
+    def clean(self):
+        # El mismo bloqueo por intentos fallidos que el ingreso de la
+        # aplicación: si no, /admin/ serviría para probar contraseñas sin límite.
+        correo = (self.cleaned_data.get("username") or "").strip().lower()
+        try:
+            if correo:
+                bloqueo_de_ingreso.comprobar(correo)
+            try:
+                return super().clean()
+            except ValidationError as error:
+                if getattr(error, "code", None) == "invalid_login" and correo:
+                    bloqueo_de_ingreso.anotar_fallo(correo)
+                raise
+        except ReglaDeNegocio as error:
+            raise ValidationError(error.detalle, code=error.codigo) from error
+
     def confirm_login_allowed(self, user):
+        # La contraseña fue correcta: los fallos anteriores ya no cuentan.
+        bloqueo_de_ingreso.levantar(user)
         super().confirm_login_allowed(user)
         if user.segundo_factor_activo:
             codigo = (self.cleaned_data.get("codigo") or "").strip()
@@ -81,7 +99,8 @@ class UsuarioAdmin(UserAdmin):
         (None, {"fields": ("correo", "password")}),
         ("Datos personales", {"fields": ("nombres", "apellidos", "documento")}),
         ("Pertenencia", {"fields": ("centro", "rol", "esta_activo")}),
-        ("Seguridad", {"fields": ("segundo_factor_activo", "ultimo_acceso_en")}),
+        ("Seguridad", {"fields": ("segundo_factor_activo", "ultimo_acceso_en",
+                                   "ingreso_bloqueado_hasta")}),
         ("Permisos de Django", {"fields": ("is_staff", "is_superuser", "groups",
                                            "user_permissions")}),
     )
@@ -95,7 +114,7 @@ class UsuarioAdmin(UserAdmin):
     # El factor no se marca a mano: activarlo sin secreto dejaría la cuenta
     # fuera, y quitarlo con la casilla no pasaría por la auditoría. Se quita
     # con la acción de abajo; el secreto no se muestra en ninguna parte.
-    readonly_fields = ("ultimo_acceso_en", "segundo_factor_activo")
+    readonly_fields = ("ultimo_acceso_en", "segundo_factor_activo", "ingreso_bloqueado_hasta")
     actions = ["reiniciar_segundo_factor"]
 
     @admin.action(description="Reiniciar la verificación en dos pasos")

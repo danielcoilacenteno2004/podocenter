@@ -26,7 +26,7 @@ from apps.core.contexto_http import fijar_centro_en_la_sesion
 from apps.core.errores import ReglaDeNegocio
 from apps.core.vistas import ContextoDeCentro
 
-from . import segundo_factor
+from . import bloqueo_de_ingreso, segundo_factor
 from .models import Usuario
 from .servicios import cambiar_contrasena
 
@@ -82,11 +82,16 @@ class IniciarSesion(APIView):
                 "credenciales-incompletas", "Indique el correo y la contraseña."
             )
 
+        # Una cuenta bloqueada no entra ni con la contraseña correcta: por eso
+        # se mira antes de comprobarla (Tabla 35 del Informe).
+        bloqueo_de_ingreso.comprobar(correo)
         # `authenticate` ya descarta al usuario desactivado, porque `is_active`
         # refleja `esta_activo`: una cuenta dada de baja cae en esta misma rama
         # y recibe el mensaje genérico, sin revelar que el correo existe.
         usuario = authenticate(request, username=correo, password=contrasena)
         if usuario is None:
+            # Al quinto fallo seguido levanta el error de cuenta bloqueada.
+            bloqueo_de_ingreso.anotar_fallo(correo)
             # Mismo mensaje para usuario inexistente y contraseña errada: no se
             # confirma qué correos existen (OWASP, enumeración de cuentas).
             return Response(
@@ -100,6 +105,8 @@ class IniciarSesion(APIView):
                 status=status.HTTP_401_UNAUTHORIZED,
                 content_type="application/problem+json",
             )
+        # La contraseña fue correcta: los fallos anteriores ya no cuentan.
+        bloqueo_de_ingreso.levantar(usuario)
         centro = usuario.centro
         if centro is not None and not centro.esta_operativo:
             # Tabla 31: un centro suspendido no puede iniciar sesión. Las

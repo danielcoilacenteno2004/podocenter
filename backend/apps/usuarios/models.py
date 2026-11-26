@@ -58,6 +58,9 @@ class Usuario(AbstractBaseUser, PermissionsMixin, SelloDeTiempo):
     ultimo_paso_totp = models.BigIntegerField(null=True, blank=True)
     intentos_fallidos_segundo_factor = models.PositiveSmallIntegerField(default=0)
     segundo_factor_bloqueado_hasta = models.DateTimeField(null=True, blank=True)
+    # Bloqueo tras cinco contraseñas erradas seguidas (bloqueo_de_ingreso.py).
+    intentos_fallidos_ingreso = models.PositiveSmallIntegerField(default=0)
+    ingreso_bloqueado_hasta = models.DateTimeField(null=True, blank=True)
     ultimo_acceso_en = models.DateTimeField(null=True, blank=True)
     # Encendido mientras la cuenta tenga una contraseña temporal (alta o
     # restablecimiento): hasta cambiarla, la API solo deja cambiarla.
