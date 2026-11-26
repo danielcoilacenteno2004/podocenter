@@ -111,3 +111,20 @@ de la corrida que queda en `07_recorridos.txt`:
   existe cuando el paciente no tiene atenciones.
 - Medía el desborde contra `innerWidth`, que en un móvil emulado crece con el contenido. Ahora
   se mide contra los 390 px configurados.
+
+## Corrección del 26/11/2026 (rama `feat/rf16-rf07-rf18`, sin commit)
+
+Evidencia en `docs/pruebas/evidencia/`, con sufijo `-correccion`.
+
+- **DEF-P9-01 (CP-03), corregido.** Al quinto intento fallido seguido, la cuenta queda
+  bloqueada 15 minutos y no entra ni con la contraseña correcta, por la API y por `/admin/`.
+  Pruebas en `backend/apps/usuarios/tests/test_bloqueo_de_ingreso.py`.
+- **DEF-P9-03, corregido.** `npm audit` sin vulnerabilidades tras subir `axios`, `vue`,
+  `vite`, `vitest` y `eslint` (ver `docs/ESTADO.md`).
+- **DEF-P9-05, corregido en lo que aplica a producción.** `infra/nginx/nginx.conf` declara la
+  CSP y `server_tokens off`. Corrección a lo dicho arriba: la alerta «Cross-Domain
+  Misconfiguration» no viene de `CORS_PERMITIR_TODO`, que ningún código usa, sino del servidor
+  de desarrollo de Vite. Django no envía cabeceras CORS (comprobado el 26/11), así que en
+  producción no aplica.
+- **DEF-P9-07 (390 px), sigue abierto.**
+

@@ -9,6 +9,13 @@ Corte: 12 de noviembre de 2026. Primera entrega comprometida: **12/11/2026**.
 > rama; el detalle, con lo que se desvió del pedido, está en
 > `docs/resultados_rf.json`. Hasta que se haga el commit, `main` sigue como
 > describe el resto del documento.
+>
+> **Actualización del 26/11/2026, misma rama, sin commit.** Se corrigieron los
+> tres defectos abiertos de la ejecución completa de la Práctica N.° 9 que
+> impedían la salida a producción (criterios E1 y E3 de la Práctica N.° 10):
+> DEF-25, el bloqueo tras cinco contraseñas erradas; DEF-26, las dependencias
+> vulnerables del cliente; y DEF-27, la cabecera CSP. La evidencia, antes y
+> después de la corrección, está en `docs/pruebas/evidencia/`.
 
 ## 1. El riesgo principal
 
@@ -105,7 +112,11 @@ válida para el RNF02 es la que se haga con la podóloga.
   módulo, `docs/pruebas/02_cobertura_por_modulo.txt`. **25/11, rama
   `feat/rf16-rf07-rf18`: 397 pruebas en verde, 95.86 % de sentencias y
   87.14 % de ramas** (Python 3.12.13, PostgreSQL 18 local con el rol sin
-  privilegios; sin evidencia guardada en `docs/pruebas/`).
+  privilegios). El 26/11 por la mañana, sobre el mismo código, dio 96.36 %
+  de sentencias: la cobertura de `cargar_demo` depende de la hora en que corre
+  la suite (siembra distinto antes o después de las 17:00). **26/11, tras
+  corregir DEF-25 a DEF-27: 408 pruebas en verde, 96.50 % de sentencias y
+  88.16 % de ramas** (`docs/pruebas/evidencia/texto/E02-correccion.txt`).
 - **Panel del día (P04) con cifras que cuadran.** Lo cobrado sale del mismo
   cálculo que el registro diario (P16), así que las dos pantallas dan la
   misma cifra; la ocupación se mide contra la capacidad real de la sede
@@ -124,9 +135,24 @@ válida para el RNF02 es la que se haga con la podóloga.
   subir a Django 5.2 LTS, DRF 3.18.2, django-filter 25.2 y cryptography
   50.0.2 (`pip-audit`, 18/11/2026). El 25/11 se añadieron `segno` 1.6.6 (QR
   del segundo factor), `reportlab` 5.1.2 y `openpyxl` 3.1.5 (exportación), y
-  `pip-audit -r requirements.txt` sigue sin hallazgos. **El frontend no está igual**: `npm audit`
-  da 11, y 3 altas llegan a producción (`axios` 1.7.9 y `vue` 3.5.13); ver
-  `docs/pruebas/defectos.md`.
+  `pip-audit -r requirements.txt` sigue sin hallazgos. **El frontend, desde el
+  26/11, tampoco tiene vulnerabilidades conocidas** (`npm audit`): eran 11, 3
+  altas en producción. Se subió `axios` de 1.7.9 a 1.21.1, `vue` de 3.5.13 a
+  3.5.45, `vite` a 6.4.6, `vitest` a 4.1.12 y `eslint` a 9.39.5, sin cambiar de
+  versión mayor salvo `vitest`, que no tiene pruebas (DEF-24). El
+  `package-lock.json` se regeneró con npm 11, porque npm 10 falla al resolver
+  las dependencias opcionales de `vitest` 4; `npm ci` con npm 10, el del
+  pipeline y de la imagen de Nginx, lo instala sin errores.
+- **Bloqueo tras cinco contraseñas erradas seguidas** (26/11, DEF-25): la
+  cuenta queda bloqueada 15 minutos y no entra ni con la correcta, en la API y
+  en `/admin/`; un correo inexistente nunca se bloquea, para no delatar qué
+  cuentas existen, y la contraseña temporal de la administradora levanta el
+  bloqueo (`apps/usuarios/bloqueo_de_ingreso.py`).
+- **CSP en Nginx** (26/11, DEF-27): solo se ejecuta y se carga lo que sirve la
+  misma procedencia, sin `unsafe-inline`; además, `server_tokens off`. Una
+  prueba falla si se quita la política o se afloja. Se comprobó en Chromium y
+  en WebKit, con la SPA compilada servida con esa misma cabecera, que la
+  interfaz y el admin no violan la política.
 - `ruff`, `bandit` 1.9.4 y `npm run lint` limpios. `bandit` se comprobó
   además contra un archivo deliberadamente inseguro, en Python 3.12 y 3.14,
   para asegurar que **sí falla** cuando debe.
@@ -193,7 +219,7 @@ Registradas en la Práctica N.° 7 y pendientes de decisión de alcance:
 | CC-12 | Tercer indicador del panel (stock), alerta automática del RF13, pantalla de reprogramación del RF08 |
 | CC-18 | *Añade* la barra de filtros de la agenda |
 | CC-19 | *Añade* el panel segmentado por decisión; no revierte CC-12 |
-| RF07 | **25/11: rehecho con canal intercambiable, sin envío real todavía.** `CanalRecordatorio` con tres implementaciones: correo (Amazon SES por SMTP), WhatsApp manual (el botón de la agenda) y WhatsApp automático **vacío hasta que la Gerencia apruebe el costo (CC-28)**; la implementación anterior contra la API de Meta se retiró del flujo y queda en el historial (`08b32bc`). Cada centro activa o desactiva los recordatorios, fija la hora de envío y elige el canal (`/recordatorios/configuracion/`, sin pantalla todavía); nace desactivado y con el canal manual. El planificador corre cada quince minutos y, pasada la hora del centro, avisa una vez de cada cita **del día siguiente** (antes: de las próximas 24 horas), con tres intentos, anulado si se cancela la cita y sin que un fallo detenga el lote. **No ha salido ningún correo real**: faltan las credenciales SMTP de SES. Falta la llamada de retorno con el estado de entrega (CU16), y el estado se ve en P05, no en P10 como dice la Práctica 7 |
+| RF07 | **25/11: rehecho con canal intercambiable, sin envío real todavía.** `CanalRecordatorio` con tres implementaciones: correo (Amazon SES por SMTP), WhatsApp manual (el botón de la agenda) y WhatsApp automático **vacío: la Gerencia aprobó el costo (CC-28) en el acta complementaria del 26/11, y falta implementarlo con la cuenta de WhatsApp Business**; la implementación anterior contra la API de Meta se retiró del flujo y queda en el historial (`08b32bc`). Cada centro activa o desactiva los recordatorios, fija la hora de envío y elige el canal (`/recordatorios/configuracion/`, sin pantalla todavía); nace desactivado y con el canal manual. El planificador corre cada quince minutos y, pasada la hora del centro, avisa una vez de cada cita **del día siguiente** (antes: de las próximas 24 horas), con tres intentos, anulado si se cancela la cita y sin que un fallo detenga el lote. **No ha salido ningún correo real**: faltan las credenciales SMTP de SES. Falta la llamada de retorno con el estado de entrega (CU16), y el estado se ve en P05, no en P10 como dice la Práctica 7 |
 | RF16 | **25/11: construido.** `GET /reportes/registro-diario/exportar/?formato=pdf\|xlsx` con `fecha` o con `desde`/`hasta` (hasta 31 días), con la misma consulta y los mismos permisos que P16; el archivo se genera en memoria, lleva encabezado, neutraliza fórmulas en Excel y queda auditado (acción `EXPORTACION`). Botones «Exportar PDF» y «Exportar Excel» en P16 |
 | RF18 | **25/11: construido.** TOTP (RFC 6238) con secreto cifrado, alta con QR y primer código, ingreso en dos pasos (también en `/admin/`), 10 códigos de recuperación con resumen SHA-256 con sal, bloqueo de 15 minutos tras 5 códigos errados y reinicio solo por el administrador de plataforma, auditado. Las cuentas administrativas de `cargar_demo` nacen **sin** factor y lo activan en su primer ingreso |
 
@@ -231,11 +257,12 @@ Queda abierto: la edición de pacientes (ver la sección 6).
 - **La prueba de usabilidad** necesita una hora de la dueña y una de la
   podóloga. Es el requisito más barato de los tres y el que lleva más tiempo
   parado. Además, es la que valida de verdad el RNF02.
-- **El canal del recordatorio (RF07)** es de la Gerencia: correo (requiere
-  un dominio verificado en Amazon SES y sus credenciales SMTP), WhatsApp
-  manual (sin costo, lo envía una persona) o WhatsApp automático (costo por
-  mensaje, riesgo R9, pendiente de CC-28). También la hora de envío: las
-  18:00 son un valor por omisión del equipo, no una indicación del centro.
+- **El canal del recordatorio (RF07).** La Gerencia aprobó el WhatsApp
+  automático (CC-28) en el acta complementaria del 26/11. Falta implementar
+  `CanalWhatsAppApi`, que hoy está vacío, y tener la cuenta de WhatsApp
+  Business aprobada por Meta con su plantilla; hasta entonces el recordatorio
+  sale con el botón. También falta decidir la hora de envío: las 18:00 son un
+  valor por omisión del equipo, no una indicación del centro.
 - **Quién custodia los códigos de recuperación de las cuentas
   administrativas (RF18)**, en especial la del administrador de plataforma,
   que no tiene a nadie por encima para reiniciarle el factor si pierde el
